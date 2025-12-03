@@ -1,4 +1,4 @@
-package com.vention.medfast.controllers;
+package com.vention.medfast.controller;
 
 import com.vention.medfast.constants.ApiPaths;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,6 @@ public class HelloController {
     public String hello() {
         return "Hello World!";
     }
-
 
 
 }
