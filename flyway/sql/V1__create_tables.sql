@@ -1,5 +1,4 @@
 -- Last modification date: 2025-12-04
-
 -- ==========================================
 -- ENUMS & TYPES
 -- ==========================================
@@ -19,26 +18,26 @@ CREATE TYPE gender_type AS ENUM (
 	'NOT_SPECIFIED'
 );
 
+
+CREATE TYPE role_type AS ENUM (
+    'ADMIN',
+    'DOCTOR',
+    'PATIENT'
+    );
+
 -- Table: users
-ALTER TABLE users
-    ADD COLUMN first_name varchar(255) NOT NULL DEFAULT 'Unknown',
-    ADD COLUMN last_name varchar(255) NOT NULL DEFAULT 'Unknown',
-    ADD COLUMN profile_url varchar(255);
+CREATE TABLE users (
+                       id bigserial,
+                       email varchar(255)  NOT NULL,
+                       password_hash varchar(255)  NOT NULL,
+                       first_name varchar(255)  NOT NULL,
+                       last_name varchar(255)  NOT NULL,
+                       role role_type  NOT NULL,
+                       profile_url varchar(255),
+                       CONSTRAINT unique_email UNIQUE (email),
+                       CONSTRAINT users_pk PRIMARY KEY (id)
+);
 
-ALTER TABLE users RENAME COLUMN username TO email;
-
-ALTER TABLE users RENAME COLUMN password TO password_hash;
-
-ALTER TABLE users
-    ALTER COLUMN email TYPE varchar(255),
-    ALTER COLUMN id TYPE bigint;
-
-ALTER TABLE roles
-    ALTER COLUMN id TYPE bigint;
-
-ALTER TABLE user_roles
-    ALTER COLUMN user_id TYPE bigint,
-    ALTER COLUMN role_id TYPE bigint;
 
 -- Table: addresses
 CREATE TABLE addresses (

@@ -1,7 +1,6 @@
 -- ==========================================
 -- FOREIGN KEYS
 -- ==========================================
-
 -- Reference: appointment_doctor (table: appointments)
 ALTER TABLE appointments ADD CONSTRAINT fk_appointment_doctor
     FOREIGN KEY (doctor_id)
@@ -116,23 +115,6 @@ ALTER TABLE tests ADD CONSTRAINT fk_tests_appointments
         REFERENCES appointments (id)
         ON DELETE  CASCADE
         ON UPDATE  CASCADE
-        NOT DEFERRABLE
-            INITIALLY IMMEDIATE;
-
--- Reference: user_roles_roles (table: user_roles)
-ALTER TABLE user_roles ADD CONSTRAINT fk_user_roles_roles
-    FOREIGN KEY (role_id)
-        REFERENCES roles (id)
-        ON DELETE CASCADE
-        NOT DEFERRABLE
-            INITIALLY IMMEDIATE;
-
--- Reference: user_roles_users (table: user_roles)
-ALTER TABLE user_roles ADD CONSTRAINT fk_user_roles_users
-    FOREIGN KEY (user_id)
-        REFERENCES users (id)
-        ON DELETE CASCADE
-
         NOT DEFERRABLE
             INITIALLY IMMEDIATE;
 
