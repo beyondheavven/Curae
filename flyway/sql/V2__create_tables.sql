@@ -31,7 +31,7 @@ ALTER TABLE users RENAME COLUMN password TO password_hash;
 
 ALTER TABLE users
     ALTER COLUMN email TYPE varchar(255);
-    ALTER COLUMN id TYPE bigint;
+    ALTER COLUMN id TYPE bigserial;
 
 -- Table: addresses
 CREATE TABLE addresses (
