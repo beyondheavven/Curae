@@ -33,6 +33,13 @@ ALTER TABLE users
     ALTER COLUMN email TYPE varchar(255),
     ALTER COLUMN id TYPE bigint;
 
+ALTER TABLE roles
+    ALTER COLUMN id TYPE bigint;
+
+ALTER TABLE user_roles
+    ALTER COLUMN user_id TYPE bigint,
+    ALTER COLUMN role_id TYPE bigint;
+
 -- Table: addresses
 CREATE TABLE addresses (
                            id bigserial,
