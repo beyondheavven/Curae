@@ -132,6 +132,7 @@ ALTER TABLE user_roles ADD CONSTRAINT user_roles_users
     FOREIGN KEY (user_id)
         REFERENCES users (id)
         ON DELETE CASCADE
+
         NOT DEFERRABLE
             INITIALLY IMMEDIATE;
 
