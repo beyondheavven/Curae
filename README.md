@@ -6,7 +6,7 @@ The Medfast REST API provides **interactive documentation** using **Swagger/Open
 
 #### Local Development
 
-Open your browser and navigate to: 
+Open your browser and navigate to:
 http://localhost:8080/swagger-ui/index.html
 
 #### Features in Swagger UI
@@ -48,9 +48,14 @@ Database initialization and migrations are automated using Docker Compose.
 ├─ .env
 ├─ flyway/
 │  └─ sql/
-│     └─ V1__init.sql
+│     ├─ V1__create_tables.sql
+│     ├─ V2__create_constraints.sql
+│     ├─ V3__create_indexes.sql
+│     └─ V4__seed_data.sql
 └─ README.md
 ```
+## Database ER Diagram
+![Database ER Diagram](./Medfast_internship-2025-12-08_12-55.png)
 
 ## Quick Start
 
