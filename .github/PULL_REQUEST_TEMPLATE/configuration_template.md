@@ -12,6 +12,12 @@ Describe the configuration changes or additions in this pull request.
 Closes # (issue number)
 Related to: # (issue numbers)
 
+## How Has This Been Tested?
+Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
+
+- [ ] Test A
+- [ ] Test B
+
 ## Checklist
 - [ ] Configuration files updated and reviewed
 - [ ] Documentation updated and reviewed

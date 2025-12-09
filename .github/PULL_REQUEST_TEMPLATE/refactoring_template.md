@@ -1,7 +1,7 @@
 # Refactoring Pull Request
 
 ## Description
-Describe the code refactoring or improvement.  
+Describe the code refactoring or improvement.
 Include the motivation behind the changes (performance, readability, maintainability, etc.).
 
 ## Type of change
@@ -11,6 +11,12 @@ Include the motivation behind the changes (performance, readability, maintainabi
 ## Related issues
 Closes # (issue number)
 Related to: # (issue numbers)
+
+## How Has This Been Tested?
+Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
+
+- [ ] Test A
+- [ ] Test B
 
 ## Checklist
 - [ ] Code follows the project style guidelines

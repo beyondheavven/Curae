@@ -11,6 +11,12 @@ Briefly describe the urgent fix and the problem it resolves.
 Closes # (issue number)
 Related to: # (issue numbers)
 
+## How Has This Been Tested?
+Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
+
+- [ ] Test A
+- [ ] Test B
+
 ## Checklist
 - [ ] Fix verified locally
 - [ ] CI checks passed

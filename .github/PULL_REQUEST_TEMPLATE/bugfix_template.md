@@ -11,6 +11,12 @@ Describe the bug and how this pull request fixes it.
 Closes # (issue number)
 Related to: # (issue numbers)
 
+## How Has This Been Tested?
+Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
+
+- [ ] Test A
+- [ ] Test B
+
 ## Checklist
 - [ ] Code follows the project style guidelines
 - [ ] Bug is tested and passes CI checks
