@@ -1,20 +1,3 @@
-openapi:
-  server-url: http://localhost:8080
-  server-description: Local server
-
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    properties:
-      hibernate:
-        ddl-auto: none
-        show_sql: false
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-
 # todo Actuator need to add Spring Security.
 # todo Authorisation will be required to access /health details and components, /env, /prometheus, /metrics, /info endpoints.
 
