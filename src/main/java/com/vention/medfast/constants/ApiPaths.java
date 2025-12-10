@@ -10,4 +10,8 @@ public final class ApiPaths {
 
 	public static final String USER_ENDPOINT = BASE + "/users";
 
+	public static final String AUTH_ENDPOINT = BASE + "/auth";
+
+	public static final String TEST_ENDPOINT = BASE + "/test";
+
 }

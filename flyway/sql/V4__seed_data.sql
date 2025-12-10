@@ -15,7 +15,9 @@ VALUES
 (3, 'watson@med.com', '$2a$12$Gz2yX1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4hZ.h5.Y3c', 'John', 'Watson', 'DOCTOR', NULL),
 -- Patients
 (4, 'jane.doe@mail.com', '$2a$12$Jk4zY1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4hZ.h5.Z8d', 'Jane', 'Doe', 'PATIENT', NULL),
-(5, 'john.smith@mail.com', '$2a$12$Nm7vV1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4hZ.h5.A2e', 'John', 'Smith', 'PATIENT', NULL);
+(5, 'john.smith@mail.com', '$2a$12$Nm7vV1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4hZ.h5.A2e', 'John', 'Smith', 'PATIENT', NULL),
+(6, 'Test@test.com', '$2a$12$Wf4OuPkFrVa86PSw.ltuRelbcK/zPHdkA9DLJ7WZlN3e9y8aAzJCa', 'Test', 'Test', 'ADMIN', NULL);
+-- id 6 pass test123
 
 -- 3. SPECIALIZATIONS
 INSERT INTO specializations (id, name, description)
