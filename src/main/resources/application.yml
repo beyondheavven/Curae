@@ -1,3 +1,19 @@
 openapi:
   server-url: http://localhost:8080
   server-description: Local server
+
+app:
+  jwt:
+    secret: "very-long-secret-should-be-at-least-256-bit"
+    access-token-expiration-ms: 900000        # 15 min
+    refresh-token-expiration-ms: 2592000000   # 30 days
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/medfast_db
+    username: medfast_user
+    password: medfast_password
+    driver-class-name: org.postgresql.Driver

@@ -25,6 +25,11 @@ CREATE TYPE role_type AS ENUM (
     'PATIENT'
     );
 
+CREATE TYPE refresh_token_status AS ENUM (
+    'ACTIVE',
+    'REVOKED'
+);
+
 -- Table: users
 CREATE TABLE users (
                        id bigserial,
@@ -36,6 +41,19 @@ CREATE TABLE users (
                        profile_url varchar(255),
                        CONSTRAINT unique_email UNIQUE (email),
                        CONSTRAINT users_pk PRIMARY KEY (id)
+);
+
+-- Table: refresh_tokens
+CREATE TABLE refresh_tokens (
+                                id        BIGSERIAL PRIMARY KEY,
+                                users_id  BIGINT NOT NULL,
+                                token     VARCHAR(512) NOT NULL UNIQUE,
+                                status    VARCHAR(15)  NOT NULL,
+
+                                CONSTRAINT refresh_tokens_user_fk
+                                    FOREIGN KEY (users_id)
+                                        REFERENCES users(id)
+                                        ON DELETE CASCADE
 );
 
 
