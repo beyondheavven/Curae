@@ -1,0 +1,49 @@
+openapi:
+  server-url: http://localhost:8080
+  server-description: Local server
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: none
+        show_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "info, health, metrics, env, prometheus"
+
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  info:
+    build:
+      enabled: true
+    git:
+      enabled: true
+    env:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+info:
+  app:
+    name: Medfast API
+    description: Internship project
+    environment: dev
+  database:
+    url: ${POSTGRES_DB:unknown}
+    port: ${POSTGRES_PORT:unknown}
+    user: ${POSTGRES_USER:unknown}
