@@ -1,0 +1,31 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "info, health, metrics, env, prometheus"
+
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  info:
+    build:
+      enabled: true
+    git:
+      enabled: true
+    env:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+info:
+  app:
+    name: Medfast API
+    description: Internship project
+    environment: dev
+  database:
+    url: ${POSTGRES_DB:unknown}
+    port: ${POSTGRES_PORT:unknown}
+    user: ${POSTGRES_USER:unknown}

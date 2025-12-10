@@ -1,0 +1,32 @@
+# todo Actuator need to add Spring Security.
+# todo Authorisation will be required to access /health details and components, /env, /prometheus, /metrics, /info endpoints.
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "info, health, metrics, prometheus, env"
+
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  info:
+    build:
+      enabled: true
+    git:
+      enabled: true
+    env:
+      enabled: true
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+info:
+  app:
+    name: Medfast API
+    description: Internship project
+    environment: stage
+
+
