@@ -1,0 +1,6 @@
+UPDATE users SET password_hash = '061641e0c35c5eaf61d8232e43cead4410b60ae9ad61204b001d8cf6c5a5a526' WHERE id = 1;
+UPDATE users SET password_hash = '2120506a2669516bb022781db9048ea9b06ac2766588697a225a5ca9a537307c' WHERE id = 2;
+UPDATE users SET password_hash = '8923bab91e1213fab9bed2063fff27a97979f432194c03c2f8fe97e622b54c18' WHERE id = 3;
+UPDATE users SET password_hash = 'ca3e42af1b875becbf64924c4d8cc1fa3f81b0b10322b9f72fba0b21551620b4' WHERE id = 4;
+UPDATE users SET password_hash = '148a5ef40db7bd6044fce36516c587cbd7290ef119c0d2b9db948b7190776217' WHERE id = 5;
+UPDATE users SET password_hash = '484cb22ed89e91b465de08e43972121b7498a251f4b7663eb4f40ca053d03398' WHERE id = 6;
