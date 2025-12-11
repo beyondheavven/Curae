@@ -1,7 +1,14 @@
 openapi:
   server-url: https://api.medfast.com
   server-description: Production server
-
+springdoc:
+  show-actuator: true
+  group-configs:
+    - group: "Medfast API"
+      paths-to-match: "/**"
+      paths-to-exclude: "/actuator/**"
+    - group: "Actuator"
+      paths-to-match: "/actuator/**"
 spring:
   datasource:
     url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
@@ -14,6 +21,9 @@ spring:
         ddl-auto: none
         show_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+server:
+  servlet:
+    context-path: /api
 app:
   jwt:
     secret: "very-long-secret-should-be-at-least-256-bit"
