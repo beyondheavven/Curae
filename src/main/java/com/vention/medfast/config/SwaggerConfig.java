@@ -41,22 +41,4 @@ public class SwaggerConfig {
 					new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
 			.addSecurityItem(new SecurityRequirement().addList(securitySchemeName));
 	}
-
-    @Bean
-    public GroupedOpenApi apiGroup() {
-        return GroupedOpenApi.builder()
-            .group("Medfast API")
-            .pathsToMatch("/api/**")
-            .build();
-    }
-
-    @Bean
-    public GroupedOpenApi actuatorGroup() {
-        return GroupedOpenApi.builder()
-            .group("Actuator")
-            .pathsToMatch("/actuator/**")
-            .pathsToExclude("/api/**")
-            .build();
-    }
-
 }
