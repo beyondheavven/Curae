@@ -2,6 +2,8 @@ openapi:
   server-url: https://api.medfast.com
   server-description: Production server
 
+springdoc:
+  show-actuator: true
 spring:
   datasource:
     url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
