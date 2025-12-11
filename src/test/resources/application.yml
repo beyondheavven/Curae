@@ -1,0 +1,12 @@
+spring:
+  flyway:
+    enabled: true
+    locations: "filesystem:${user.dir}/flyway/sql"
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+openapi:
+  server-url: http://localhost:8080
+  server-description: Test server

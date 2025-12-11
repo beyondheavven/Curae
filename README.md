@@ -105,3 +105,49 @@ POSTGRES_PORT=5432
 ## Notes
 
 * Simply running `docker compose up` is sufficient; no manual steps are required.
+
+---
+## Integration Testing with Testcontainers
+
+This project uses **Testcontainers** to spin up isolated PostgreSQL instances for integration testing.
+
+### Running Tests
+#### 1. Local Development
+By default, running tests locally will use the `test` profile. This profile is configured to **reuse** the database container between runs to speed up execution.
+
+**Prerequisites**
+
+Even though the code enables reuse, **Testcontainers requires a global permission flag** on your machine.
+1. Navigate to your home directory
+2. Find (or create) file names .testcontainers.properties.
+3. Add the following line to the file:
+```properties
+testcontainers.reuse.enable=true
+```
+**Without this file, Testcontainers will ignore the code settings**
+#### 2. CI Mode
+To run tests in a pristine environment, use the test-ci profile. This forces a fresh container for every run to ensure isolation.
+
+**Example using mvn**
+```bash
+mvn verify "-Dspring.profiles.active=test-ci"
+```
+
+### Troubleshooting
+
+#### Docker not running
+Error: `IllegalStateException: Could not find a valid Docker environment`
+
+Fix: Start Docker and retry.
+
+#### Flyway checksum mismatch
+Error: `org.springframework.beans.factory.BeanCreationException: ... Validate failed: Migrations have failed validation`
+
+Possible Cause: You modified a SQL migration script after the test container had already run.
+
+Fix: Manually destroy the reusable container to force a fresh start.
+
+#### Container reuse not working
+Check:
+* Active profile is set to 'test'(default).
+* ~/.testcontainers.properties exists with testcontainers.reuse.enable=true.
