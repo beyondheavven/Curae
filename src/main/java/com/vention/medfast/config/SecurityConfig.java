@@ -1,8 +1,8 @@
 package com.vention.medfast.config;
 
-import com.vention.medfast.repository.UserRepository;
-import com.vention.medfast.security.core.CustomUserDetails;
-import com.vention.medfast.security.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.auth.core.CustomUserDetails;
+import com.vention.medfast.auth.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,15 +56,8 @@ public class SecurityConfig {
 				.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
 				.permitAll()
 
-				.requestMatchers("/api/auth/login", "/api/auth/refresh")
+				.requestMatchers("/auth/login", "/auth/refresh")
 				.permitAll()
-
-				.requestMatchers("/api/test/admin")
-				.hasRole("ADMIN")
-				.requestMatchers("/api/test/doctor")
-				.hasRole("DOCTOR")
-				.requestMatchers("/api/test/patient")
-				.hasRole("PATIENT")
 
 				.anyRequest()
 				.authenticated())
