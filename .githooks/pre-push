@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[pre-push] Running checks..."
+echo "[pre-push] Running Maven Verify"
+
+mvn -q -DskipTests=false verify
+
+echo "[pre-push] OK"
