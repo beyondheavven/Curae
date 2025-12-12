@@ -1,5 +1,5 @@
 openapi:
-  server-url: https://api.medfast.com
+  server-url: http://localhost:8080/api
   server-description: Production server
 springdoc:
   show-actuator: true
@@ -9,6 +9,7 @@ springdoc:
       paths-to-exclude: "/actuator/**"
     - group: "Actuator"
       paths-to-match: "/actuator/**"
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
