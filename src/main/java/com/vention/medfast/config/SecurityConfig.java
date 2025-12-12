@@ -1,8 +1,9 @@
 package com.vention.medfast.config;
 
-import com.vention.medfast.repository.UserRepository;
-import com.vention.medfast.security.core.CustomUserDetails;
-import com.vention.medfast.security.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.auth.core.CustomUserDetails;
+import com.vention.medfast.auth.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.user.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,6 +21,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${custom.security.public-routes}")
+    private String[] actuatorEndpoints;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -53,18 +57,13 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable())
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**")
+                .requestMatchers("/api-docs/**","/swagger-ui/**","/swagger-ui.html","/v3/api-docs/**")
 				.permitAll()
 
-				.requestMatchers("/auth/login", "/auth/refresh")
-				.permitAll()
+                .requestMatchers("/auth/login", "/auth/refresh")
+                .permitAll()
 
-				.requestMatchers("/test/admin")
-				.hasRole("ADMIN")
-				.requestMatchers("/test/doctor")
-				.hasRole("DOCTOR")
-				.requestMatchers("/test/patient")
-				.hasRole("PATIENT")
+                .requestMatchers(actuatorEndpoints).permitAll()
 
 				.anyRequest()
 				.authenticated())

@@ -1,3 +1,7 @@
+custom:
+  security:
+    public-routes: "/actuator/**"
+
 management:
   endpoints:
     web:
