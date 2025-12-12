@@ -211,7 +211,7 @@ import com.vention.medfast.constants.ApiPaths;
 public void shouldReturn204WhenDeleteUserExists() throws Exception {
     doNothing().when(userService).deleteUserById(1L);
 
-    ResultActions result = mockMvc.perform(delete(ApiPaths.USER_ENDPOINT +"/1"));
+    ResultActions result = mockMvc.perform(delete(ApiPaths.USER_ENDPOINT + "/1"));
 
     verify(userService, times(1)).deleteUserById(1L);
     result.andDo(print())

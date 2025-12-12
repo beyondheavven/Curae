@@ -1,17 +1,22 @@
 package com.vention.medfast.api.exception;
 
 import com.vention.medfast.api.response.ErrorResponseDto;
+import com.vention.medfast.api.response.ValidationErrorResponseDto;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
 
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ErrorResponseDto> handleUnexpectedException(Exception ex) {
@@ -61,6 +66,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			.build();
 
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ValidationErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex) {
+
+		Map<String, String> errors = new HashMap<>();
+
+		ex.getBindingResult()
+			.getFieldErrors()
+			.forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+
+		return new ResponseEntity<>(ValidationErrorResponseDto.builder()
+			.message("Validation error")
+			.statusCode(400)
+			.fieldErrors(errors)
+			.build(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(EntityNotFoundException.class)
+	public ResponseEntity<ErrorResponseDto> handleResourceNotFound(EntityNotFoundException ex) {
+		ErrorResponseDto error = ErrorResponseDto.builder().message(ex.getMessage()).statusCode(404).build();
+
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 
 }
