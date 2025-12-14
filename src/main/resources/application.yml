@@ -19,10 +19,12 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
     properties:
       hibernate:
-        ddl-auto: none
-        show_sql: false
+        format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   #local MailHog in prod change to real staff
@@ -34,6 +36,10 @@ spring:
     properties:
       mail.smtp.auth: false
       mail.smtp.starttls.enable: false
+
+server:
+  servlet:
+    context-path: /api
 
 app:
   jwt:

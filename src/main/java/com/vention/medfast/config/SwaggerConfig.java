@@ -8,20 +8,17 @@ import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
 @Configuration
+@RequiredArgsConstructor
 public class SwaggerConfig {
 
-	@Value("${openapi.server-url}")
-	private String serverUrl;
-
-	@Value("${openapi.server-description}")
-	private String serverDescription;
+	private final OpenApiProperties openApiProperties;
 
 	@Bean
 	public OpenAPI customOpenAPI() {
@@ -32,7 +29,8 @@ public class SwaggerConfig {
 				within the Medfast system. Enables appointment booking, modification,
 				and cancellation, as well as administrative management of healthcare operations.
 				""").contact(new Contact().name("Medfast Support Team").email("support@medfast.com")))
-			.servers(List.of(new Server().url(serverUrl).description(serverDescription)))
+			.servers(List.of(new Server().url(openApiProperties.getServerUrl())
+				.description(openApiProperties.getServerDescription())))
 			.tags(List.of(new Tag().name("Patients").description("Operations related to patient management"),
 					new Tag().name("Doctors").description("Operations related to doctor management"),
 					new Tag().name("Appointments").description("Operations related to appointment management")))

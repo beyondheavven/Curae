@@ -105,3 +105,80 @@ POSTGRES_PORT=5432
 ## Notes
 
 * Simply running `docker compose up` is sufficient; no manual steps are required.
+
+---
+## Integration Testing with Testcontainers
+
+This project uses **Testcontainers** to spin up isolated PostgreSQL instances for integration testing.
+
+### Running Tests
+#### 1. Local Development
+By default, running tests locally will use the `test` profile. This profile is configured to **reuse** the database container between runs to speed up execution.
+
+**Prerequisites**
+
+Even though the code enables reuse, **Testcontainers requires a global permission flag** on your machine.
+1. Navigate to your home directory
+2. Find (or create) file names .testcontainers.properties.
+3. Add the following line to the file:
+```properties
+testcontainers.reuse.enable=true
+```
+**Without this file, Testcontainers will ignore the code settings**
+#### 2. CI Mode
+To run tests in a pristine environment, use the test-ci profile. This forces a fresh container for every run to ensure isolation.
+
+**Example using mvn**
+```bash
+mvn verify "-Dspring.profiles.active=test-ci"
+```
+
+### Troubleshooting
+
+#### Docker not running
+Error: `IllegalStateException: Could not find a valid Docker environment`
+
+Fix: Start Docker and retry.
+
+#### Flyway checksum mismatch
+Error: `org.springframework.beans.factory.BeanCreationException: ... Validate failed: Migrations have failed validation`
+
+Possible Cause: You modified a SQL migration script after the test container had already run.
+
+Fix: Manually destroy the reusable container to force a fresh start.
+
+#### Container reuse not working
+Check:
+* Active profile is set to 'test'(default).
+* ~/.testcontainers.properties exists with testcontainers.reuse.enable=true.
+
+
+## Git Pre-push Hooks
+
+Our team uses in this project git pre-push hooks to execute scripts before pushing to remote origin.
+Currently, we have 1 script file, which ensures project builds correctly
+
+Scripts are stored in:
+* ./.githooks/
+
+### 1. How to install
+
+#### Linux / macOS
+
+For pre-push scripts to work correctly on Linux and macOS, you only need to install Git and Maven.
+
+#### Windows
+
+For Windows you should install Maven, Git and Git Bash. Git Bash is needed for executing shell scripts from .githooks
+
+### 2. Setup
+
+Scripts in .githooks must be marked as executable. Also You should set folder with pre-push scripts in your git.
+
+You can execute following command to do that (Linux, macOS and Windows with Git Bash)
+```
+git config core.hooksPath .githooks
+chmod +x .githooks/*
+```
+Or you can run bash script from (Linux, macOS and Windows with Git Bash)
+* ./scripts/setup-hooks.sh

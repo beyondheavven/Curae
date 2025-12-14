@@ -1,8 +1,8 @@
 package com.vention.medfast.config;
 
-import com.vention.medfast.repository.UserRepository;
-import com.vention.medfast.security.core.CustomUserDetails;
-import com.vention.medfast.security.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.auth.core.CustomUserDetails;
+import com.vention.medfast.auth.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.user.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
