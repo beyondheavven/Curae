@@ -1,10 +1,10 @@
 package com.vention.medfast.api.response;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
-@Builder
+@SuperBuilder
 public class ErrorResponseDto {
 
 	private final Integer statusCode;

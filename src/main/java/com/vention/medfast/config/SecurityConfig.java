@@ -22,8 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    @Value("${custom.security.public-routes}")
-    private String[] actuatorEndpoints;
+	@Value("${custom.security.public-routes}")
+	private String[] actuatorEndpoints;
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
@@ -57,13 +57,14 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf.disable())
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api-docs/**","/swagger-ui/**","/swagger-ui.html","/v3/api-docs/**")
+				.requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 				.permitAll()
 
-                .requestMatchers("/auth/login", "/auth/refresh")
-                .permitAll()
+				.requestMatchers("/auth/login", "/auth/refresh")
+				.permitAll()
 
-                .requestMatchers(actuatorEndpoints).permitAll()
+				.requestMatchers(actuatorEndpoints)
+				.permitAll()
 
 				.anyRequest()
 				.authenticated())

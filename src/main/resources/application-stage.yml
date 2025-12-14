@@ -1,8 +1,6 @@
-# todo Actuator need to add Spring Security.
-# todo Authorisation will be required to access /health details and components, /env, /prometheus, /metrics, /info endpoints.
 custom:
   security:
-    public-routes: "/actuator/info, actuator/health/liveness, /actuator/readiness"
+    public-routes: "/actuator/info"
 
 management:
   endpoints:
@@ -17,8 +15,10 @@ management:
         enabled: true
   info:
     env:
-      enabled: false
+      enabled: true
     git:
+      enabled: false
+    build:
       enabled: false
   prometheus:
     metrics:

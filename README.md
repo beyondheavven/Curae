@@ -151,3 +151,34 @@ Fix: Manually destroy the reusable container to force a fresh start.
 Check:
 * Active profile is set to 'test'(default).
 * ~/.testcontainers.properties exists with testcontainers.reuse.enable=true.
+
+
+## Git Pre-push Hooks
+
+Our team uses in this project git pre-push hooks to execute scripts before pushing to remote origin.
+Currently, we have 1 script file, which ensures project builds correctly
+
+Scripts are stored in:
+* ./.githooks/
+
+### 1. How to install
+
+#### Linux / macOS
+
+For pre-push scripts to work correctly on Linux and macOS, you only need to install Git and Maven.
+
+#### Windows
+
+For Windows you should install Maven, Git and Git Bash. Git Bash is needed for executing shell scripts from .githooks
+
+### 2. Setup
+
+Scripts in .githooks must be marked as executable. Also You should set folder with pre-push scripts in your git.
+
+You can execute following command to do that (Linux, macOS and Windows with Git Bash)
+```
+git config core.hooksPath .githooks
+chmod +x .githooks/*
+```
+Or you can run bash script from (Linux, macOS and Windows with Git Bash)
+* ./scripts/setup-hooks.sh
