@@ -23,7 +23,7 @@ public class SecurityConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
+		return new BCryptPasswordEncoder(12);
 	}
 
 	@Bean
@@ -66,7 +66,10 @@ public class SecurityConfig {
 				.requestMatchers("/api/test/patient")
 				.hasRole("PATIENT")
 
-				.anyRequest()
+                .requestMatchers("/api/account/password-reset/**").permitAll()
+                .requestMatchers("/api/account/**").authenticated()
+
+                .anyRequest()
 				.authenticated())
 			.authenticationProvider(authenticationProvider)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

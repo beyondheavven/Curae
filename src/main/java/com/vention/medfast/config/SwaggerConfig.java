@@ -40,5 +40,4 @@ public class SwaggerConfig {
 					new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
 			.addSecurityItem(new SecurityRequirement().addList(securitySchemeName));
 	}
-
 }

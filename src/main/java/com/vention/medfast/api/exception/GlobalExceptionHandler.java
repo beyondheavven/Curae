@@ -13,54 +13,53 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorResponseDto> handleUnexpectedException(Exception ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-			.message("Internal server error")
-			.build();
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleUnexpectedException(Exception ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+            .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+            .message("Internal server error")
+            .build();
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-	}
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
 
-	@ExceptionHandler(InvalidRefreshTokenException.class)
-	public ResponseEntity<ErrorResponseDto> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.UNAUTHORIZED.value())
-			.message(ex.getMessage())
-			.build();
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponseDto> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+            .statusCode(HttpStatus.UNAUTHORIZED.value())
+            .message(ex.getMessage())
+            .build();
 
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-	}
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
 
-	@ExceptionHandler(AccessDeniedException.class)
-	public ResponseEntity<ErrorResponseDto> handleAccessDenied(AccessDeniedException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.FORBIDDEN.value())
-			.message("Access denied")
-			.build();
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccessDenied(AccessDeniedException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+            .statusCode(HttpStatus.FORBIDDEN.value())
+            .message("Access denied")
+            .build();
 
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
-	}
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
 
-	@ExceptionHandler(UsernameNotFoundException.class)
-	public ResponseEntity<ErrorResponseDto> handleUserNotFound(UsernameNotFoundException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.UNAUTHORIZED.value())
-			.message(ex.getMessage())
-			.build();
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponseDto> handleUserNotFound(UsernameNotFoundException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+            .statusCode(HttpStatus.UNAUTHORIZED.value())
+            .message(ex.getMessage())
+            .build();
 
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-	}
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
 
-	@ExceptionHandler(BadCredentialsException.class)
-	public ResponseEntity<ErrorResponseDto> handleBadCredentials(BadCredentialsException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.UNAUTHORIZED.value())
-			.message("Invalid email or password")
-			.build();
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponseDto> handleBadCredentials(BadCredentialsException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+            .statusCode(HttpStatus.UNAUTHORIZED.value())
+            .message("Invalid email or password")
+            .build();
 
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-	}
-
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
 }

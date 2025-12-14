@@ -1,14 +1,15 @@
 package com.vention.medfast.api.response;
 
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
+
+import java.net.http.HttpResponse;
 
 @Getter
+@AllArgsConstructor
 @Builder
 public class ErrorResponseDto {
 
-	private final Integer statusCode;
-
-	private final String message;
+	private  Integer statusCode;
+	private  String message;
 
 }

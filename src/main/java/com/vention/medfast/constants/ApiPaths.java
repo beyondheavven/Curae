@@ -14,4 +14,6 @@ public final class ApiPaths {
 
 	public static final String TEST_ENDPOINT = BASE + "/test";
 
+    public static final String ACCOUNT_ENDPOINT =  BASE + "/account";
+
 }

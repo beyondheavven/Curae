@@ -2,27 +2,37 @@ services:
   postgres:
     image: postgres:15-alpine
     container_name: medfast-postgres
-    env_file:
-      - .env
+    environment:
+      POSTGRES_USER: medfastuser
+      POSTGRES_PASSWORD: medfastpassword
+      POSTGRES_DB: medfastdb
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U medfastuser -d medfastdb"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   flyway:
     image: flyway/flyway:10-alpine
-    command: -url=jdbc:postgresql://postgres:5432/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -connectRetries=60 migrate
+    command: -url=jdbc:postgresql://postgres:5432/medfastdb -user=medfastuser -password=medfastpassword -connectRetries=60 migrate
     volumes:
       - ./flyway/sql:/flyway/sql
     depends_on:
       postgres:
         condition: service_healthy
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: medfast-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    restart: unless-stopped
 
 volumes:
   pgdata:

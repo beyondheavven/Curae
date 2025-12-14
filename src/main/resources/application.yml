@@ -2,20 +2,41 @@ openapi:
   server-url: https://api.medfast.com
   server-description: Production server
 
+springdoc:
+  show-actuator: true
+  group-configs:
+    - group: "Medfast API"
+      paths-to-match: "/**"
+      paths-to-exclude: "/actuator/**"
+    - group: "Actuator"
+      paths-to-match: "/actuator/**"
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/medfastdb
+    username: medfastuser
+    password: medfastpassword
     driver-class-name: org.postgresql.Driver
+
   jpa:
     properties:
       hibernate:
         ddl-auto: none
         show_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  #local MailHog in prod change to real staff
+  mail:
+    host: localhost
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
 app:
   jwt:
     secret: "very-long-secret-should-be-at-least-256-bit"
-    access-token-expiration-ms: 900000        # 15 min
-    refresh-token-expiration-ms: 2592000000   # 30 days
+    access-token-expiration-ms: 900000
+    refresh-token-expiration-ms: 2592000000
