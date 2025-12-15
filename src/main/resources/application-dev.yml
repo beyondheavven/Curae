@@ -1,6 +1,6 @@
-openapi:
-  server-url: https://localhost:8080
-  server-description: Development server
+custom:
+  security:
+    public-routes: "/actuator/**"
 
 management:
   endpoints:
