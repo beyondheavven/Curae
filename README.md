@@ -182,3 +182,76 @@ chmod +x .githooks/*
 ```
 Or you can run bash script from (Linux, macOS and Windows with Git Bash)
 * ./scripts/setup-hooks.sh
+
+---
+
+## Logging
+The application logging is configured in `src/main/resources/logback-spring.xml`. This file defines environment-specific behaviors, log levels and sensitive data masking rules.
+
+### How to Change Log Level at Runtime
+We use Spring Boot Actuator to manage log levels dynamically without restarting the service.
+
+**Base URL**: `http://localhost:8080/api/actuator/loggers`
+
+#### Check the current log level:
+To see log level for the application package:
+```bash
+curl http://localhost:8080/api/actuator/loggers/com.vention.medfast
+```
+
+#### Change Log Level
+To enable `DEBUG` logs for the main application:
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "DEBUG"}' \
+  http://localhost:8080/api/actuator/loggers/com.vention.medfast
+```
+
+To enable `DEBUG` logs for Spring Security:
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "DEBUG"}' \
+  http://localhost:8080/api/actuator/loggers/org.springframework.security
+```
+### How to Enable SQL Logging
+
+#### Enable SQL Query Logging:
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "DEBUG"}' \
+  http://localhost:8080/api/actuator/loggers/org.hibernate.SQL
+```
+
+#### Enable Bind Parameters(see values):
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "TRACE"}' \
+  http://localhost:8080/api/actuator/loggers/org.hibernate.orm.jdbc.bind
+```
+
+### Example of Log Formats
+Development(dev/stage) - Console Output:
+```
+09:27:39.549 [http-nio-8080-exec-1] DEBUG c.v.m.auth.service.AuthServiceImpl - Authentication successful. Generating tokens for User ID: 1
+09:27:39.729 [scheduling-1] DEBUG c.v.medfast.scheduled.LogsPoster - Debug message
+09:27:39.797 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into refresh_tokens (status,token,users_id) values (?,?,?)
+```
+
+Production(prod) - JSON Output:
+```JSON
+{
+  "Timestamp/UTC": "2025-12-15T08:22:49.043273Z",
+  "service": "medfast_api",
+  "version": "0.0.0",
+  "env": "prod",
+  "Level": "WARN",
+  "Thread": "http-nio-8080-exec-3",
+  "Logger": "com.vention.medfast.auth.service.AuthServiceImpl",
+  "ServiceName": "default",
+  "Class": "com.vention.medfast.auth.service.AuthServiceImpl",
+  "Method": "login",
+  "File": "AuthServiceImpl.java",
+  "Line": 62,
+  "Message": "Failed login attempt for email: admin@med.com - Bad Credentials"
+}
+```
