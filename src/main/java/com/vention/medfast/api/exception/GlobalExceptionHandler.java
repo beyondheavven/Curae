@@ -91,4 +91,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponseDto> handleIllegalArgument(IllegalArgumentException ex) {
+        ErrorResponseDto error = ErrorResponseDto.builder()
+            .statusCode(HttpStatus.BAD_REQUEST.value())
+            .message(ex.getMessage())
+            .build();
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(error);
+    }
+
 }

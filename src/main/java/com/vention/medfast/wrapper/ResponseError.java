@@ -1,11 +1,7 @@
 package com.vention.medfast.wrapper;
 
-import lombok.*;
-import lombok.experimental.NonFinal;
+public record ResponseError(
+    ErrorCode errorCode,
+    String message
+) {}
 
-@Value
-@NonFinal
-public class ResponseError {
-    ErrorCode errorCode;
-    String message;
-}

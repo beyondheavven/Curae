@@ -1,6 +1,6 @@
 package com.vention.medfast.api.response;
 
-import lombok.*;
+import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
 @Getter

@@ -1,7 +1,8 @@
 package com.vention.medfast.wrapper;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import lombok.*;
+import lombok.Value;
+import lombok.Builder;
 import org.springframework.http.HttpStatus;
 
 @Value

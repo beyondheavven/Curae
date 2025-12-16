@@ -1,21 +1,8 @@
-openapi:
-  server-url: https://api.medfast.com
-  server-description: Production server
-
-springdoc:
-  show-actuator: true
-  group-configs:
-    - group: "Medfast API"
-      paths-to-match: "/**"
-      paths-to-exclude: "/actuator/**"
-    - group: "Actuator"
-      paths-to-match: "/actuator/**"
-
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/medfastdb
-    username: medfastuser
-    password: medfastpassword
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -27,22 +14,31 @@ spring:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  #local MailHog in prod change to real staff
+  flyway:
+    enabled: true
+    locations: filesystem:./flyway/sql
+    baseline-on-migrate: false
+    validate-on-migrate: true
+
   mail:
-    host: localhost
-    port: 1025
-    username: ""
-    password: ""
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
-      mail.smtp.auth: false
-      mail.smtp.starttls.enable: false
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS}
 
 server:
   servlet:
     context-path: /api
 
 app:
+  email-verification:
+    ttl-ms: ${EMAIL_VERIFICATION_TTL_MS}
   jwt:
-    secret: "very-long-secret-should-be-at-least-256-bit"
+    secret: ${JWT_SECRET}
     access-token-expiration-ms: 900000
-    refresh-token-expiration-ms: 2592000000

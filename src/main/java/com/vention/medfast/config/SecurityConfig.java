@@ -23,7 +23,7 @@ public class SecurityConfig {
 
 	@Bean
 	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(12);
+		return new BCryptPasswordEncoder();
 	}
 
 	@Bean
@@ -66,8 +66,10 @@ public class SecurityConfig {
 				.requestMatchers("/api/test/patient")
 				.hasRole("PATIENT")
 
-                .requestMatchers("/api/account/password-reset/**").permitAll()
-                .requestMatchers("/api/account/**").authenticated()
+                .requestMatchers(
+                    "/account/password-reset/request",
+                    "/account/password-reset/verify",
+                    "/account/password-reset/confirm").permitAll()
 
                 .anyRequest()
 				.authenticated())
