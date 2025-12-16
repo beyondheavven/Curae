@@ -10,6 +10,8 @@ public final class ApiPaths {
 
 	public static final String SPECIALIZATION_ENDPOINT = "/specializations";
 
+    public static final String PATIENT_ENDPOINT = "/patients";
+
 	public static final String AUTH_ENDPOINT = "/auth";
 
 	public static final String TEST_ENDPOINT = "/test";
