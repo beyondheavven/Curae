@@ -7,12 +7,13 @@ import com.vention.medfast.auth.dto.LogoutRequestDto;
 import com.vention.medfast.auth.dto.RefreshTokenRequestDto;
 import com.vention.medfast.auth.service.AuthService;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseFactory;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,13 +29,11 @@ public class AuthController {
         description = "Accepts email and password, returns access and refresh tokens upon successful authentication."
     )
     @PostMapping("/login")
-    public ResponseWrapper<AuthResponseDto> login(@RequestBody AuthRequestDto request) {
-        try {
-            AuthResponseDto response = authService.login(request);
-            return ResponseFactory.ok(response);
-        } catch (IllegalArgumentException ex) {
-            return ResponseFactory.badRequest(ex.getMessage(), ErrorCode.AUTH_ERROR);
-        }
+    public ResponseEntity<ResponseWrapper<AuthResponseDto>> login(@Valid @RequestBody AuthRequestDto request) {
+        AuthResponseDto response = authService.login(request);
+        return ResponseEntity.ok(
+            ResponseFactory.ok(response)
+        );
     }
 
     @Operation(
@@ -42,13 +41,13 @@ public class AuthController {
         description = "Accepts a refresh token and returns a new access token."
     )
     @PostMapping("/refresh")
-    public ResponseWrapper<AuthResponseDto> refresh(@RequestBody RefreshTokenRequestDto request) {
-        try {
-            AuthResponseDto response = authService.refresh(request.getRefreshToken());
-            return ResponseFactory.ok(response);
-        } catch (IllegalArgumentException ex) {
-            return ResponseFactory.badRequest(ex.getMessage(), ErrorCode.AUTH_ERROR);
-        }
+    public ResponseEntity<ResponseWrapper<AuthResponseDto>> refresh(@Valid @RequestBody RefreshTokenRequestDto request) {
+        AuthResponseDto response =
+            authService.refresh(request.getRefreshToken());
+
+        return ResponseEntity.ok(
+            ResponseFactory.ok(response)
+        );
     }
 
     @Operation(

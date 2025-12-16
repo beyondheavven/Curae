@@ -1,6 +1,9 @@
 package com.vention.medfast.passwordReset.service;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 public interface PasswordResetService {
-    void sendResetCode(String email);
-    String verifyCode(String email, String code);
+    void sendResetCode(@NotBlank @Email String email);
+    String verifyCode(@NotBlank @Email String email, @NotBlank String code);
 }

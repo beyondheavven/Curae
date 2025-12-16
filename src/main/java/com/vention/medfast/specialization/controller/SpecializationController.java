@@ -5,6 +5,8 @@ import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.specialization.dto.SpecializationCreateDto;
 import com.vention.medfast.specialization.dto.SpecializationResponseDto;
 import com.vention.medfast.specialization.service.SpecializationService;
+import com.vention.medfast.wrapper.ResponseFactory;
+import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,14 +45,20 @@ public class SpecializationController {
 							schema = @Schema(implementation = SpecializationResponseDto.class))),
 			@ApiResponse(responseCode = "204", description = "No specializations found") })
 	@GetMapping
-	public ResponseEntity<List<SpecializationResponseDto>> getAllSpecializations() {
-		List<SpecializationResponseDto> specializations = specializationService.getAll();
+	public ResponseEntity<ResponseWrapper<List<SpecializationResponseDto>>> getAllSpecializations() {
+        List<SpecializationResponseDto> specializations =
+            specializationService.getAll();
 
-		if (specializations.isEmpty()) {
-			return ResponseEntity.noContent().build();
-		}
+        if (specializations.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(
+                    ResponseFactory.withStatus(HttpStatus.NO_CONTENT, List.of())
+                );
+        }
 
-		return ResponseEntity.ok(specializations);
+        return ResponseEntity.ok(
+            ResponseFactory.ok(specializations)
+        );
 	}
 
 	@Operation(summary = "Get specialization by ID")
@@ -62,9 +70,14 @@ public class SpecializationController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@GetMapping("/{id}")
-	public SpecializationResponseDto getSpecializationById(
+	public ResponseEntity<ResponseWrapper<SpecializationResponseDto>> getSpecializationById(
 			@Parameter(description = "ID of specialization to find") @PathVariable(name = "id") Long id) {
-		return specializationService.getById(id);
+        SpecializationResponseDto dto =
+            specializationService.getById(id);
+
+        return ResponseEntity.ok(
+            ResponseFactory.ok(dto)
+        );
 	}
 
 	@Operation(summary = "Create specialization")
@@ -77,8 +90,14 @@ public class SpecializationController {
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public SpecializationResponseDto createSpecialization(@Valid @RequestBody SpecializationCreateDto dto) {
-		return specializationService.create(dto);
+	public ResponseEntity<ResponseWrapper<SpecializationResponseDto>> createSpecialization(@Valid @RequestBody SpecializationCreateDto dto) {
+        SpecializationResponseDto created =
+            specializationService.create(dto);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(
+                ResponseFactory.withStatus(HttpStatus.CREATED, created)
+            );
 	}
 
 	@Operation(summary = "Delete a specialization")
@@ -105,11 +124,15 @@ public class SpecializationController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PutMapping("/{id}")
-	public SpecializationResponseDto updateSpecialization(
+	public ResponseEntity<ResponseWrapper<SpecializationResponseDto>> updateSpecialization(
 			@Parameter(description = "ID of the specialization to update",
 					required = true) @PathVariable(name = "id") Long id,
 			@Parameter(description = "Fields to update") @Valid @RequestBody SpecializationCreateDto dto) {
-		return specializationService.update(id, dto);
-	}
+        SpecializationResponseDto updated =
+            specializationService.update(id, dto);
 
+        return ResponseEntity.ok(
+            ResponseFactory.ok(updated)
+        );
+	}
 }
