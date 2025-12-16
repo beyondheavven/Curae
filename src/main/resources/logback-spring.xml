@@ -28,7 +28,7 @@
 
       <providers>
         <timestamp>
-          <fieldName>Timestamp/UTC</fieldName>
+          <fieldName>timestamp_utc</fieldName>
           <timeZone>UTC</timeZone>
         </timestamp>
 
@@ -92,7 +92,7 @@
     <logger name="com.zaxxer.hikari" level="INFO"/>
 
     <root level="INFO">
-      <appender-ref ref="CONSOLE"/>
+      <appender-ref ref="JSON"/>
     </root>
   </springProfile>
 

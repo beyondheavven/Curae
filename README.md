@@ -100,6 +100,8 @@ POSTGRES_USER=medfast_user
 POSTGRES_PASSWORD=medfast_password
 POSTGRES_DB=medfast_db
 POSTGRES_PORT=5432
+
+GF_ADMIN_PASSWORD=admin
 ```
 
 ## Notes
@@ -230,14 +232,14 @@ curl -i -X POST -H "Content-Type: application/json" \
 ```
 
 ### Example of Log Formats
-Development(dev/stage) - Console Output:
+Stage(stage) - Console Output:
 ```
 09:27:39.549 [http-nio-8080-exec-1] DEBUG c.v.m.auth.service.AuthServiceImpl - Authentication successful. Generating tokens for User ID: 1
 09:27:39.729 [scheduling-1] DEBUG c.v.medfast.scheduled.LogsPoster - Debug message
 09:27:39.797 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into refresh_tokens (status,token,users_id) values (?,?,?)
 ```
 
-Production(prod) - JSON Output:
+Dev/Production(dev, prod) - JSON Output:
 ```JSON
 {
   "Timestamp/UTC": "2025-12-15T08:22:49.043273Z",
@@ -255,3 +257,40 @@ Production(prod) - JSON Output:
   "Message": "Failed login attempt for email: admin@med.com - Bad Credentials"
 }
 ```
+
+## Observability
+This project uses **Grafana, Loki** and **Promtail** to create observability stack. The goal is to provide developers with real-time log search and metric visualization.
+
+### How to run the application
+To launch the entire environment - PostgreSQL database, our application, and the monitoring stack - use one single command.
+
+```bash
+docker-compose up -d --build
+```
+
+**Confirm running services**
+```bash
+docker-compose ps
+```
+
+### How to access the Monitoring UI(Grafana)
+The primary dashboard is available immediately upon successful startup:
+
+|Service|Address| Role                                                                                                                |
+|-------|---------------------|---------------------------------------------------------------------------------------------------------------------|
+|Grafana|http://localhost:3000| The main dashboard used for viewing logs and basic metrics                                                          |
+|Prometheus|http://localhost:9090/targets | Metrics status. Check this page to confirm Prometheus is successfully scraping metrics from all configured services |
+
+### Viewing and Filtering Application Logs
+Logs from the Spring Boot application are collected, parsed, and stored as structured JSON data in Loki.
+
+#### Dashboard Filters
+From the Grafana home dashboard, you can quickly filter logs using the dedicated panels:
+
+- **Level Filter**: Select one or more log levels(e.g., `ERROR`, `WARN`, `INFO`) from the dropdown list.
+- **Package Filter**: Enter a specific class or package, such as `com.vention.medfast.user`, to narrow results.
+
+#### LogQL Query Structure(Advanced)
+For precise filtering and searching, use the LogQL in Grafana's Explore view.
+
+- `{container="medfast_api"} |= "Database connected"`: find logs containing text
