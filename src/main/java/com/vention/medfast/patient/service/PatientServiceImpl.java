@@ -32,35 +32,32 @@ public class PatientServiceImpl implements PatientService {
     @Override
     @Transactional
     public PatientResponseDto create(PatientCreateDto patientCreateDto) {
-        try {
-            User user = new User();
-            user.setFirstName(patientCreateDto.user().firstName());
-            user.setLastName(patientCreateDto.user().lastName());
-            user.setEmail(patientCreateDto.user().email());
-            user.setPasswordHash(patientCreateDto.user().password());
-            user.setRole(RoleType.PATIENT);
+        User user = new User();
+        user.setFirstName(patientCreateDto.user().firstName());
+        user.setLastName(patientCreateDto.user().lastName());
+        user.setProfileUrl(patientCreateDto.user().profileUrl());
+        user.setEmail(patientCreateDto.user().email());
+        user.setPasswordHash(patientCreateDto.user().password());
+        user.setRole(RoleType.PATIENT);
 
-            User savedUser = userRepository.save(user);
+        User savedUser = userRepository.save(user);
 
-            Address address = new Address();
-            address.setStreet(patientCreateDto.address().street());
-            address.setCity(patientCreateDto.address().city());
-            address.setHouseNumber(patientCreateDto.address().houseNumber());
-            address.setState(patientCreateDto.address().state());
-            address.setApartment(patientCreateDto.address().apartment());
-            address.setZipCode(patientCreateDto.address().zipCode());
-            address.setPhone(patientCreateDto.address().phone());
+        Address address = new Address();
+        address.setStreet(patientCreateDto.address().street());
+        address.setCity(patientCreateDto.address().city());
+        address.setHouseNumber(patientCreateDto.address().houseNumber());
+        address.setState(patientCreateDto.address().state());
+        address.setApartment(patientCreateDto.address().apartment());
+        address.setZipCode(patientCreateDto.address().zipCode());
+        address.setPhone(patientCreateDto.address().phone());
 
-            Patient patient = patientMapper.toEntity(patientCreateDto);
-            patient.setAddress(address);
-            patient.setUser(savedUser);
+        Patient patient = patientMapper.toEntity(patientCreateDto);
+        patient.setAddress(address);
+        patient.setUser(savedUser);
 
-            Patient saved = patientRepository.save(patient);
-            return patientMapper.toDto(saved);
-        }catch (Exception e){
-            log.error(e.getMessage());
-        }
-        return null;
+        Patient saved = patientRepository.save(patient);
+
+        return patientMapper.toDto(saved);
     }
 
     @Override

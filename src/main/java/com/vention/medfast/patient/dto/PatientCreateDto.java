@@ -17,6 +17,16 @@ import java.time.LocalDate;
 @Schema(description = "DTO for creating ang getting patient")
 public record PatientCreateDto(
 
+    @Schema(description = "User account information")
+    @NotNull(message = "User information is required")
+    @Valid
+    UserCreateDto user,
+
+    @Schema(description = "Patient's permanent address")
+    @NotNull(message = "Address is required")
+    @Valid
+    AddressCreateDto address,
+
     @Schema(description = "Citizenship of the patient", example = "USA")
     @NotBlank(message = "Citizenship is required")
     @Size(min = 2, max = 50, message = "Name of citizenship should be between 2 and 50 characters")
@@ -29,16 +39,6 @@ public record PatientCreateDto(
     @Schema(description = "Date of birth", example = "1995-10-25", format = "date")
     @NotNull(message = "Date of birth is required")
     @Past(message = "Date of birth must be in the past")
-    LocalDate birthDate,
-
-    @Schema(description = "Patient's permanent address")
-    @NotNull(message = "Address is required")
-    @Valid
-    AddressCreateDto address,
-
-    @Schema(description = "User account information")
-    @NotNull(message = "User information is required")
-    @Valid
-    UserCreateDto user
+    LocalDate birthDate
 ) {
 }

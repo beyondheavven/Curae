@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @Entity
@@ -11,14 +13,14 @@ import lombok.Setter;
 public class Address {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
 
     @Column(name = "street_name", nullable = false, length = 255)
     private String street;
 
-    @Column(name = "city", nullable = false, length = 255)
+    @Column(name = "city_name", nullable = false, length = 255)
     private String city;
 
     @Column(name = "house_number", nullable = false, length = 255)

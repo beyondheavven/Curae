@@ -5,6 +5,8 @@ import com.vention.medfast.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 public class Patient {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
@@ -22,6 +25,7 @@ public class Patient {
     private String citizenship;
 
     @Column(name = "gender", nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Enumerated(EnumType.STRING)
     private GenderType gender;
 
