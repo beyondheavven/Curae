@@ -12,6 +12,8 @@ public final class ApiPaths {
 
 	public static final String PATIENT_ENDPOINT = "/patients";
 
+	public static final String SERVICE_ENDPOINT = "/services";
+
 	public static final String AUTH_ENDPOINT = "/auth";
 
 	public static final String TEST_ENDPOINT = "/test";

@@ -100,6 +100,8 @@ POSTGRES_USER=medfast_user
 POSTGRES_PASSWORD=medfast_password
 POSTGRES_DB=medfast_db
 POSTGRES_PORT=5432
+
+GF_ADMIN_PASSWORD=admin
 ```
 
 ## Notes
@@ -182,3 +184,113 @@ chmod +x .githooks/*
 ```
 Or you can run bash script from (Linux, macOS and Windows with Git Bash)
 * ./scripts/setup-hooks.sh
+
+---
+
+## Logging
+The application logging is configured in `src/main/resources/logback-spring.xml`. This file defines environment-specific behaviors, log levels and sensitive data masking rules.
+
+### How to Change Log Level at Runtime
+We use Spring Boot Actuator to manage log levels dynamically without restarting the service.
+
+**Base URL**: `http://localhost:8080/api/actuator/loggers`
+
+#### Check the current log level:
+To see log level for the application package:
+```bash
+curl http://localhost:8080/api/actuator/loggers/com.vention.medfast
+```
+
+#### Change Log Level
+To enable `DEBUG` logs for the main application:
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "DEBUG"}' \
+  http://localhost:8080/api/actuator/loggers/com.vention.medfast
+```
+
+To enable `DEBUG` logs for Spring Security:
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "DEBUG"}' \
+  http://localhost:8080/api/actuator/loggers/org.springframework.security
+```
+### How to Enable SQL Logging
+
+#### Enable SQL Query Logging:
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "DEBUG"}' \
+  http://localhost:8080/api/actuator/loggers/org.hibernate.SQL
+```
+
+#### Enable Bind Parameters(see values):
+```bash
+curl -i -X POST -H "Content-Type: application/json" \
+  -d '{"configuredLevel": "TRACE"}' \
+  http://localhost:8080/api/actuator/loggers/org.hibernate.orm.jdbc.bind
+```
+
+### Example of Log Formats
+Stage(stage) - Console Output:
+```
+09:27:39.549 [http-nio-8080-exec-1] DEBUG c.v.m.auth.service.AuthServiceImpl - Authentication successful. Generating tokens for User ID: 1
+09:27:39.729 [scheduling-1] DEBUG c.v.medfast.scheduled.LogsPoster - Debug message
+09:27:39.797 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into refresh_tokens (status,token,users_id) values (?,?,?)
+```
+
+Dev/Production(dev, prod) - JSON Output:
+```JSON
+{
+  "Timestamp/UTC": "2025-12-15T08:22:49.043273Z",
+  "service": "medfast_api",
+  "version": "0.0.0",
+  "env": "prod",
+  "Level": "WARN",
+  "Thread": "http-nio-8080-exec-3",
+  "Logger": "com.vention.medfast.auth.service.AuthServiceImpl",
+  "ServiceName": "default",
+  "Class": "com.vention.medfast.auth.service.AuthServiceImpl",
+  "Method": "login",
+  "File": "AuthServiceImpl.java",
+  "Line": 62,
+  "Message": "Failed login attempt for email: admin@med.com - Bad Credentials"
+}
+```
+
+## Observability
+This project uses **Grafana, Loki** and **Promtail** to create observability stack. The goal is to provide developers with real-time log search and metric visualization.
+
+### How to run the application
+To launch the entire environment - PostgreSQL database, our application, and the monitoring stack - use one single command.
+
+```bash
+docker-compose up -d --build
+```
+
+**Confirm running services**
+```bash
+docker-compose ps
+```
+
+### How to access the Monitoring UI(Grafana)
+The primary dashboard is available immediately upon successful startup:
+
+|Service|Address| Role                                                                                                                |
+|-------|---------------------|---------------------------------------------------------------------------------------------------------------------|
+|Grafana|http://localhost:3000| The main dashboard used for viewing logs and basic metrics                                                          |
+|Prometheus|http://localhost:9090/targets | Metrics status. Check this page to confirm Prometheus is successfully scraping metrics from all configured services |
+
+### Viewing and Filtering Application Logs
+Logs from the Spring Boot application are collected, parsed, and stored as structured JSON data in Loki.
+
+#### Dashboard Filters
+From the Grafana home dashboard, you can quickly filter logs using the dedicated panels:
+
+- **Level Filter**: Select one or more log levels(e.g., `ERROR`, `WARN`, `INFO`) from the dropdown list.
+- **Package Filter**: Enter a specific class or package, such as `com.vention.medfast.user`, to narrow results.
+
+#### LogQL Query Structure(Advanced)
+For precise filtering and searching, use the LogQL in Grafana's Explore view.
+
+- `{container="medfast_api"} |= "Database connected"`: find logs containing text

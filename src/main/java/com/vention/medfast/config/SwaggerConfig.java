@@ -3,7 +3,6 @@ package com.vention.medfast.config;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import io.swagger.v3.oas.models.tags.Tag;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
@@ -31,9 +30,6 @@ public class SwaggerConfig {
 				""").contact(new Contact().name("Medfast Support Team").email("support@medfast.com")))
 			.servers(List.of(new Server().url(openApiProperties.getServerUrl())
 				.description(openApiProperties.getServerDescription())))
-			.tags(List.of(new Tag().name("Patients").description("Operations related to patient management"),
-					new Tag().name("Doctors").description("Operations related to doctor management"),
-					new Tag().name("Appointments").description("Operations related to appointment management")))
 			.components(new Components().addSecuritySchemes(securitySchemeName,
 					new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
 			.addSecurityItem(new SecurityRequirement().addList(securitySchemeName));

@@ -1,16 +1,11 @@
 package com.vention.medfast.specialization.dto;
 
+import com.vention.medfast.service.dto.ProvidedServiceBaseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
 
-@Builder
+import java.util.List;
+
 @Schema(description = "Represents the returned doctor specialization details")
-public record SpecializationResponseDto(
-
-		@Schema(description = "Unique identifier of the specialization", example = "10") Long id,
-
-		@Schema(description = "Name of the specialization", example = "Cardiology") String name,
-
-		@Schema(description = "Description of the specialization",
-				example = "Branch of medicine that deals with disorders of the heart.") String description) {
+public record SpecializationResponseDto(Long id, String name, String description,
+		List<ProvidedServiceBaseDto> services) {
 }

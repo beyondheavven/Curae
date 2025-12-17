@@ -143,11 +143,10 @@ CREATE TABLE patients (
 );
 
 -- Table: service_categories
-CREATE TABLE service_categories (
-                                    id bigserial,
-                                    name varchar(255)  NOT NULL,
-                                    specialization_id bigint  NOT NULL,
-                                    CONSTRAINT pk_service_categories PRIMARY KEY (id)
+CREATE TABLE service_specializations (
+                                         specialization_id bigserial NOT NULL,
+                                         service_id bigserial NOT NULL,
+                                         CONSTRAINT pk_service_specializations PRIMARY KEY (specialization_id, service_id)
 );
 
 -- Table: services
@@ -157,7 +156,6 @@ CREATE TABLE services (
                           description text,
                           price decimal(10,2)  NOT NULL,
                           duration_minutes int  NOT NULL,
-                          service_category_id bigint  NOT NULL,
                           CONSTRAINT pk_services PRIMARY KEY (id),
                           CONSTRAINT chk_price_positive CHECK (price >= 0),
                           CONSTRAINT chk_duration_positive CHECK (duration_minutes > 0)

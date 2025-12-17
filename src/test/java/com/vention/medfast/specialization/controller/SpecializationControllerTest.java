@@ -1,306 +1,287 @@
 package com.vention.medfast.specialization.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vention.medfast.auth.jwt.JwtAuthenticationFilter;
-import com.vention.medfast.auth.jwt.service.JwtService;
-import com.vention.medfast.auth.jwt.service.JwtServiceImpl;
+import com.jayway.jsonpath.JsonPath;
+import com.vention.medfast.AbstractIntegrationTest;
+import com.vention.medfast.auth.dto.AuthRequestDto;
 import com.vention.medfast.specialization.dto.SpecializationCreateDto;
-import com.vention.medfast.specialization.dto.SpecializationResponseDto;
-import com.vention.medfast.specialization.mapper.SpecializationMapper;
-import com.vention.medfast.specialization.model.Specialization;
-import com.vention.medfast.specialization.service.SpecializationService;
-import jakarta.persistence.EntityNotFoundException;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
+import tools.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-@WebMvcTest(SpecializationController.class)
-@AutoConfigureMockMvc(addFilters = false)
-public class SpecializationControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class SpecializationControllerTest extends AbstractIntegrationTest {
 
 	@Autowired
-	private MockMvc mockMvc;
+	MockMvc mockMvc;
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	@Autowired
+	ObjectMapper objectMapper;
 
-	@MockitoBean
-	private SpecializationService specializationService;
+	static String token;
 
-	@MockitoBean
-	private SpecializationMapper specializationMapper;
+	@BeforeAll
+	void obtainToken() throws Exception {
+		AuthRequestDto loginRequest = new AuthRequestDto("admin@med.com", "pass");
 
-	@MockitoBean
-	private JwtServiceImpl jwtService;
+		String json = objectMapper.writeValueAsString(loginRequest);
 
-	@MockitoBean
-	private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-	@MockitoBean
-	private AuthenticationProvider authenticationProvider;
-
-	@Test
-	void shouldReturnResponseWhenCreateIsValid() throws Exception {
-		SpecializationCreateDto requestDto = SpecializationCreateDto.builder()
-			.name("Cardiologist")
-			.description("Test description")
-			.build();
-
-		Specialization entity = new Specialization();
-		entity.setName(requestDto.name());
-		entity.setDescription(requestDto.description());
-		entity.setId(10L);
-
-		SpecializationResponseDto responseDto = SpecializationResponseDto.builder()
-			.id(10L)
-			.name("Cardiologist")
-			.description("Test description")
-			.build();
-
-		given(specializationMapper.toEntity(any(SpecializationCreateDto.class))).willReturn(entity);
-		given(specializationService.create(any(SpecializationCreateDto.class))).willReturn(responseDto);
-		given(specializationMapper.toDto(any(Specialization.class))).willReturn(responseDto);
-
-		mockMvc
-			.perform(post("/api/specializations").contextPath("/api")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)))
-			.andDo(print())
-			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.id", is(10)))
-			.andExpect(jsonPath("$.name", is("Cardiologist")))
-			.andExpect(jsonPath("$.description", is("Test description")));
-
-		verify(specializationService, times(1)).create(any(SpecializationCreateDto.class));
-	}
-
-	@Test
-	void shouldReturnResponseWhenGetByIdExists() throws Exception {
-		SpecializationResponseDto responseDto = SpecializationResponseDto.builder()
-			.id(10L)
-			.name("Cardiologist")
-			.description("Test description")
-			.build();
-
-		given(specializationService.getById(any(Long.class))).willReturn(responseDto);
-		given(specializationMapper.toDto(any(Specialization.class))).willReturn(responseDto);
-
-		ResultActions result = mockMvc
-			.perform(get("/api/specializations/{id}", 10L).contextPath("/api").contentType(MediaType.APPLICATION_JSON));
-
-		result.andDo(print())
+		String response = mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(json))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.id", is(10)))
-			.andExpect(jsonPath("$.name", is("Cardiologist")))
-			.andExpect(jsonPath("$.description", is("Test description")));
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
 
-		verify(specializationService, times(1)).getById(any(Long.class));
+		token = JsonPath.read(response, "$.accessToken");
 	}
 
 	@Test
-	void shouldReturnUpdatedResponseWhenUpdateValid() throws Exception {
-		SpecializationCreateDto requestDto = SpecializationCreateDto.builder()
-			.name("Cardiologist2")
-			.description("Test description2")
-			.build();
-
-		SpecializationResponseDto responseDto = SpecializationResponseDto.builder()
-			.id(10L)
-			.name("Cardiologist2")
-			.description("Test description2")
-			.build();
-
-		given(specializationService.update(any(Long.class), any(SpecializationCreateDto.class)))
-			.willReturn(responseDto);
-		given(specializationMapper.toDto(any(Specialization.class))).willReturn(responseDto);
-
-		ResultActions result = mockMvc.perform(put("/api/specializations/{id}", 10L).contextPath("/api")
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(requestDto)));
-
-		result.andDo(print())
+	public void shouldReturnSpecializationByIdWhenInputIsValid() throws Exception {
+		mockMvc.perform(get("/specializations/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.id", is(10)))
-			.andExpect(jsonPath("$.name", is("Cardiologist2")))
-			.andExpect(jsonPath("$.description", is("Test description2")));
+			.andExpect(jsonPath("$.id").exists())
+			.andExpect(jsonPath("$.name").value("General Practitioner"))
+			.andExpect(jsonPath("$.description").value("Primary care provider dealing with a wide range of diseases"))
 
-		verify(specializationService, times(1)).update(any(Long.class), any(SpecializationCreateDto.class));
+			.andExpect(jsonPath("$.services").isArray())
+			.andExpect(jsonPath("$.services.length()").value(2))
+
+			.andExpect(jsonPath("$.services[0].id").value(1))
+			.andExpect(jsonPath("$.services[0].name").value("General Checkup"))
+			.andExpect(jsonPath("$.services[0].description").value("Routine physical examination"))
+			.andExpect(jsonPath("$.services[0].price").value(150.0))
+			.andExpect(jsonPath("$.services[0].duration").value(30))
+
+			.andExpect(jsonPath("$.services[1].id").value(3))
+			.andExpect(jsonPath("$.services[1].name").value("Quick Consultation"))
+			.andExpect(jsonPath("$.services[1].description").value("Brief medical advice"))
+			.andExpect(jsonPath("$.services[1].price").value(75.0))
+			.andExpect(jsonPath("$.services[1].duration").value(15));
 	}
 
 	@Test
-	void shouldReturn404WhenGetResourceByIdNotFound() throws Exception {
-		given(specializationService.getById(anyLong()))
-			.willThrow(new EntityNotFoundException("Specialization not found"));
+	void shouldReturn404WhenSpecializationNotFound() throws Exception {
+		long notExistingId = 999L;
 
-		ResultActions result = mockMvc
-			.perform(get("/api/specializations/{id}", 10L).contextPath("/api").contentType(MediaType.APPLICATION_JSON));
-
-		result.andDo(print())
+		mockMvc.perform(get("/specializations/{id}", notExistingId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message", is("Specialization not found")));
-
-		verify(specializationService, times(1)).getById(any(Long.class));
+			.andExpect(jsonPath("$.message").value("Specialization not found"))
+			.andExpect(jsonPath("$.statusCode").value(404));
 	}
 
 	@Test
-	void shouldReturn404WhenDeleteResourceByIdNotFound() throws Exception {
-		doThrow(new EntityNotFoundException("Specialization not found")).when(specializationService)
-			.deleteById(anyLong());
+	public void shouldReturnSpecializationListByWhenSpecializationsPresent() throws Exception {
+		mockMvc.perform(get("/specializations").header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
 
-		ResultActions result = mockMvc.perform(
-				delete("/api/specializations/{id}", 10L).contextPath("/api").contentType(MediaType.APPLICATION_JSON));
+			.andExpect(jsonPath("$").isArray())
+			.andExpect(jsonPath("$.length()").value(3))
 
-		result.andDo(print())
-			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message", is("Specialization not found")));
-
-		verify(specializationService, times(1)).deleteById(any(Long.class));
-	}
-
-	@Test
-	void shouldReturn404WhenUpdatedResourceNotFound() throws Exception {
-		SpecializationCreateDto requestDto = SpecializationCreateDto.builder()
-			.name("Cardiologist2")
-			.description("Test description2")
-			.build();
-
-		doThrow(new EntityNotFoundException("Specialization not found")).when(specializationService)
-			.update(anyLong(), any(SpecializationCreateDto.class));
-
-		ResultActions result = mockMvc.perform(put("/api/specializations/{id}", 10L).contextPath("/api")
-			.contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(requestDto)));
-
-		result.andDo(print())
-			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message", is("Specialization not found")));
-
-		verify(specializationService, times(1)).update(any(Long.class), any(SpecializationCreateDto.class));
-	}
-
-	@Test
-	void shouldReturn204WhenDeleteSuccessful() throws Exception {
-		doNothing().when(specializationService).deleteById(1L);
-
-		ResultActions result = mockMvc.perform(delete("/api/specializations/{id}", 1L).contextPath("/api"));
-
-		verify(specializationService, times(1)).deleteById(1L);
-		result.andDo(print()).andExpect(status().isNoContent());
-	}
-
-	@Test
-	void shouldReturn400WhenCreateSpecializationWithInvalidNameAndDescriptionFields() throws Exception {
-		SpecializationCreateDto requestDto = SpecializationCreateDto.builder().name("T").description("D").build();
-
-		mockMvc
-			.perform(post("/api/specializations").contextPath("/api")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)))
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.fieldErrors.name", is("Name should be between 3 and 50 characters")))
+			.andExpect(jsonPath("$[0].id").value(1))
+			.andExpect(jsonPath("$[0].name").value("General Practitioner"))
 			.andExpect(
-					jsonPath("$.fieldErrors.description", is("Description should be between 10 and 255 characters")));
+					jsonPath("$[0].description").value("Primary care provider dealing with a wide range of diseases"))
+			.andExpect(jsonPath("$[0].services").isArray())
+			.andExpect(jsonPath("$[0].services.length()").value(2))
 
-		verify(specializationService, times(0)).create(any(SpecializationCreateDto.class));
+			.andExpect(jsonPath("$[0].services[0].id").value(1))
+
+			.andExpect(jsonPath("$[0].services[1].id").value(3))
+
+			.andExpect(jsonPath("$[1].id").value(2))
+			.andExpect(jsonPath("$[1].name").value("Cardiologist"))
+			.andExpect(jsonPath("$[1].description").value("Heart and cardiovascular system specialist"))
+			.andExpect(jsonPath("$[1].services.length()").value(1))
+
+			.andExpect(jsonPath("$[1].services[0].id").value(2))
+
+			.andExpect(jsonPath("$[2].id").value(3))
+			.andExpect(jsonPath("$[2].name").value("Diagnostician"))
+			.andExpect(jsonPath("$[2].description").value("Specialist in identifying complex medical conditions"))
+			.andExpect(jsonPath("$[2].services.length()").value(1))
+
+			.andExpect(jsonPath("$[2].services[0].id").value(2));
 	}
 
 	@Test
-	void shouldReturn400WhenCreateSpecializationWithNullNameField() throws Exception {
-		SpecializationCreateDto requestDto = SpecializationCreateDto.builder()
-			.name(null)
-			.description("Test description")
-			.build();
+	void shouldCreateSpecializationWhenInputIsValid() throws Exception {
+		int createdSpecializationId = createValidSpecialization();
 
 		mockMvc
-			.perform(post("/api/specializations").contextPath("/api")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)))
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.fieldErrors.name", is("Name is required")));
-
-		verify(specializationService, times(0)).create(any(SpecializationCreateDto.class));
-	}
-
-	@Test
-	void shouldReturn400WhenUpdateSpecializationWithBlankNameField() throws Exception {
-		SpecializationCreateDto requestDto = SpecializationCreateDto.builder()
-			.name("")
-			.description("Test description")
-			.build();
-
-		mockMvc
-			.perform(put("/api/specializations/{id}", 1L).contextPath("/api")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)))
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.fieldErrors.name", is("Name should be between 3 and 50 characters")));
-
-		verify(specializationService, times(0)).update(any(Long.class), any(SpecializationCreateDto.class));
-	}
-
-	@Test
-	void shouldReturnAllSpecializationsWhenSpecializationsExist() throws Exception {
-		List<SpecializationResponseDto> specializations = List.of(
-				SpecializationResponseDto.builder().id(1L).name("Cardiologist").description("Heart specialist").build(),
-				SpecializationResponseDto.builder()
-					.id(2L)
-					.name("General Practitioner")
-					.description("Primary care provider")
-					.build());
-
-		given(specializationService.getAll()).willReturn(specializations);
-
-		mockMvc.perform(get("/api/specializations").contextPath("/api").contentType(MediaType.APPLICATION_JSON))
-			.andDo(print())
+			.perform(get("/specializations/{id}", createdSpecializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$", hasSize(2)))
-			.andExpect(jsonPath("$[0].id", is(1)))
-			.andExpect(jsonPath("$[0].name", is("Cardiologist")))
-			.andExpect(jsonPath("$[0].description", is("Heart specialist")))
-			.andExpect(jsonPath("$[1].id", is(2)))
-			.andExpect(jsonPath("$[1].name", is("General Practitioner")))
-			.andExpect(jsonPath("$[1].description", is("Primary care provider")));
+			.andExpect(jsonPath("$.name").value("Test Specialization"))
+			.andExpect(jsonPath("$.description").value("Test description"))
+			.andExpect(jsonPath("$.services[0].id").value(1))
 
-		verify(specializationService, times(1)).getAll();
+			.andExpect(jsonPath("$.services[1].id").value(3));
+
+		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdSpecializationId)));
+
+		mockMvc.perform(get("/services/{id}", 3).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdSpecializationId)));
+
+		mockMvc
+			.perform(
+					delete("/specializations/{id}", createdSpecializationId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isNoContent());
 	}
 
 	@Test
-	void shouldReturnEmptyListWhenSpecializationsAreNull() throws Exception {
-		given(specializationService.getAll()).willReturn(new ArrayList<>());
+	void shouldReturn400WhenValidationErrorsPresentWithCreate() throws Exception {
+		SpecializationCreateDto dto = new SpecializationCreateDto("A", "", List.of());
 
-		mockMvc.perform(get("/api/specializations").contextPath("/api").contentType(MediaType.APPLICATION_JSON))
-			.andDo(print())
+		String json = objectMapper.writeValueAsString(dto);
+
+		mockMvc
+			.perform(post("/specializations").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.message").value("Validation error"))
+			.andExpect(jsonPath("$.statusCode").value(400))
+			.andExpect(jsonPath("$.fieldErrors.name").value("Name should be between 3 and 50 characters"))
+			.andExpect(
+					jsonPath("$.fieldErrors.description").value("Description should be between 10 and 255 characters"))
+			.andExpect(jsonPath("$.fieldErrors.serviceIds").value("At least one service is required"));
+	}
+
+	@Test
+	void shouldDeleteSpecializationByIdWhenInputIsValid() throws Exception {
+		int specializationId = createValidSpecialization();
+		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNoContent());
 
-		verify(specializationService, times(1)).getAll();
+		mockMvc.perform(get("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.message").value("Specialization not found"))
+			.andExpect(jsonPath("$.statusCode").value(404));
+	}
+
+	@Test
+	void shouldReturn404WhenSpecializationForDeleteNotFound() throws Exception {
+		long notExistingId = 999L;
+
+		mockMvc.perform(delete("/specializations/{id}", notExistingId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.message").value("Specialization not found"))
+			.andExpect(jsonPath("$.statusCode").value(404));
+	}
+
+	@Test
+	void shouldUpdateSpecializationWhenInputIsValid() throws Exception {
+		int specializationId = createValidSpecialization();
+
+		SpecializationCreateDto updateDto = new SpecializationCreateDto("Updated Name", "Updated description",
+				List.of(2));
+
+		String updateJson = objectMapper.writeValueAsString(updateDto);
+
+		mockMvc
+			.perform(put("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(updateJson))
+			.andExpect(status().isOk());
+
+		mockMvc.perform(get("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name").value("Updated Name"))
+			.andExpect(jsonPath("$.description").value("Updated description"))
+			.andExpect(jsonPath("$.services[*].id", Matchers.containsInAnyOrder(2)));
+
+		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationId))));
+
+		mockMvc.perform(get("/services/{id}", 3).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationId))));
+
+		mockMvc.perform(get("/services/{id}", 2).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(specializationId)));
+
+		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isNoContent());
+	}
+
+	@Test
+	void shouldReturn404WhenSpecializationForUpdateNotFound() throws Exception {
+		long notExistingId = 999L;
+
+		SpecializationCreateDto dto = new SpecializationCreateDto("Test Specialization", "Test description",
+				List.of(1, 3));
+
+		String json = objectMapper.writeValueAsString(dto);
+
+		mockMvc
+			.perform(put("/specializations/{id}", notExistingId).header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.message").value("Specialization not found"))
+			.andExpect(jsonPath("$.statusCode").value(404));
+	}
+
+	@Test
+	void shouldReturn400WhenValidationErrorsPresentWithUpdate() throws Exception {
+		int specializationId = createValidSpecialization();
+
+		SpecializationCreateDto invalidDto = new SpecializationCreateDto("A", "", List.of());
+
+		String invalidJson = objectMapper.writeValueAsString(invalidDto);
+
+		mockMvc
+			.perform(put("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(invalidJson))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.message").value("Validation error"))
+			.andExpect(jsonPath("$.statusCode").value(400))
+			.andExpect(jsonPath("$.fieldErrors.name").value("Name should be between 3 and 50 characters"))
+			.andExpect(
+					jsonPath("$.fieldErrors.description").value("Description should be between 10 and 255 characters"))
+			.andExpect(jsonPath("$.fieldErrors.serviceIds").value("At least one service is required"));
+
+		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isNoContent());
+	}
+
+	private int createValidSpecialization() throws Exception {
+		SpecializationCreateDto createDto = new SpecializationCreateDto("Test Specialization", "Test description",
+				List.of(1, 3));
+
+		String createJson = objectMapper.writeValueAsString(createDto);
+		String createResponse = mockMvc
+			.perform(post("/specializations").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(createJson))
+			.andExpect(status().isCreated())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
+
+		return JsonPath.read(createResponse, "$");
 	}
 
 }
