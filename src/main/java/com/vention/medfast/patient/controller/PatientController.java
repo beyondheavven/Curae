@@ -23,37 +23,34 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Patients", description = "Endpoints for managing patients")
 public class PatientController {
 
-    private final PatientService patientService;
+	private final PatientService patientService;
 
-    @Operation(summary = "Create patient")
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Successfully created",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = PatientResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Validation error",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))) })
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public PatientResponseDto createPatient(@Valid @RequestBody PatientCreateDto request){
-        return patientService.create(request);
-    }
+	@Operation(summary = "Create patient")
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "Successfully created",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = PatientResponseDto.class))),
+			@ApiResponse(responseCode = "400", description = "Validation error",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public PatientResponseDto createPatient(@Valid @RequestBody PatientCreateDto request) {
+		return patientService.create(request);
+	}
 
-
-    @Operation(summary = "Get patient by ID")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Patient found",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = PatientResponseDto.class))),
-        @ApiResponse(responseCode = "404", description = "Patient not found",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))) })
-    @GetMapping("/{id}")
-    public PatientResponseDto getPatientById(@Parameter(
-        description = "ID of patient to find") @PathVariable(name = "id") Long id){
-        return patientService.getPatientById(id);
-    }
-
-
+	@Operation(summary = "Get patient by ID")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Patient found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = PatientResponseDto.class))),
+			@ApiResponse(responseCode = "404", description = "Patient not found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@GetMapping("/{id}")
+	public PatientResponseDto getPatientById(
+			@Parameter(description = "ID of patient to find") @PathVariable(name = "id") Long id) {
+		return patientService.getPatientById(id);
+	}
 
 }

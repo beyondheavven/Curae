@@ -21,7 +21,7 @@ public class User {
 	@Column(name = "id", nullable = false)
 	private Long id;
 
-    @Column(name = "email", nullable = false, length = 255)
+	@Column(name = "email", nullable = false, length = 255)
 	private String email;
 
 	@Column(name = "password_hash", nullable = false, length = 255)
@@ -37,7 +37,7 @@ public class User {
 	private String profileUrl;
 
 	@Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "role", nullable = false)
 	private RoleType role;
 

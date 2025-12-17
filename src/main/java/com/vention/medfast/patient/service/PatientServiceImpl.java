@@ -21,53 +21,50 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class PatientServiceImpl implements PatientService {
 
-    private final PatientRepository patientRepository;
+	private final PatientRepository patientRepository;
 
-    private final UserRepository userRepository;
+	private final UserRepository userRepository;
 
-    private final PatientMapper patientMapper;
+	private final PatientMapper patientMapper;
 
-    private final AddressRepository addressRepository;
+	@Override
+	@Transactional
+	public PatientResponseDto create(PatientCreateDto patientCreateDto) {
+		User user = new User();
+		user.setFirstName(patientCreateDto.user().firstName());
+		user.setLastName(patientCreateDto.user().lastName());
+		user.setProfileUrl(patientCreateDto.user().profileUrl());
+		user.setEmail(patientCreateDto.user().email());
+		user.setPasswordHash(patientCreateDto.user().password());
+		user.setRole(RoleType.PATIENT);
 
-    @Override
-    @Transactional
-    public PatientResponseDto create(PatientCreateDto patientCreateDto) {
-        User user = new User();
-        user.setFirstName(patientCreateDto.user().firstName());
-        user.setLastName(patientCreateDto.user().lastName());
-        user.setProfileUrl(patientCreateDto.user().profileUrl());
-        user.setEmail(patientCreateDto.user().email());
-        user.setPasswordHash(patientCreateDto.user().password());
-        user.setRole(RoleType.PATIENT);
+		User savedUser = userRepository.save(user);
 
-        User savedUser = userRepository.save(user);
+		Address address = new Address();
+		address.setStreet(patientCreateDto.address().street());
+		address.setCity(patientCreateDto.address().city());
+		address.setHouseNumber(patientCreateDto.address().houseNumber());
+		address.setState(patientCreateDto.address().state());
+		address.setApartment(patientCreateDto.address().apartment());
+		address.setZipCode(patientCreateDto.address().zipCode());
+		address.setPhone(patientCreateDto.address().phone());
 
-        Address address = new Address();
-        address.setStreet(patientCreateDto.address().street());
-        address.setCity(patientCreateDto.address().city());
-        address.setHouseNumber(patientCreateDto.address().houseNumber());
-        address.setState(patientCreateDto.address().state());
-        address.setApartment(patientCreateDto.address().apartment());
-        address.setZipCode(patientCreateDto.address().zipCode());
-        address.setPhone(patientCreateDto.address().phone());
+		Patient patient = patientMapper.toEntity(patientCreateDto);
+		patient.setAddress(address);
+		patient.setUser(savedUser);
 
-        Patient patient = patientMapper.toEntity(patientCreateDto);
-        patient.setAddress(address);
-        patient.setUser(savedUser);
+		Patient saved = patientRepository.save(patient);
 
-        Patient saved = patientRepository.save(patient);
+		return patientMapper.toDto(saved);
+	}
 
-        return patientMapper.toDto(saved);
-    }
+	@Override
+	public PatientResponseDto getPatientById(Long id) {
+		return patientMapper.toDto(findById(id));
+	}
 
-    @Override
-    public PatientResponseDto getPatientById(Long id) {
-        return patientMapper.toDto(findById(id));
-    }
-
-    public Patient findById(Long id) {
-        return patientRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
-    }
+	public Patient findById(Long id) {
+		return patientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+	}
 
 }
