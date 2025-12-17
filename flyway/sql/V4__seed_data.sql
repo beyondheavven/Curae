@@ -32,10 +32,10 @@ VALUES
     ('Central City Hospital', 'logo.png', 'Advanced medical care center', 1);
 
 -- 5. DOCTORS
-INSERT INTO doctors (id, bio, user_id, clinic_id)
+INSERT INTO doctors (bio, user_id, clinic_id)
 VALUES
-    (1, 'World-renowned diagnostician with unconventional methods.', 2, 1),
-    (2, 'Experienced general practitioner and surgeon.', 3, 1);
+    ('World-renowned diagnostician with unconventional methods.', 2, 1),
+    ('Experienced general practitioner and surgeon.', 3, 1);
 
 -- 6. DOCTOR SPECIALIZATIONS
 INSERT INTO doctor_specializations (doctor_id, specialization_id)
