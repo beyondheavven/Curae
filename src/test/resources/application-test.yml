@@ -1,3 +1,19 @@
 testcontainers:
   reuse:
     enable: true
+
+spring:
+  flyway:
+    enabled: true
+    locations:
+      - filesystem:${user.dir}/flyway/sql/schema
+      - classpath:flyway/sql/test
+custom:
+  security:
+    public-routes: "/actuator/**"
+
+app:
+  jwt:
+    secret: "very-long-secret-should-be-at-least-256-bit"
+    access-token-expiration-ms: 900000        # 15 min
+    refresh-token-expiration-ms: 2592000000   # 30 days

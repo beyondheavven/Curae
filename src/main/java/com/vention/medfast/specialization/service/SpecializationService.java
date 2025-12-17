@@ -11,10 +11,10 @@ public interface SpecializationService {
 
 	SpecializationResponseDto getById(Long id);
 
-	SpecializationResponseDto create(SpecializationCreateDto dto);
+	long create(SpecializationCreateDto dto);
 
 	void deleteById(Long id);
 
-	SpecializationResponseDto update(Long id, SpecializationCreateDto dto);
+	long update(Long id, SpecializationCreateDto dto);
 
 }

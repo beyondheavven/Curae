@@ -4,10 +4,16 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import com.vention.medfast.service.model.ProvidedService;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,5 +31,10 @@ public class Specialization {
 
 	@Column(name = "description", nullable = false)
 	private String description;
+
+	@ManyToMany
+	@JoinTable(name = "service_specializations", joinColumns = @JoinColumn(name = "specialization_id"),
+			inverseJoinColumns = @JoinColumn(name = "service_id"))
+	private List<ProvidedService> services;
 
 }

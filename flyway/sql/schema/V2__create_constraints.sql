@@ -95,19 +95,17 @@ ALTER TABLE patients ADD CONSTRAINT fk_patients_addresses
         NOT DEFERRABLE
             INITIALLY IMMEDIATE;
 
--- Reference: service_categories_specializations (table: service_categories)
-ALTER TABLE service_categories ADD CONSTRAINT fk_service_categories_specializations
-    FOREIGN KEY (specialization_id)
-        REFERENCES specializations (id)
-        NOT DEFERRABLE
-            INITIALLY IMMEDIATE;
+-- Reference: service_specializations_specializations (table: service_specializations)
+ALTER TABLE service_specializations
+    ADD CONSTRAINT fk_service_specializations_specializations
+        FOREIGN KEY (specialization_id)
+            REFERENCES specializations (id)
+            NOT DEFERRABLE INITIALLY IMMEDIATE,
+    ADD CONSTRAINT fk_service_specializations_services
+        FOREIGN KEY (service_id)
+        REFERENCES services (id)
+        NOT DEFERRABLE INITIALLY IMMEDIATE;
 
--- Reference: services_service_categories (table: services)
-ALTER TABLE services ADD CONSTRAINT fk_services_service_categories
-    FOREIGN KEY (service_category_id)
-        REFERENCES service_categories (id)
-        NOT DEFERRABLE
-            INITIALLY IMMEDIATE;
 
 -- Reference: tests_appointments (table: tests)
 ALTER TABLE tests ADD CONSTRAINT fk_tests_appointments
