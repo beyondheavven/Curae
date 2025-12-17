@@ -5,13 +5,14 @@ import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.model.Patient;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PatientMapper {
 
 	Patient toEntity(PatientCreateDto dto);
 
-    @Mapping(source = "id", target = "id")
+	@Mapping(source = "id", target = "id")
 	@Mapping(source = "user.firstName", target = "firstName")
 	@Mapping(source = "user.lastName", target = "lastName")
 	@Mapping(source = "user.profileUrl", target = "profileUrl")

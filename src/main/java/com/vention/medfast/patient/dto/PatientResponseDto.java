@@ -7,7 +7,7 @@ import lombok.Builder;
 @Schema(description = "Represents the returned patient details")
 public record PatientResponseDto(
 
-        @Schema(description = "Unique identifier of the patient", example = "10") Long id,
+		@Schema(description = "Unique identifier of the patient", example = "10") Long id,
 
 		@Schema(description = "First name from User account", example = "John") String firstName,
 
