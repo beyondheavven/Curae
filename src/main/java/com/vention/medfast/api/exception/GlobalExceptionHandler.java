@@ -142,4 +142,20 @@ public class GlobalExceptionHandler {
                     .build()
             );
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleIllegalState(
+        IllegalStateException ex
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(
+                ResponseWrapper.builder()
+                    .error(new ResponseError(
+                        ErrorCode.BAD_REQUEST,
+                        ex.getMessage()
+                    ))
+                    .build()
+            );
+    }
 }
