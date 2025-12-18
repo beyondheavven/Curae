@@ -1,5 +1,7 @@
 package com.vention.medfast.specialization.service;
 
+import com.vention.medfast.service.model.ProvidedService;
+import com.vention.medfast.service.repository.ProvidedServiceRepository;
 import com.vention.medfast.specialization.dto.SpecializationCreateDto;
 import com.vention.medfast.specialization.dto.SpecializationResponseDto;
 import com.vention.medfast.specialization.mapper.SpecializationMapper;
@@ -11,10 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SpecializationServiceImpl implements SpecializationService {
+
+	private final ProvidedServiceRepository serviceRepository;
 
 	private final SpecializationRepository specializationRepository;
 
@@ -28,28 +34,68 @@ public class SpecializationServiceImpl implements SpecializationService {
 		return specializationMapper.toDto(findById(id));
 	}
 
+	@Override
 	@Transactional
-	public SpecializationResponseDto create(SpecializationCreateDto dto) {
-		Specialization saved = specializationRepository.save(specializationMapper.toEntity(dto));
-		return specializationMapper.toDto(saved);
+	public long create(SpecializationCreateDto dto) {
+		Specialization entity = specializationMapper.toEntity(dto);
+		entity.setServices(processServices(dto.serviceIds()));
+		Specialization saved = specializationRepository.save(entity);
+		return saved.getId();
 	}
 
-	@Transactional
+	@Override
 	public void deleteById(Long id) {
 		Specialization specialization = findById(id);
 		specializationRepository.delete(specialization);
 	}
 
+	@Override
 	@Transactional
-	public SpecializationResponseDto update(Long id, SpecializationCreateDto dto) {
-		Specialization spec = findById(id);
-		specializationMapper.updateFromDto(dto, spec);
-		return specializationMapper.toDto(spec);
+	public long update(Long id, SpecializationCreateDto dto) {
+		Specialization specialization = findById(id);
+		specializationMapper.updateFromDto(dto, specialization);
+
+		List<ProvidedService> newServices = processServices(dto.serviceIds());
+
+		Set<Long> oldIds = specialization.getServices()
+			.stream()
+			.map(ProvidedService::getId)
+			.collect(Collectors.toSet());
+		Set<Long> newIds = newServices.stream().map(ProvidedService::getId).collect(Collectors.toSet());
+
+		specialization.getServices()
+			.stream()
+			.filter(oldService -> !newIds.contains(oldService.getId()))
+			.forEach(oldService -> oldService.getSpecializations().remove(specialization));
+
+		specialization.getServices().removeIf(oldService -> !newIds.contains(oldService.getId()));
+
+		newServices.stream().filter(newService -> !oldIds.contains(newService.getId())).forEach(newService -> {
+			specialization.getServices().add(newService);
+			newService.getSpecializations().add(specialization);
+		});
+
+		return specialization.getId();
 	}
 
 	private Specialization findById(Long id) {
 		return specializationRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Specialization not found"));
+	}
+
+	private List<ProvidedService> processServices(List<Integer> serviceIds) {
+		List<Long> longIds = serviceIds.stream().map(Integer::longValue).toList();
+
+		List<ProvidedService> services = serviceRepository.findAllById(longIds);
+
+		Set<Long> foundIds = services.stream().map(ProvidedService::getId).collect(Collectors.toSet());
+
+		List<Long> missingIds = longIds.stream().filter(id -> !foundIds.contains(id)).toList();
+
+		if (!missingIds.isEmpty()) {
+			throw new EntityNotFoundException("Services not found with ids: " + missingIds);
+		}
+		return services;
 	}
 
 }

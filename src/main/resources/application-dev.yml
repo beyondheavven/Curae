@@ -1,12 +1,12 @@
-openapi:
-  server-url: https://localhost:8080
-  server-description: Development server
+custom:
+  security:
+    public-routes: "/actuator/**"
 
 management:
   endpoints:
     web:
       exposure:
-        include: "info, health, metrics, env, prometheus"
+        include: "info, health, metrics, env, prometheus, loggers"
 
   endpoint:
     health:

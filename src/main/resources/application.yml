@@ -1,3 +1,16 @@
+openapi:
+  server-url: http://localhost:8080/api
+  server-description: Production server
+
+springdoc:
+  show-actuator: true
+  group-configs:
+    - group: "Medfast API"
+      paths-to-match: "/**"
+      paths-to-exclude: "/actuator/**"
+    - group: "Actuator"
+      paths-to-match: "/actuator/**"
+
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL}

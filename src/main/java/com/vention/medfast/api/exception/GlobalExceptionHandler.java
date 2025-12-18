@@ -10,7 +10,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,142 +20,111 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ResponseWrapper<?>> handleUnexpectedException(
         Exception ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.SERVER_ERROR,
-                        "Internal server error"
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            ErrorCode.SERVER_ERROR,
+            "Internal server error"
+        );
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<ResponseWrapper<?>> handleInvalidRefreshToken(
         InvalidRefreshTokenException ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.UNAUTHORIZED)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.AUTH_ERROR,
-                        ex.getMessage()
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.UNAUTHORIZED,
+            ErrorCode.AUTH_ERROR,
+            ex.getMessage()
+        );
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ResponseWrapper<?>> handleAccessDenied(
         AccessDeniedException ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.AUTH_ERROR,
-                        "Access denied"
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.FORBIDDEN,
+            ErrorCode.AUTH_ERROR,
+            "Access denied"
+        );
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ResponseWrapper<?>> handleUserNotFound(
         UsernameNotFoundException ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.UNAUTHORIZED)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.AUTH_ERROR,
-                        ex.getMessage()
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.UNAUTHORIZED,
+            ErrorCode.AUTH_ERROR,
+            ex.getMessage()
+        );
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ResponseWrapper<?>> handleBadCredentials(
         BadCredentialsException ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.UNAUTHORIZED)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.AUTH_ERROR,
-                        "Invalid email or password"
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.UNAUTHORIZED,
+            ErrorCode.AUTH_ERROR,
+            "Invalid email or password"
+        );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ResponseWrapper<?>> handleValidationExceptions(
         MethodArgumentNotValidException ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.VALIDATION_ERROR,
-                        "Validation error"
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.VALIDATION_ERROR,
+            "Validation error"
+        );
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ResponseWrapper<?>> handleResourceNotFound(
         EntityNotFoundException ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.NOT_FOUND)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.NOT_FOUND,
-                        ex.getMessage()
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.NOT_FOUND,
+            ErrorCode.NOT_FOUND,
+            ex.getMessage()
+        );
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ResponseWrapper<?>> handleIllegalArgument(
         IllegalArgumentException ex
     ) {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(
-                ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.BAD_REQUEST,
-                        ex.getMessage()
-                    ))
-                    .build()
-            );
+        return buildError(
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.BAD_REQUEST,
+            ex.getMessage()
+        );
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ResponseWrapper<?>> handleIllegalState(
         IllegalStateException ex
     ) {
+        return buildError(
+            HttpStatus.CONFLICT,
+            ErrorCode.BAD_REQUEST,
+            ex.getMessage()
+        );
+    }
+
+    private ResponseEntity<ResponseWrapper<?>> buildError(
+        HttpStatus status,
+        ErrorCode code,
+        String message
+    ) {
         return ResponseEntity
-            .status(HttpStatus.CONFLICT)
+            .status(status)
             .body(
                 ResponseWrapper.builder()
-                    .error(new ResponseError(
-                        ErrorCode.BAD_REQUEST,
-                        ex.getMessage()
-                    ))
+                    .error(new ResponseError(code, message))
                     .build()
             );
     }

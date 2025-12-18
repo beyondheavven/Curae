@@ -1,5 +1,7 @@
 package com.vention.medfast.specialization.service;
 
+import com.vention.medfast.service.model.ProvidedService;
+import com.vention.medfast.service.repository.ProvidedServiceRepository;
 import com.vention.medfast.specialization.dto.SpecializationCreateDto;
 import com.vention.medfast.specialization.dto.SpecializationResponseDto;
 import com.vention.medfast.specialization.mapper.SpecializationMapper;
@@ -12,12 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -32,39 +36,34 @@ public class SpecializationServiceImplTest {
 	@Mock
 	private SpecializationRepository specializationRepository;
 
+	@Mock
+	private ProvidedServiceRepository providedServiceRepository;
+
 	@InjectMocks
 	private SpecializationServiceImpl specializationService;
 
 	@Test
 	public void shouldCreateSpecializationWhenInputIsValid() {
-		SpecializationCreateDto dto = SpecializationCreateDto.builder()
-			.name("Cardiologist")
-			.description("Heart specialist")
-			.build();
+		SpecializationCreateDto dto = new SpecializationCreateDto("Cardiologist", "Heart specialist", List.of(1));
 
 		Specialization entity = new Specialization();
 		entity.setId(1L);
 		entity.setName(dto.name());
 		entity.setDescription(dto.description());
 
-		SpecializationResponseDto responseDto = SpecializationResponseDto.builder()
-			.id(1L)
-			.name(dto.name())
-			.description(dto.description())
-			.build();
+		ProvidedService service = new ProvidedService();
+		service.setId(1L);
 
 		when(specializationMapper.toEntity(dto)).thenReturn(entity);
-		when(specializationMapper.toDto(entity)).thenReturn(responseDto);
+		when(providedServiceRepository.findAllById(anyList())).thenReturn(List.of(service));
 		when(specializationRepository.save(entity)).thenReturn(entity);
 
-		SpecializationResponseDto result = specializationService.create(dto);
+		long resultId = specializationService.create(dto);
 
-		assertEquals(Long.valueOf(1L), result.id());
-		assertEquals("Cardiologist", result.name());
-		assertEquals("Heart specialist", result.description());
+		assertEquals(1L, resultId);
 
 		verify(specializationMapper).toEntity(dto);
-		verify(specializationMapper).toDto(entity);
+		verify(providedServiceRepository).findAllById(anyList());
 		verify(specializationRepository).save(entity);
 	}
 
@@ -75,11 +74,8 @@ public class SpecializationServiceImplTest {
 		entity.setName("Cardiologist");
 		entity.setDescription("Heart specialist");
 
-		SpecializationResponseDto responseDto = SpecializationResponseDto.builder()
-			.id(1L)
-			.name(entity.getName())
-			.description(entity.getDescription())
-			.build();
+		SpecializationResponseDto responseDto = new SpecializationResponseDto(1L, entity.getName(),
+				entity.getDescription(), new ArrayList<>());
 
 		when(specializationMapper.toDto(entity)).thenReturn(responseDto);
 		when(specializationRepository.findById(1L)).thenReturn(Optional.of(entity));
@@ -96,33 +92,28 @@ public class SpecializationServiceImplTest {
 
 	@Test
 	public void shouldUpdateSpecializationWhenInputIsValid() {
-		SpecializationCreateDto dto = SpecializationCreateDto.builder()
-			.name("Cardiologist2")
-			.description("Heart specialist2")
-			.build();
+		SpecializationCreateDto dto = new SpecializationCreateDto("Cardiologist2", "Heart specialist2", List.of(1));
+
+		ProvidedService service = new ProvidedService();
+		service.setId(1L);
 
 		Specialization entity = new Specialization();
 		entity.setId(1L);
 		entity.setName("Cardiologist2");
 		entity.setDescription("Heart specialist2");
+		ArrayList<ProvidedService> services = new ArrayList<>();
+		services.add(service);
+		entity.setServices(services);
 
-		SpecializationResponseDto responseDto = SpecializationResponseDto.builder()
-			.id(1L)
-			.name(entity.getName())
-			.description(entity.getDescription())
-			.build();
-
-		when(specializationMapper.toDto(entity)).thenReturn(responseDto);
 		when(specializationRepository.findById(1L)).thenReturn(Optional.of(entity));
+		when(providedServiceRepository.findAllById(anyList())).thenReturn(List.of(service));
 
-		SpecializationResponseDto result = specializationService.update(1L, dto);
+		long result = specializationService.update(1L, dto);
 
-		assertEquals(Long.valueOf(1L), result.id());
-		assertEquals("Cardiologist2", result.name());
-		assertEquals("Heart specialist2", result.description());
+		assertEquals(Long.valueOf(1L), result);
 
-		verify(specializationMapper).toDto(entity);
 		verify(specializationRepository).findById(any(Long.class));
+		verify(providedServiceRepository).findAllById((anyList()));
 	}
 
 	@Test
@@ -139,17 +130,11 @@ public class SpecializationServiceImplTest {
 
 		List<Specialization> entityResultList = List.of(entity, entity2);
 
-		SpecializationResponseDto responseDto = SpecializationResponseDto.builder()
-			.id(1L)
-			.name(entity.getName())
-			.description(entity.getDescription())
-			.build();
+		SpecializationResponseDto responseDto = new SpecializationResponseDto(1L, entity.getName(),
+				entity.getDescription(), new ArrayList<>());
 
-		SpecializationResponseDto responseDto2 = SpecializationResponseDto.builder()
-			.id(2L)
-			.name(entity2.getName())
-			.description(entity2.getDescription())
-			.build();
+		SpecializationResponseDto responseDto2 = new SpecializationResponseDto(2L, entity2.getName(),
+				entity2.getDescription(), new ArrayList<>());
 
 		when(specializationMapper.toDto(entity)).thenReturn(responseDto);
 		when(specializationMapper.toDto(entity2)).thenReturn(responseDto2);
@@ -196,11 +181,7 @@ public class SpecializationServiceImplTest {
 	@Test
 	public void shouldThrowExceptionWhenUpdateSpecializationNotFound() {
 		Long id = 10L;
-		SpecializationCreateDto dto = SpecializationCreateDto.builder()
-			.name("Updated Name")
-			.description("Updated Description")
-			.build();
-
+		SpecializationCreateDto dto = new SpecializationCreateDto("Cardiologist", "Heart specialist", List.of(1));
 		when(specializationRepository.findById(id)).thenReturn(Optional.empty());
 
 		EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
@@ -217,10 +198,25 @@ public class SpecializationServiceImplTest {
 	public void shouldDeleteSpecializationWhenInputIsValid() {
 		Long id = 1L;
 
+		ProvidedService service = new ProvidedService();
+		service.setId(1L);
+
+		ArrayList<ProvidedService> services = new ArrayList<>();
+		services.add(service);
+
+		Specialization entity2 = new Specialization();
+		entity2.setServices(services);
+
 		Specialization entity = new Specialization();
-		entity.setId(id);
-		entity.setName("Cardiologist");
-		entity.setDescription("Heart specialist");
+		entity.setId(1L);
+		entity.setName("Cardiologist2");
+		entity.setDescription("Heart specialist2");
+		entity.setServices(services);
+
+		ArrayList<Specialization> specList = new ArrayList<>();
+		specList.add(entity);
+		specList.add(entity2);
+		service.setSpecializations(specList);
 
 		when(specializationRepository.findById(id)).thenReturn(Optional.of(entity));
 
