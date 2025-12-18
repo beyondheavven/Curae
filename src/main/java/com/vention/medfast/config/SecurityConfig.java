@@ -66,7 +66,12 @@ public class SecurityConfig {
 				.requestMatchers(actuatorEndpoints)
 				.permitAll()
 
-				.anyRequest()
+                .requestMatchers(
+                    "/account/password-reset/request",
+                    "/account/password-reset/verify",
+                    "/account/password-reset/confirm").permitAll()
+
+                .anyRequest()
 				.authenticated())
 			.authenticationProvider(authenticationProvider)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

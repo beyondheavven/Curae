@@ -83,16 +83,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
 	private void writeUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
+        int status = HttpServletResponse.SC_UNAUTHORIZED;
 
-		int status = HttpServletResponse.SC_UNAUTHORIZED;
+        ErrorResponseDto error = ErrorResponseDto.builder().statusCode(status).message(message).build();
 
-		ErrorResponseDto error = ErrorResponseDto.builder().statusCode(status).message(message).build();
+        response.setStatus(status);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
-		response.setStatus(status);
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-
-		objectMapper.writeValue(response.getWriter(), error);
+        objectMapper.writeValue(response.getWriter(), error);
 	}
-
 }

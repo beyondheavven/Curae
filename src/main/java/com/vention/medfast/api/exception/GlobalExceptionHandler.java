@@ -1,96 +1,131 @@
 package com.vention.medfast.api.exception;
 
-import com.vention.medfast.api.response.ErrorResponseDto;
-import com.vention.medfast.api.response.ValidationErrorResponseDto;
+import com.vention.medfast.wrapper.ErrorCode;
+import com.vention.medfast.wrapper.ResponseError;
+import com.vention.medfast.wrapper.ResponseWrapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorResponseDto> handleUnexpectedException(Exception ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-			.message("Internal server error")
-			.build();
-		System.out.println(ex.getMessage());
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ResponseWrapper<?>> handleUnexpectedException(
+        Exception ex
+    ) {
+        return buildError(
+            HttpStatus.INTERNAL_SERVER_ERROR,
+            ErrorCode.SERVER_ERROR,
+            "Internal server error"
+        );
+    }
 
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-	}
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleInvalidRefreshToken(
+        InvalidRefreshTokenException ex
+    ) {
+        return buildError(
+            HttpStatus.UNAUTHORIZED,
+            ErrorCode.AUTH_ERROR,
+            ex.getMessage()
+        );
+    }
 
-	@ExceptionHandler(InvalidRefreshTokenException.class)
-	public ResponseEntity<ErrorResponseDto> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.UNAUTHORIZED.value())
-			.message(ex.getMessage())
-			.build();
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleAccessDenied(
+        AccessDeniedException ex
+    ) {
+        return buildError(
+            HttpStatus.FORBIDDEN,
+            ErrorCode.AUTH_ERROR,
+            "Access denied"
+        );
+    }
 
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-	}
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleUserNotFound(
+        UsernameNotFoundException ex
+    ) {
+        return buildError(
+            HttpStatus.UNAUTHORIZED,
+            ErrorCode.AUTH_ERROR,
+            ex.getMessage()
+        );
+    }
 
-	@ExceptionHandler(AccessDeniedException.class)
-	public ResponseEntity<ErrorResponseDto> handleAccessDenied(AccessDeniedException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.FORBIDDEN.value())
-			.message("Access denied")
-			.build();
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleBadCredentials(
+        BadCredentialsException ex
+    ) {
+        return buildError(
+            HttpStatus.UNAUTHORIZED,
+            ErrorCode.AUTH_ERROR,
+            "Invalid email or password"
+        );
+    }
 
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
-	}
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleValidationExceptions(
+        MethodArgumentNotValidException ex
+    ) {
+        return buildError(
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.VALIDATION_ERROR,
+            "Validation error"
+        );
+    }
 
-	@ExceptionHandler(UsernameNotFoundException.class)
-	public ResponseEntity<ErrorResponseDto> handleUserNotFound(UsernameNotFoundException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.UNAUTHORIZED.value())
-			.message(ex.getMessage())
-			.build();
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleResourceNotFound(
+        EntityNotFoundException ex
+    ) {
+        return buildError(
+            HttpStatus.NOT_FOUND,
+            ErrorCode.NOT_FOUND,
+            ex.getMessage()
+        );
+    }
 
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-	}
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleIllegalArgument(
+        IllegalArgumentException ex
+    ) {
+        return buildError(
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.BAD_REQUEST,
+            ex.getMessage()
+        );
+    }
 
-	@ExceptionHandler(BadCredentialsException.class)
-	public ResponseEntity<ErrorResponseDto> handleBadCredentials(BadCredentialsException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder()
-			.statusCode(HttpStatus.UNAUTHORIZED.value())
-			.message("Invalid email or password")
-			.build();
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ResponseWrapper<?>> handleIllegalState(
+        IllegalStateException ex
+    ) {
+        return buildError(
+            HttpStatus.CONFLICT,
+            ErrorCode.BAD_REQUEST,
+            ex.getMessage()
+        );
+    }
 
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
-	}
-
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ValidationErrorResponseDto> handleValidationExceptions(MethodArgumentNotValidException ex) {
-
-		Map<String, String> errors = new HashMap<>();
-
-		ex.getBindingResult()
-			.getFieldErrors()
-			.forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-
-		return new ResponseEntity<>(ValidationErrorResponseDto.builder()
-			.message("Validation error")
-			.statusCode(400)
-			.fieldErrors(errors)
-			.build(), HttpStatus.BAD_REQUEST);
-	}
-
-	@ExceptionHandler(EntityNotFoundException.class)
-	public ResponseEntity<ErrorResponseDto> handleResourceNotFound(EntityNotFoundException ex) {
-		ErrorResponseDto error = ErrorResponseDto.builder().message(ex.getMessage()).statusCode(404).build();
-
-		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-	}
-
+    private ResponseEntity<ResponseWrapper<?>> buildError(
+        HttpStatus status,
+        ErrorCode code,
+        String message
+    ) {
+        return ResponseEntity
+            .status(status)
+            .body(
+                ResponseWrapper.builder()
+                    .error(new ResponseError(code, message))
+                    .build()
+            );
+    }
 }

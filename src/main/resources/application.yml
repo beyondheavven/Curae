@@ -13,7 +13,7 @@ springdoc:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+    url: ${SPRING_DATASOURCE_URL}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -27,12 +27,32 @@ spring:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  flyway:
+    enabled: true
+    locations: filesystem:./flyway/sql
+    baseline-on-migrate: false
+    validate-on-migrate: true
+
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS}
+
 server:
   servlet:
     context-path: /api
 
 app:
+  email-verification:
+    ttl-ms: ${EMAIL_VERIFICATION_TTL_MS}
+    verify-url: ${EMAIL_VERIFICATION_VERIFY_URL}
   jwt:
-    secret: "very-long-secret-should-be-at-least-256-bit"
-    access-token-expiration-ms: 900000        # 15 min
-    refresh-token-expiration-ms: 2592000000   # 30 days
+    secret: ${JWT_SECRET}
+    access-token-expiration-ms: 900000
