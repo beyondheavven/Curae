@@ -24,51 +24,49 @@ import java.time.Instant;
 @Validated
 public class PasswordManagementServiceImpl implements PasswordManagementService {
 
-    private final UserService userService;
-    private final EmailTokenRepository emailTokenRepository;
-    private final PasswordEncoder passwordEncoder;
+	private final UserService userService;
 
-    @Override
-        public void changePassword(@NotNull Long userId,
-                                   @NotBlank String currentPassword,
-                                   @NotBlank @Size(min = 8) String newPassword,
-                                   @NotBlank String repeatPassword) {
-        User user = userService.findById(userId);
+	private final EmailTokenRepository emailTokenRepository;
 
-        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
-            throw new BadCredentialsException("Incorrect current password");
-        }
-        if (!newPassword.equals(repeatPassword)) {
-            throw new IllegalStateException("Passwords do not match");
-        }
-        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
-            throw new IllegalStateException("New password must be different from the old one");
-        }
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
-    }
+	private final PasswordEncoder passwordEncoder;
 
-    @Override
-    public void resetPassword(@NotBlank String resetToken,
-                              @NotBlank @Size(min = 8) String newPassword,
-                              @NotBlank String repeatPassword) {
-        String tokenHash = EmailTokenGenerator.hash(resetToken);
-        EmailToken token = emailTokenRepository.findByTokenHash(tokenHash)
-            .orElseThrow(() ->
-                new EntityNotFoundException("Reset token not found")
-            );
-        if (token.getStatus() != EmailTokenStatus.VERIFIED) {
-            throw new IllegalStateException("Reset token is not verified");
-        }
-        if (token.getExpiresAt().isBefore(Instant.now())) {
-            throw new IllegalStateException("Reset token expired");
-        }
-        if (!newPassword.equals(repeatPassword)) {
-            throw new IllegalStateException("Passwords do not match");
-        }
-        User user = token.getUser();
-        if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
-            throw new IllegalStateException("New password must be different from the old one");
-        }
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
-    }
+	@Override
+	public void changePassword(@NotNull Long userId, @NotBlank String currentPassword,
+			@NotBlank @Size(min = 8) String newPassword, @NotBlank String repeatPassword) {
+		User user = userService.findById(userId);
+
+		if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+			throw new BadCredentialsException("Incorrect current password");
+		}
+		if (!newPassword.equals(repeatPassword)) {
+			throw new IllegalStateException("Passwords do not match");
+		}
+		if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+			throw new IllegalStateException("New password must be different from the old one");
+		}
+		user.setPasswordHash(passwordEncoder.encode(newPassword));
+	}
+
+	@Override
+	public void resetPassword(@NotBlank String resetToken, @NotBlank @Size(min = 8) String newPassword,
+			@NotBlank String repeatPassword) {
+		String tokenHash = EmailTokenGenerator.hash(resetToken);
+		EmailToken token = emailTokenRepository.findByTokenHash(tokenHash)
+			.orElseThrow(() -> new EntityNotFoundException("Reset token not found"));
+		if (token.getStatus() != EmailTokenStatus.VERIFIED) {
+			throw new IllegalStateException("Reset token is not verified");
+		}
+		if (token.getExpiresAt().isBefore(Instant.now())) {
+			throw new IllegalStateException("Reset token expired");
+		}
+		if (!newPassword.equals(repeatPassword)) {
+			throw new IllegalStateException("Passwords do not match");
+		}
+		User user = token.getUser();
+		if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+			throw new IllegalStateException("New password must be different from the old one");
+		}
+		user.setPasswordHash(passwordEncoder.encode(newPassword));
+	}
+
 }

@@ -5,8 +5,11 @@ import lombok.Data;
 
 @Data
 public class PasswordResetVerifyDto {
-    @NotBlank
-    private String email;
-    @NotBlank
-    private String code;
+
+	@NotBlank
+	private String email;
+
+	@NotBlank
+	private String code;
+
 }

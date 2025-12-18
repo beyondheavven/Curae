@@ -12,11 +12,15 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class ChangePasswordRequestDto {
-    @NotBlank
-    private String currentPassword;
-    @NotBlank
-    @Size(min = 8)
-    private String newPassword;
-    @NotBlank
-    private String repeatPassword;
+
+	@NotBlank
+	private String currentPassword;
+
+	@NotBlank
+	@Size(min = 8)
+	private String newPassword;
+
+	@NotBlank
+	private String repeatPassword;
+
 }

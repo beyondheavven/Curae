@@ -9,8 +9,13 @@ import org.springframework.http.HttpStatus;
 @Builder
 @JsonDeserialize(builder = ResponseWrapper.ResponseWrapperBuilder.class)
 public class ResponseWrapper<T> {
-    T data;
-    ResponseError error;
-    HttpStatus status;
-    int statusCode;
+
+	T data;
+
+	ResponseError error;
+
+	HttpStatus status;
+
+	int statusCode;
+
 }

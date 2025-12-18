@@ -1,19 +1,26 @@
 package com.vention.medfast.user.service;
 
+import com.vention.medfast.api.exception.EmailAlreadyExistsException;
+import com.vention.medfast.registration.dto.PersonDto;
+import com.vention.medfast.user.mapper.UserMapper;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
+
+	private final UserMapper userMapper;
+
+	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -22,9 +29,28 @@ public class UserServiceImpl implements UserService {
 			.orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
 	}
 
-    @Override
-    @Transactional(readOnly = true)
-    public Optional<User> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
+	@Override
+	public boolean existsByEmail(String email) {
+		if (userRepository.existsByEmail(email)) {
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public User createPatient(PersonDto personDto) {
+		if (userRepository.existsByEmail(personDto.getEmail())) {
+			throw new EmailAlreadyExistsException("User with this email already exists");
+		}
+
+		User user = userMapper.toPatientUser(personDto, passwordEncoder);
+		return userRepository.save(user);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Optional<User> findByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
+
 }

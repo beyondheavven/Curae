@@ -7,6 +7,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class ErrorResponseDto {
 
-    private Integer statusCode;
-    private String message;
+	private Integer statusCode;
+
+	private String message;
+
 }

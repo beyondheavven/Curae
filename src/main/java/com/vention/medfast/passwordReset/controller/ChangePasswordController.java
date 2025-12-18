@@ -24,66 +24,41 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Account", description = "Endpoints for account management")
 public class ChangePasswordController {
 
-    private final PasswordManagementService passwordService;
-    private final PasswordResetService passwordResetService;
+	private final PasswordManagementService passwordService;
 
-    @PostMapping("/change-password")
-    public ResponseEntity<ResponseWrapper<ChangePasswordRequestDto>> changePassword(
-        @Valid @RequestBody ChangePasswordRequestDto request,
-        Authentication auth
-    ) {
-        Long userId =
-            ((CustomUserDetails) auth.getPrincipal()).getId();
-        passwordService.changePassword(
-            userId,
-            request.getCurrentPassword(),
-            request.getNewPassword(),
-            request.getRepeatPassword()
-        );
-        return ResponseEntity.ok(
-            ResponseFactory.ok(request)
-        );
-    }
+	private final PasswordResetService passwordResetService;
 
-    @PostMapping("/password-reset/request")
-    public ResponseEntity<ResponseWrapper<PasswordResetRequestDto>> requestReset(
-        @Valid @RequestBody PasswordResetRequestDto request
-    ) {
-        passwordResetService.sendResetCode(request.getEmail());
+	@PostMapping("/change-password")
+	public ResponseEntity<ResponseWrapper<ChangePasswordRequestDto>> changePassword(
+			@Valid @RequestBody ChangePasswordRequestDto request, Authentication auth) {
+		Long userId = ((CustomUserDetails) auth.getPrincipal()).getId();
+		passwordService.changePassword(userId, request.getCurrentPassword(), request.getNewPassword(),
+				request.getRepeatPassword());
+		return ResponseEntity.ok(ResponseFactory.ok(request));
+	}
 
-        return ResponseEntity.ok(
-            ResponseFactory.ok(request)
-        );
-    }
+	@PostMapping("/password-reset/request")
+	public ResponseEntity<ResponseWrapper<PasswordResetRequestDto>> requestReset(
+			@Valid @RequestBody PasswordResetRequestDto request) {
+		passwordResetService.sendResetCode(request.getEmail());
 
-    @PostMapping("/password-reset/verify")
-    public ResponseEntity<ResponseWrapper<PasswordResetVerifyResponseDto>> verifyCode(
-        @Valid @RequestBody PasswordResetVerifyDto request
-    ) {
-        String resetToken = passwordResetService.verifyCode(
-            request.getEmail(),
-            request.getCode()
-        );
+		return ResponseEntity.ok(ResponseFactory.ok(request));
+	}
 
-        return ResponseEntity.ok(
-            ResponseFactory.ok(
-                new PasswordResetVerifyResponseDto(resetToken)
-            )
-        );
-    }
+	@PostMapping("/password-reset/verify")
+	public ResponseEntity<ResponseWrapper<PasswordResetVerifyResponseDto>> verifyCode(
+			@Valid @RequestBody PasswordResetVerifyDto request) {
+		String resetToken = passwordResetService.verifyCode(request.getEmail(), request.getCode());
 
-    @PostMapping("/password-reset/confirm")
-    public ResponseEntity<ResponseWrapper<PasswordResetConfirmDto>> confirmReset(
-        @Valid @RequestBody PasswordResetConfirmDto request
-    ) {
-        passwordService.resetPassword(
-            request.getResetToken(),
-            request.getNewPassword(),
-            request.getRepeatPassword()
-        );
+		return ResponseEntity.ok(ResponseFactory.ok(new PasswordResetVerifyResponseDto(resetToken)));
+	}
 
-        return ResponseEntity.ok(
-            ResponseFactory.ok(request)
-        );
-    }
+	@PostMapping("/password-reset/confirm")
+	public ResponseEntity<ResponseWrapper<PasswordResetConfirmDto>> confirmReset(
+			@Valid @RequestBody PasswordResetConfirmDto request) {
+		passwordService.resetPassword(request.getResetToken(), request.getNewPassword(), request.getRepeatPassword());
+
+		return ResponseEntity.ok(ResponseFactory.ok(request));
+	}
+
 }

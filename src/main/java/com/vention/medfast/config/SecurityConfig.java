@@ -6,6 +6,7 @@ import com.vention.medfast.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -59,19 +60,20 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**")
 				.permitAll()
+				.requestMatchers(HttpMethod.POST, "/registration")
+				.permitAll()
 
-				.requestMatchers("/auth/login", "/auth/refresh")
+				.requestMatchers("/auth/login", "/auth/refresh", "/auth/verify")
 				.permitAll()
 
 				.requestMatchers(actuatorEndpoints)
 				.permitAll()
 
-                .requestMatchers(
-                    "/account/password-reset/request",
-                    "/account/password-reset/verify",
-                    "/account/password-reset/confirm").permitAll()
+				.requestMatchers("/account/password-reset/request", "/account/password-reset/verify",
+						"/account/password-reset/confirm")
+				.permitAll()
 
-                .anyRequest()
+				.anyRequest()
 				.authenticated())
 			.authenticationProvider(authenticationProvider)
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

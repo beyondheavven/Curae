@@ -10,4 +10,5 @@ public class MedfastApplication {
 		SpringApplication.run(MedfastApplication.class, args);
 
 	}
+
 }

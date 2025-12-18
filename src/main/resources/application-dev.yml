@@ -12,6 +12,7 @@ management:
     health:
       show-details: always
       show-components: always
+
   info:
     build:
       enabled: true
@@ -19,6 +20,7 @@ management:
       enabled: true
     env:
       enabled: true
+
   prometheus:
     metrics:
       export:
@@ -33,3 +35,75 @@ info:
     url: ${POSTGRES_DB:unknown}
     port: ${POSTGRES_PORT:unknown}
     user: ${POSTGRES_USER:unknown}
+
+openapi:
+  server-url: http://localhost:8080/api
+  server-description: Production server
+
+springdoc:
+  show-actuator: true
+  group-configs:
+    - group: "Medfast API"
+      paths-to-match: "/**"
+      paths-to-exclude: "/actuator/**"
+    - group: "Actuator"
+      paths-to-match: "/actuator/**"
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: medfast.noreply@gmail.com
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+validation:
+  password:
+    regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+
+server:
+  servlet:
+    context-path: /api
+
+app:
+  base-url: ${openapi.server-url}
+
+  email-verification:
+    ttl-ms: 3600000
+
+  jwt:
+    secret: "very-long-secret-should-be-at-least-256-bit"
+    access-token-expiration-ms: 900000        # 15 min
+    refresh-token-expiration-ms: 2592000000   # 30 days
+
+  mail:
+    from: ${spring.mail.username}
+
+    templates:
+      verify-email: mail/verify-email
+
+    subjects:
+      verify-email: Email verification
+
+    paths:
+      verify-email: /auth/verify

@@ -12,8 +12,11 @@ springdoc:
       paths-to-match: "/actuator/**"
 
 spring:
+  profiles:
+    active: dev
+
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:${POSTGRES_PORT}/${POSTGRES_DB}}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -29,30 +32,50 @@ spring:
 
   flyway:
     enabled: true
-    locations: filesystem:./flyway/sql
+    locations: classpath:db/migration
     baseline-on-migrate: false
     validate-on-migrate: true
 
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
-    username: ${MAIL_USERNAME}
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:medfast.noreply@gmail.com}
     password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
-          auth: ${MAIL_SMTP_AUTH}
+          auth: ${MAIL_SMTP_AUTH:true}
           starttls:
-            enable: ${MAIL_SMTP_STARTTLS}
+            enable: ${MAIL_SMTP_STARTTLS:true}
 
 server:
   servlet:
     context-path: /api
 
+validation:
+  password:
+    regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+
 app:
+  base-url: ${openapi.server-url}
+
+  mail:
+    from: ${spring.mail.username}
+    templates:
+      verify-email: mail/verify-email
+      reset-password: mail/reset-password
+
+    subjects:
+      verify-email: Email verification
+      reset-password: Password reset code
+
+    paths:
+      verify-email: /auth/verify
+      reset-password: /auth/reset-password
+
+
   email-verification:
     ttl-ms: ${EMAIL_VERIFICATION_TTL_MS}
     verify-url: ${EMAIL_VERIFICATION_VERIFY_URL}
-  jwt:
-    secret: ${JWT_SECRET}
-    access-token-expiration-ms: 900000
+
+

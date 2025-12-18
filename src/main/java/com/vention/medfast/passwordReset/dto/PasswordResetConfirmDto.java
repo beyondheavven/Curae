@@ -6,11 +6,15 @@ import lombok.Data;
 
 @Data
 public class PasswordResetConfirmDto {
-    @NotBlank
-    private String resetToken;
-    @NotBlank
-    @Size(min = 8)
-    private String newPassword;
-    @NotBlank
-    private String repeatPassword;
+
+	@NotBlank
+	private String resetToken;
+
+	@NotBlank
+	@Size(min = 8)
+	private String newPassword;
+
+	@NotBlank
+	private String repeatPassword;
+
 }

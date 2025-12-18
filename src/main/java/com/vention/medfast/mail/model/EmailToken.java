@@ -25,36 +25,37 @@ import java.time.Instant;
 @NoArgsConstructor
 public class EmailToken {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
-    @Column(name = "token_hash", length = 64)
-    private String tokenHash;
+	@Column(name = "token_hash", length = 64)
+	private String tokenHash;
 
-    @Column(name = "code")
-    private Integer code;
+	@Column(name = "code")
+	private Integer code;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false, length = 25)
-    private EmailTokenType type;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "type", nullable = false, length = 25)
+	private EmailTokenType type;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 25)
-    private EmailTokenStatus status;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false, length = 25)
+	private EmailTokenStatus status;
 
-    @Column(name = "expires_at", nullable = false)
-    private Instant expiresAt;
+	@Column(name = "expires_at", nullable = false)
+	private Instant expiresAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private Instant createdAt;
 
-    @PrePersist
-    void onCreate() {
-        this.createdAt = Instant.now();
-    }
+	@PrePersist
+	void onCreate() {
+		this.createdAt = Instant.now();
+	}
+
 }
