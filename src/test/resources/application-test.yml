@@ -1,6 +1,6 @@
 testcontainers:
   reuse:
-    enable: true
+    enable: false
 
 spring:
   flyway:

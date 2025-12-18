@@ -1,148 +1,151 @@
 package com.vention.medfast.patient.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
+import com.vention.medfast.AbstractIntegrationTest;
 import com.vention.medfast.address.dto.AddressCreateDto;
-import com.vention.medfast.auth.jwt.JwtAuthenticationFilter;
-import com.vention.medfast.auth.jwt.service.JwtServiceImpl;
-import com.vention.medfast.patient.dto.*;
-import com.vention.medfast.patient.mapper.PatientMapper;
+import com.vention.medfast.auth.dto.AuthRequestDto;
+import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.model.GenderType;
-import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.specialization.mapper.SpecializationMapper;
 import com.vention.medfast.user.dto.UserCreateDto;
-import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PatientController.class)
-@AutoConfigureMockMvc(addFilters = false)
-public class PatientControllerTest {
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class PatientControllerTest extends AbstractIntegrationTest {
 
 	@Autowired
-	private MockMvc mockMvc;
+	MockMvc mockMvc;
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	@Autowired
+	ObjectMapper objectMapper;
 
-	@MockitoBean
-	private PatientService patientService;
+	static String token;
 
-	@MockitoBean
-	private PatientMapper patientMapper;
+	@BeforeAll
+	void obtainToken() throws Exception {
+		AuthRequestDto loginRequest = new AuthRequestDto("admin@med.com", "pass");
 
-	@MockitoBean
-	private JwtServiceImpl jwtService;
+		String json = objectMapper.writeValueAsString(loginRequest);
 
-	@MockitoBean
-	private JwtAuthenticationFilter jwtAuthenticationFilter;
+		String response = mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(json))
+			.andExpect(status().isOk())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
 
-	@MockitoBean
-	private AuthenticationProvider authenticationProvider;
+		token = JsonPath.read(response, "$.accessToken");
+	}
 
 	@Test
-	void shouldReturnResponseWhenCreateIsValid() throws Exception {
-		objectMapper.registerModule(new JavaTimeModule());
-		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john.doe@example.com", "password123",
-				"http://profile.url");
+	public void shouldReturnPatientByIdWhenInputIsValid() throws Exception {
+		int createdPatientId = createValidPatient();
+
+		mockMvc.perform(get("/patients/{id}", createdPatientId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id", is(createdPatientId)))
+			.andExpect(jsonPath("$.firstName", is("John")))
+			.andExpect(jsonPath("$.lastName", is("Doe")));
+	}
+
+	@Test
+	void shouldReturn404WhenPatientNotFound() throws Exception {
+		long notExistingId = 99999L;
+
+		mockMvc.perform(get("/patients/{id}", notExistingId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.message").value("Patient not found"))
+			.andExpect(jsonPath("$.statusCode").value(404));
+	}
+
+	@Test
+	void shouldCreatePatientWhenInputIsValid() throws Exception {
+		String uniqueEmail = "jane.doe." + UUID.randomUUID() + "@example.com";
+		String profileUrl = "http://profile.url";
+		UserCreateDto userDto = new UserCreateDto("Jane", "Doe", uniqueEmail, "password123", profileUrl);
+		AddressCreateDto addressDto = new AddressCreateDto("Baker St", "London", "221B", "UK", "1", "NW1 6XE",
+				"+4412345678");
+		PatientCreateDto requestDto = new PatientCreateDto(userDto, addressDto, "USA", GenderType.FEMALE,
+				LocalDate.of(1995, 5, 20));
+
+		String json = objectMapper.writeValueAsString(requestDto);
+
+		String createResponse = mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.firstName").value("Jane"))
+			.andExpect(jsonPath("$.lastName").value("Doe"))
+			.andExpect(jsonPath("$.profileUrl").value(profileUrl))
+			.andExpect(jsonPath("$.id").exists())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
+
+		int createdId = JsonPath.read(createResponse, "$.id");
+
+		mockMvc.perform(get("/patients/{id}", createdId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.id").value(createdId));
+	}
+
+	@Test
+	void shouldReturn400WhenValidationErrorsPresentWithCreate() throws Exception {
+		PatientCreateDto invalidDto = new PatientCreateDto(null, null, "", null, LocalDate.now().plusDays(1));
+
+		String json = objectMapper.writeValueAsString(invalidDto);
+
+		mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.message").value("Validation error"))
+			.andExpect(jsonPath("$.statusCode").value(400))
+			.andExpect(jsonPath("$.fieldErrors.user").exists())
+			.andExpect(jsonPath("$.fieldErrors.address").exists())
+			.andExpect(jsonPath("$.fieldErrors.citizenship").exists())
+			.andExpect(jsonPath("$.fieldErrors.birthDate").exists());
+	}
+
+	private int createValidPatient() throws Exception {
+		String uniqueEmail = "john.doe." + UUID.randomUUID() + "@example.com";
+
+		UserCreateDto userDto = new UserCreateDto("John", "Doe", uniqueEmail, "password123", "http://profile.url");
 		AddressCreateDto addressDto = new AddressCreateDto("Baker St", "London", "221B", "UK", "1", "NW1 6XE",
 				"+4412345678");
 
 		PatientCreateDto requestDto = new PatientCreateDto(userDto, addressDto, "USA", GenderType.FEMALE,
 				LocalDate.of(1990, 1, 1));
 
-		PatientResponseDto responseDto = PatientResponseDto.builder()
-			.id(1L)
-			.firstName("John")
-			.lastName("Doe")
-			.profileUrl("http://profile.url")
-			.build();
-
-		given(patientService.create(any(PatientCreateDto.class))).willReturn(responseDto);
-
-		mockMvc
-			.perform(post("/api/patients").contextPath("/api")
+		String createResponse = mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(requestDto)))
-			.andDo(print())
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.id", is(1)))
-			.andExpect(jsonPath("$.firstName", is("John")))
-			.andExpect(jsonPath("$.lastName", is("Doe")))
-			.andExpect(jsonPath("$.profileUrl", is("http://profile.url")));
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
 
-		verify(patientService).create(any(PatientCreateDto.class));
-	}
-
-	@Test
-	void shouldReturnResponseWhenGetByIdExists() throws Exception {
-		PatientResponseDto responseDto = PatientResponseDto.builder()
-			.id(10L)
-			.firstName("Alice")
-			.lastName("Smith")
-			.profileUrl("http://alice.img")
-			.build();
-
-		given(patientService.getPatientById(10L)).willReturn(responseDto);
-
-		mockMvc.perform(get("/api/patients/{id}", 10L).contextPath("/api").contentType(MediaType.APPLICATION_JSON))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.id", is(10)))
-			.andExpect(jsonPath("$.firstName", is("Alice")))
-			.andExpect(jsonPath("$.lastName", is("Smith")));
-
-		verify(patientService, times(1)).getPatientById(10L);
-	}
-
-	@Test
-	void shouldReturn404WhenGetPatientByIdNotFound() throws Exception {
-		given(patientService.getPatientById(anyLong())).willThrow(new EntityNotFoundException("Patient not found"));
-
-		ResultActions result = mockMvc
-			.perform(get("/api/patients/{id}", 999L).contextPath("/api").contentType(MediaType.APPLICATION_JSON));
-
-		result.andDo(print())
-			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message", is("Patient not found")));
-
-		verify(patientService, times(1)).getPatientById(999L);
-	}
-
-	@Test
-	void shouldReturn400WhenCreatePatientInvalid() throws Exception {
-		objectMapper.registerModule(new JavaTimeModule());
-		PatientCreateDto invalidDto = new PatientCreateDto(null, null, "", null, LocalDate.now().plusDays(1));
-
-		mockMvc
-			.perform(post("/api/patients").contextPath("/api")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(invalidDto)))
-			.andDo(print())
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.statusCode", is(400)));
-
-		verify(patientService, times(0)).create(any());
+		return JsonPath.read(createResponse, "$.id");
 	}
 
 }

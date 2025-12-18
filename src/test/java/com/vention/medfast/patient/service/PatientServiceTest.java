@@ -47,7 +47,7 @@ public class PatientServiceTest {
 	void shouldCreatePatientWhenInputIsValid() {
 		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
 		AddressCreateDto addressDto = new AddressCreateDto("Street", "City", "123", "State", "1", "00000",
-				"+123456789");
+				"+1234567890");
 		PatientCreateDto createDto = new PatientCreateDto(userDto, addressDto, "USA", GenderType.MALE,
 				LocalDate.of(1990, 1, 1));
 
