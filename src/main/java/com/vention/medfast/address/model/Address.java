@@ -1,13 +1,10 @@
 package com.vention.medfast.address.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,28 +14,28 @@ public class Address {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
+	@Column(nullable = false)
 	private Long id;
 
-	@Column(name = "street_name", nullable = false)
-	private String streetName;
+	@Column(name = "street_name", nullable = false, length = 255)
+	private String street;
 
-	@Column(name = "city_name", nullable = false)
-	private String cityName;
+	@Column(name = "city_name", nullable = false, length = 255)
+	private String city;
 
-	@Column(name = "house_number", nullable = false)
+	@Column(name = "house_number", nullable = false, length = 255)
 	private String houseNumber;
 
-	@Column(name = "state_name", nullable = false)
-	private String stateName;
+	@Column(name = "state_name", nullable = false, length = 255)
+	private String state;
 
-	@Column(name = "apartment_number", nullable = false)
-	private String apartmentNumber;
+	@Column(name = "apartment_number", nullable = false, length = 255)
+	private String apartment;
 
-	@Column(name = "zip_code", nullable = false)
+	@Column(name = "zip_code", nullable = false, length = 255)
 	private String zipCode;
 
-	@Column(name = "phone")
+	@Column(name = "phone", nullable = false, length = 255)
 	private String phone;
 
 }
