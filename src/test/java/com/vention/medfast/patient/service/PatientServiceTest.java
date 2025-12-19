@@ -4,7 +4,7 @@ import com.vention.medfast.address.dto.AddressCreateDto;
 import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.mapper.PatientMapper;
-import com.vention.medfast.patient.model.GenderType;
+import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.user.dto.UserCreateDto;
@@ -48,7 +48,7 @@ public class PatientServiceTest {
 		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
 		AddressCreateDto addressDto = new AddressCreateDto("Street", "City", "123", "State", "1", "00000",
 				"+1234567890");
-		PatientCreateDto createDto = new PatientCreateDto(userDto, addressDto, "USA", GenderType.MALE,
+		PatientCreateDto createDto = new PatientCreateDto(userDto, addressDto, "USA", Gender.MALE,
 				LocalDate.of(1990, 1, 1));
 
 		User savedUser = new User();

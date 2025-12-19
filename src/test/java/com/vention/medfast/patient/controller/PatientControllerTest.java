@@ -1,12 +1,12 @@
 package com.vention.medfast.patient.controller;
 
+import com.vention.medfast.patient.model.Gender;
 import tools.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.vention.medfast.AbstractIntegrationTest;
 import com.vention.medfast.address.dto.AddressCreateDto;
 import com.vention.medfast.auth.dto.AuthRequestDto;
 import com.vention.medfast.patient.dto.PatientCreateDto;
-import com.vention.medfast.patient.model.GenderType;
 import com.vention.medfast.user.dto.UserCreateDto;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -82,7 +82,7 @@ public class PatientControllerTest extends AbstractIntegrationTest {
 		UserCreateDto userDto = new UserCreateDto("Jane", "Doe", uniqueEmail, "password123", profileUrl);
 		AddressCreateDto addressDto = new AddressCreateDto("Baker St", "London", "221B", "UK", "1", "NW1 6XE",
 				"+4412345678");
-		PatientCreateDto requestDto = new PatientCreateDto(userDto, addressDto, "USA", GenderType.FEMALE,
+		PatientCreateDto requestDto = new PatientCreateDto(userDto, addressDto, "USA", Gender.FEMALE,
 				LocalDate.of(1995, 5, 20));
 
 		String json = objectMapper.writeValueAsString(requestDto);
@@ -133,7 +133,7 @@ public class PatientControllerTest extends AbstractIntegrationTest {
 		AddressCreateDto addressDto = new AddressCreateDto("Baker St", "London", "221B", "UK", "1", "NW1 6XE",
 				"+4412345678");
 
-		PatientCreateDto requestDto = new PatientCreateDto(userDto, addressDto, "USA", GenderType.FEMALE,
+		PatientCreateDto requestDto = new PatientCreateDto(userDto, addressDto, "USA", Gender.FEMALE,
 				LocalDate.of(1990, 1, 1));
 
 		String createResponse = mockMvc
