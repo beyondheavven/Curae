@@ -7,17 +7,17 @@ The Medfast REST API provides **interactive documentation** using **Swagger/Open
 #### Local Development
 
 Open your browser and navigate to:
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/api/swagger-ui/index.html
 
 #### Features in Swagger UI
 
 - Explore all available endpoints grouped by tags (Patients, Doctors, Appointments, etc.).
 - View request/response models, status codes, and descriptions.
 - **Try it out**: send test requests directly from the browser.
-  - If endpoints require JWT authentication, click the **Authorize** button and provide your token.
+    - If endpoints require JWT authentication, click the **Authorize** button and provide your token.
 - See **OpenAPI specification** in JSON or YAML format:
-  - JSON: `http://localhost:8080/v3/api-docs`
-  - YAML: `http://localhost:8080/v3/api-docs.yaml`
+    - JSON: `http://localhost:8080/v3/api-docs`
+    - YAML: `http://localhost:8080/v3/api-docs.yaml`
 
 ---
 
@@ -28,8 +28,8 @@ The OpenAPI specification is **generated automatically** from your Spring Boot c
 1. **Add or modify controllers/endpoints**, request/response models, or annotations (`@RestController`, `@GetMapping`, `@Parameter`, `@Schema`, etc.).
 2. **Restart the application** to regenerate the OpenAPI spec.
 3. **Verify changes** in Swagger UI or by accessing:
-   - JSON: `/v3/api-docs`
-   - YAML: `/v3/api-docs.yaml`
+    - JSON: `/v3/api-docs`
+    - YAML: `/v3/api-docs.yaml`
 
 ---
 
@@ -54,8 +54,10 @@ Database initialization and migrations are automated using Docker Compose.
 │     └─ V4__seed_data.sql
 └─ README.md
 ```
+
 ## Database ER Diagram
-![Database ER Diagram](./Medfast_internship-2025-12-08_12-55.png)
+
+![Database ER Diagram](Medfast_internship.png)
 
 ## Quick Start
 
@@ -109,28 +111,37 @@ GF_ADMIN_PASSWORD=admin
 * Simply running `docker compose up` is sufficient; no manual steps are required.
 
 ---
+
 ## Integration Testing with Testcontainers
 
 This project uses **Testcontainers** to spin up isolated PostgreSQL instances for integration testing.
 
 ### Running Tests
+
 #### 1. Local Development
+
 By default, running tests locally will use the `test` profile. This profile is configured to **reuse** the database container between runs to speed up execution.
 
 **Prerequisites**
 
 Even though the code enables reuse, **Testcontainers requires a global permission flag** on your machine.
+
 1. Navigate to your home directory
 2. Find (or create) file names .testcontainers.properties.
 3. Add the following line to the file:
+
 ```properties
 testcontainers.reuse.enable=true
 ```
+
 **Without this file, Testcontainers will ignore the code settings**
+
 #### 2. CI Mode
+
 To run tests in a pristine environment, use the test-ci profile. This forces a fresh container for every run to ensure isolation.
 
 **Example using mvn**
+
 ```bash
 mvn verify "-Dspring.profiles.active=test-ci"
 ```
@@ -138,11 +149,13 @@ mvn verify "-Dspring.profiles.active=test-ci"
 ### Troubleshooting
 
 #### Docker not running
+
 Error: `IllegalStateException: Could not find a valid Docker environment`
 
 Fix: Start Docker and retry.
 
 #### Flyway checksum mismatch
+
 Error: `org.springframework.beans.factory.BeanCreationException: ... Validate failed: Migrations have failed validation`
 
 Possible Cause: You modified a SQL migration script after the test container had already run.
@@ -150,10 +163,11 @@ Possible Cause: You modified a SQL migration script after the test container had
 Fix: Manually destroy the reusable container to force a fresh start.
 
 #### Container reuse not working
+
 Check:
+
 * Active profile is set to 'test'(default).
 * ~/.testcontainers.properties exists with testcontainers.reuse.enable=true.
-
 
 ## Git Pre-push Hooks
 
@@ -161,6 +175,7 @@ Our team uses in this project git pre-push hooks to execute scripts before pushi
 Currently, we have 1 script file, which ensures project builds correctly
 
 Scripts are stored in:
+
 * ./.githooks/
 
 ### 1. How to install
@@ -178,11 +193,14 @@ For Windows you should install Maven, Git and Git Bash. Git Bash is needed for e
 Scripts in .githooks must be marked as executable. Also You should set folder with pre-push scripts in your git.
 
 You can execute following command to do that (Linux, macOS and Windows with Git Bash)
+
 ```
 git config core.hooksPath .githooks
 chmod +x .githooks/*
 ```
+
 Or you can run bash script from (Linux, macOS and Windows with Git Bash)
+
 * ./scripts/setup-hooks.sh
 
 ---

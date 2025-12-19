@@ -3,6 +3,10 @@ testcontainers:
     enable: false
 
 spring:
+
+  servlet:
+    context-path: /api
+
   flyway:
     enabled: true
     locations:

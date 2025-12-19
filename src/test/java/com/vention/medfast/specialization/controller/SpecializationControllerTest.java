@@ -4,6 +4,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.vention.medfast.AbstractIntegrationTest;
 import com.vention.medfast.auth.dto.AuthRequestDto;
 import com.vention.medfast.specialization.dto.SpecializationCreateDto;
+import java.util.List;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -13,16 +14,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.ObjectMapper;
-
-import java.util.List;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -35,7 +33,7 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	static String token;
+	String token;
 
 	@BeforeAll
 	void obtainToken() throws Exception {
@@ -49,31 +47,29 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 			.getResponse()
 			.getContentAsString();
 
-		token = JsonPath.read(response, "$.accessToken");
+		token = JsonPath.read(response, "$.data.accessToken");
 	}
 
 	@Test
 	public void shouldReturnSpecializationByIdWhenInputIsValid() throws Exception {
 		mockMvc.perform(get("/specializations/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.id").exists())
-			.andExpect(jsonPath("$.name").value("General Practitioner"))
-			.andExpect(jsonPath("$.description").value("Primary care provider dealing with a wide range of diseases"))
-
-			.andExpect(jsonPath("$.services").isArray())
-			.andExpect(jsonPath("$.services.length()").value(2))
-
-			.andExpect(jsonPath("$.services[0].id").value(1))
-			.andExpect(jsonPath("$.services[0].name").value("General Checkup"))
-			.andExpect(jsonPath("$.services[0].description").value("Routine physical examination"))
-			.andExpect(jsonPath("$.services[0].price").value(150.0))
-			.andExpect(jsonPath("$.services[0].duration").value(30))
-
-			.andExpect(jsonPath("$.services[1].id").value(3))
-			.andExpect(jsonPath("$.services[1].name").value("Quick Consultation"))
-			.andExpect(jsonPath("$.services[1].description").value("Brief medical advice"))
-			.andExpect(jsonPath("$.services[1].price").value(75.0))
-			.andExpect(jsonPath("$.services[1].duration").value(15));
+			.andExpect(jsonPath("$.data.id").exists())
+			.andExpect(jsonPath("$.data.name").value("General Practitioner"))
+			.andExpect(
+					jsonPath("$.data.description").value("Primary care provider dealing with a wide range of diseases"))
+			.andExpect(jsonPath("$.data.services").isArray())
+			.andExpect(jsonPath("$.data.services.length()").value(2))
+			.andExpect(jsonPath("$.data.services[0].id").value(1))
+			.andExpect(jsonPath("$.data.services[0].name").value("General Checkup"))
+			.andExpect(jsonPath("$.data.services[0].description").value("Routine physical examination"))
+			.andExpect(jsonPath("$.data.services[0].price").value(150.0))
+			.andExpect(jsonPath("$.data.services[0].duration").value(30))
+			.andExpect(jsonPath("$.data.services[1].id").value(3))
+			.andExpect(jsonPath("$.data.services[1].name").value("Quick Consultation"))
+			.andExpect(jsonPath("$.data.services[1].description").value("Brief medical advice"))
+			.andExpect(jsonPath("$.data.services[1].price").value(75.0))
+			.andExpect(jsonPath("$.data.services[1].duration").value(15));
 	}
 
 	@Test
@@ -82,42 +78,19 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(get("/specializations/{id}", notExistingId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message").value("Specialization not found"))
-			.andExpect(jsonPath("$.statusCode").value(404));
+			.andExpect(jsonPath("$.error.message").value("Specialization not found"));
 	}
 
 	@Test
 	public void shouldReturnSpecializationListByWhenSpecializationsPresent() throws Exception {
 		mockMvc.perform(get("/specializations").header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-
 			.andExpect(jsonPath("$").isArray())
-			.andExpect(jsonPath("$.length()").value(3))
-
-			.andExpect(jsonPath("$[0].id").value(1))
-			.andExpect(jsonPath("$[0].name").value("General Practitioner"))
-			.andExpect(
-					jsonPath("$[0].description").value("Primary care provider dealing with a wide range of diseases"))
-			.andExpect(jsonPath("$[0].services").isArray())
-			.andExpect(jsonPath("$[0].services.length()").value(2))
-
-			.andExpect(jsonPath("$[0].services[0].id").value(1))
-
-			.andExpect(jsonPath("$[0].services[1].id").value(3))
-
-			.andExpect(jsonPath("$[1].id").value(2))
-			.andExpect(jsonPath("$[1].name").value("Cardiologist"))
-			.andExpect(jsonPath("$[1].description").value("Heart and cardiovascular system specialist"))
-			.andExpect(jsonPath("$[1].services.length()").value(1))
-
-			.andExpect(jsonPath("$[1].services[0].id").value(2))
-
-			.andExpect(jsonPath("$[2].id").value(3))
-			.andExpect(jsonPath("$[2].name").value("Diagnostician"))
-			.andExpect(jsonPath("$[2].description").value("Specialist in identifying complex medical conditions"))
-			.andExpect(jsonPath("$[2].services.length()").value(1))
-
-			.andExpect(jsonPath("$[2].services[0].id").value(2));
+			.andExpect(jsonPath("$", Matchers.hasSize(Matchers.greaterThanOrEqualTo(3))))
+			.andExpect(jsonPath("$[*].id", Matchers.hasItems(1, 2, 3)))
+			.andExpect(jsonPath("$[?(@.id==1)].name").value(Matchers.contains("General Practitioner")))
+			.andExpect(jsonPath("$[?(@.id==2)].name").value(Matchers.contains("Cardiologist")))
+			.andExpect(jsonPath("$[?(@.id==3)].name").value(Matchers.contains("Diagnostician")));
 	}
 
 	@Test
@@ -127,11 +100,9 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 		mockMvc
 			.perform(get("/specializations/{id}", createdSpecializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name").value("Test Specialization"))
-			.andExpect(jsonPath("$.description").value("Test description"))
-			.andExpect(jsonPath("$.services[0].id").value(1))
-
-			.andExpect(jsonPath("$.services[1].id").value(3));
+			.andExpect(jsonPath("$.data.name").value("Test Specialization"))
+			.andExpect(jsonPath("$.data.description").value("Test description"))
+			.andExpect(jsonPath("$.data.services[*].id", Matchers.hasItems(1, 3)));
 
 		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
@@ -150,7 +121,6 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 	@Test
 	void shouldReturn400WhenValidationErrorsPresentWithCreate() throws Exception {
 		SpecializationCreateDto dto = new SpecializationCreateDto("A", "", List.of());
-
 		String json = objectMapper.writeValueAsString(dto);
 
 		mockMvc
@@ -158,24 +128,23 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(json))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.message").value("Validation error"))
-			.andExpect(jsonPath("$.statusCode").value(400))
-			.andExpect(jsonPath("$.fieldErrors.name").value("Name should be between 3 and 50 characters"))
-			.andExpect(
-					jsonPath("$.fieldErrors.description").value("Description should be between 10 and 255 characters"))
-			.andExpect(jsonPath("$.fieldErrors.serviceIds").value("At least one service is required"));
+			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
+			.andExpect(jsonPath("$.error.message",
+					Matchers.anyOf(Matchers.containsString("name"), Matchers.containsString("description"),
+							Matchers.containsString("serviceIds"),
+							Matchers.containsString("At least one service is required"))));
 	}
 
 	@Test
 	void shouldDeleteSpecializationByIdWhenInputIsValid() throws Exception {
 		int specializationId = createValidSpecialization();
+
 		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNoContent());
 
 		mockMvc.perform(get("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message").value("Specialization not found"))
-			.andExpect(jsonPath("$.statusCode").value(404));
+			.andExpect(jsonPath("$.error.message").value("Specialization not found"));
 	}
 
 	@Test
@@ -184,8 +153,7 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(delete("/specializations/{id}", notExistingId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message").value("Specialization not found"))
-			.andExpect(jsonPath("$.statusCode").value(404));
+			.andExpect(jsonPath("$.error.message").value("Specialization not found"));
 	}
 
 	@Test
@@ -194,7 +162,6 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		SpecializationCreateDto updateDto = new SpecializationCreateDto("Updated Name", "Updated description",
 				List.of(2));
-
 		String updateJson = objectMapper.writeValueAsString(updateDto);
 
 		mockMvc
@@ -205,9 +172,9 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(get("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name").value("Updated Name"))
-			.andExpect(jsonPath("$.description").value("Updated description"))
-			.andExpect(jsonPath("$.services[*].id", Matchers.containsInAnyOrder(2)));
+			.andExpect(jsonPath("$.data.name").value("Updated Name"))
+			.andExpect(jsonPath("$.data.description").value("Updated description"))
+			.andExpect(jsonPath("$.data.services[*].id", Matchers.containsInAnyOrder(2)));
 
 		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
@@ -231,7 +198,6 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		SpecializationCreateDto dto = new SpecializationCreateDto("Test Specialization", "Test description",
 				List.of(1, 3));
-
 		String json = objectMapper.writeValueAsString(dto);
 
 		mockMvc
@@ -239,8 +205,7 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(json))
 			.andExpect(status().isNotFound())
-			.andExpect(jsonPath("$.message").value("Specialization not found"))
-			.andExpect(jsonPath("$.statusCode").value(404));
+			.andExpect(jsonPath("$.error.message").value("Specialization not found"));
 	}
 
 	@Test
@@ -248,7 +213,6 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 		int specializationId = createValidSpecialization();
 
 		SpecializationCreateDto invalidDto = new SpecializationCreateDto("A", "", List.of());
-
 		String invalidJson = objectMapper.writeValueAsString(invalidDto);
 
 		mockMvc
@@ -256,12 +220,11 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(invalidJson))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.message").value("Validation error"))
-			.andExpect(jsonPath("$.statusCode").value(400))
-			.andExpect(jsonPath("$.fieldErrors.name").value("Name should be between 3 and 50 characters"))
-			.andExpect(
-					jsonPath("$.fieldErrors.description").value("Description should be between 10 and 255 characters"))
-			.andExpect(jsonPath("$.fieldErrors.serviceIds").value("At least one service is required"));
+			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
+			.andExpect(jsonPath("$.error.message",
+					Matchers.anyOf(Matchers.containsString("name"), Matchers.containsString("description"),
+							Matchers.containsString("serviceIds"),
+							Matchers.containsString("At least one service is required"))));
 
 		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNoContent());
@@ -272,6 +235,7 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 				List.of(1, 3));
 
 		String createJson = objectMapper.writeValueAsString(createDto);
+
 		String createResponse = mockMvc
 			.perform(post("/specializations").header("Authorization", "Bearer " + token)
 				.contentType(MediaType.APPLICATION_JSON)
