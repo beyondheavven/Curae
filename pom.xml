@@ -40,13 +40,9 @@
 
     <!-- JPA / DB -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
     </dependency>
 
     <!-- Flyway -->
@@ -55,10 +51,14 @@
       <artifactId>spring-boot-starter-flyway</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-database-postgresql</artifactId>
-      <version>${flyway.database.postgresql.version}</version>
-      <scope>runtime</scope>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.20.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
     </dependency>
 
     <!-- OpenAPI / Swagger UI -->

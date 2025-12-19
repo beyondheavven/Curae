@@ -1,14 +1,12 @@
 package com.vention.medfast.patient.service;
 
-import com.vention.medfast.address.model.Address;
-import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.registration.dto.PersonDto;
-import com.vention.medfast.user.model.User;
+import com.vention.medfast.patient.dto.PatientCreateDto;
+import com.vention.medfast.patient.dto.PatientResponseDto;
 
 public interface PatientService {
 
-	Patient createPatientProfile(User user, Address address, PersonDto personDto);
+	PatientResponseDto create(PatientCreateDto patientCreateDto);
 
-	Patient getPatientByUserId(Long userId);
+	PatientResponseDto getPatientById(Long id);
 
 }

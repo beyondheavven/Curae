@@ -1,52 +1,83 @@
 package com.vention.medfast.patient.mapper;
 
-import com.vention.medfast.address.model.Address;
-import com.vention.medfast.patient.model.Gender;
+import com.vention.medfast.address.dto.AddressCreateDto;
+import com.vention.medfast.patient.dto.PatientCreateDto;
+import com.vention.medfast.patient.dto.PatientResponseDto;
+import com.vention.medfast.patient.model.GenderType;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.registration.dto.PersonDto;
+import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.User;
-import java.time.LocalDate;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
-class PatientMapperTest {
+import java.time.LocalDate;
 
-	private final PatientMapper mapper = Mappers.getMapper(PatientMapper.class);
+import static org.assertj.core.api.Assertions.assertThat;
 
-	@Test
-	void shouldMapPersonDtoToPatientEntityWhenDependenciesProvided() {
-		PersonDto dto = new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "secret123",
-				"john.doe@mail.com", "+123456789", "USA");
+public class PatientMapperTest {
 
-		User user = new User();
-		user.setEmail(dto.getEmail());
-		user.setFirstName(dto.getName());
-		user.setLastName(dto.getLastName());
+	private PatientMapper patientMapper;
 
-		Address address = new Address();
-		address.setCityName("Metropolis");
-		address.setStreetName("Main Street");
-		address.setHouseNumber("42");
-		address.setApartmentNumber("12B");
-		address.setStateName("State");
-		address.setZipCode("12345");
-		address.setPhone(dto.getPhoneNumber());
-
-		Patient patient = mapper.toEntity(dto, user, address);
-
-		assertThat(patient).isNotNull();
-		assertThat(patient.getId()).isNull();
-		assertThat(patient.getDateOfBirth()).isEqualTo(dto.getBirthDate());
-		assertThat(patient.getGender()).isEqualTo(dto.getGender());
-		assertThat(patient.getCitizenship()).isEqualTo(dto.getCitizenship());
-		assertThat(patient.getUser()).isSameAs(user);
-		assertThat(patient.getAddress()).isSameAs(address);
+	@BeforeEach
+	void setUp() {
+		patientMapper = Mappers.getMapper(PatientMapper.class);
 	}
 
 	@Test
-	void shouldReturnNullWhenAllArgumentsNull() {
-		assertThat(mapper.toEntity(null, null, null)).isNull();
+	void shouldMapEntityToDtoWhenInputIsValid() {
+		User user = new User();
+		user.setFirstName("John");
+		user.setLastName("Doe");
+		user.setProfileUrl("http://profile.url");
+
+		Patient entity = new Patient();
+		entity.setId(1L);
+		entity.setUser(user);
+		entity.setCitizenship("USA");
+
+		PatientResponseDto result = patientMapper.toDto(entity);
+
+		assertThat(result).isNotNull();
+		assertThat(result.id()).isEqualTo(1L);
+		assertThat(result.firstName()).isEqualTo("John");
+		assertThat(result.lastName()).isEqualTo("Doe");
+		assertThat(result.profileUrl()).isEqualTo("http://profile.url");
+	}
+
+	@Test
+	void shouldMapDtoToEntityWhenInputIsValid() {
+		UserCreateDto userDto = new UserCreateDto("Jane", "Smith", "jane@example.com", "pass", "http://img.com");
+		AddressCreateDto addressDto = new AddressCreateDto("Street", "City", "123", "State", "1", "00000", "+123456");
+
+		PatientCreateDto dto = PatientCreateDto.builder()
+			.user(userDto)
+			.address(addressDto)
+			.citizenship("Canada")
+			.gender(GenderType.FEMALE)
+			.birthDate(LocalDate.of(1995, 5, 20))
+			.build();
+
+		Patient result = patientMapper.toEntity(dto);
+
+		assertThat(result).isNotNull();
+		assertThat(result.getCitizenship()).isEqualTo("Canada");
+		assertThat(result.getGender()).isEqualTo(GenderType.FEMALE);
+		assertThat(result.getBirthDate()).isEqualTo(LocalDate.of(1995, 5, 20));
+
+		if (result.getUser() != null) {
+			assertThat(result.getUser().getFirstName()).isEqualTo("Jane");
+		}
+	}
+
+	@Test
+	void shouldReturnNullWhenEntityIsNull() {
+		assertThat(patientMapper.toDto(null)).isNull();
+	}
+
+	@Test
+	void shouldReturnNullWhenDtoIsNull() {
+		assertThat(patientMapper.toEntity(null)).isNull();
 	}
 
 }

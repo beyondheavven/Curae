@@ -5,15 +5,14 @@ import com.vention.medfast.registration.dto.PersonDto;
 import com.vention.medfast.user.mapper.UserMapper;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
-import java.util.Optional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
