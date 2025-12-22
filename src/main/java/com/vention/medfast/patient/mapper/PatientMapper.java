@@ -12,8 +12,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PatientMapper {
 
-    @Mapping(target = "dateOfBirth", source = "dto.birthDate")
-    Patient toEntity(PatientCreateDto dto);
+	@Mapping(target = "dateOfBirth", source = "dto.birthDate")
+	Patient toEntity(PatientCreateDto dto);
 
 	@Mapping(source = "user.firstName", target = "firstName")
 	@Mapping(source = "user.lastName", target = "lastName")

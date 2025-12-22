@@ -31,158 +31,139 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PatientControllerTest extends AbstractIntegrationTest {
 
-    @Autowired
-    MockMvc mockMvc;
+	@Autowired
+	MockMvc mockMvc;
 
-    @Autowired
-    ObjectMapper objectMapper;
+	@Autowired
+	ObjectMapper objectMapper;
 
-    private String token;
+	private String token;
 
-    @BeforeAll
-    void obtainToken() throws Exception {
-        AuthRequestDto loginRequest = new AuthRequestDto("admin@med.com", "pass");
-        String json = objectMapper.writeValueAsString(loginRequest);
+	@BeforeAll
+	void obtainToken() throws Exception {
+		AuthRequestDto loginRequest = new AuthRequestDto("admin@med.com", "pass");
+		String json = objectMapper.writeValueAsString(loginRequest);
 
-        String response = mockMvc.perform(post("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+		String response = mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(json))
+			.andExpect(status().isOk())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
 
-        token = JsonPath.read(response, "$.data.accessToken");
-    }
+		token = JsonPath.read(response, "$.data.accessToken");
+	}
 
-    @Test
-    void shouldCreatePatientWhenInputIsValid() throws Exception {
-        PatientCreateDto createDto = generateValidPatientDto();
-        String json = objectMapper.writeValueAsString(createDto);
+	@Test
+	void shouldCreatePatientWhenInputIsValid() throws Exception {
+		PatientCreateDto createDto = generateValidPatientDto();
+		String json = objectMapper.writeValueAsString(createDto);
 
-        mockMvc.perform(post("/patients")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.data.id").isNumber())
-            .andExpect(jsonPath("$.data.firstName").value(createDto.user().firstName()))
-            .andExpect(jsonPath("$.data.lastName").value(createDto.user().lastName()))
-            .andExpect(jsonPath("$.data").exists());
-    }
+		mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.data.id").isNumber())
+			.andExpect(jsonPath("$.data.firstName").value(createDto.user().firstName()))
+			.andExpect(jsonPath("$.data.lastName").value(createDto.user().lastName()))
+			.andExpect(jsonPath("$.data").exists());
+	}
 
-    @Test
-    void shouldReturnPatientByIdWhenInputIsValid() throws Exception {
-        long createdPatientId = createValidPatient();
+	@Test
+	void shouldReturnPatientByIdWhenInputIsValid() throws Exception {
+		long createdPatientId = createValidPatient();
 
-        mockMvc.perform(get("/patients/{id}", createdPatientId)
-                .header("Authorization", "Bearer " + token))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.data.id").value(createdPatientId))
-            .andExpect(jsonPath("$.data.firstName").isNotEmpty())
-            .andExpect(jsonPath("$.data.lastName").isNotEmpty());
-    }
+		mockMvc.perform(get("/patients/{id}", createdPatientId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.id").value(createdPatientId))
+			.andExpect(jsonPath("$.data.firstName").isNotEmpty())
+			.andExpect(jsonPath("$.data.lastName").isNotEmpty());
+	}
 
-    @Test
-    void shouldReturn404WhenPatientNotFound() throws Exception {
-        long notExistingId = 99999L;
+	@Test
+	void shouldReturn404WhenPatientNotFound() throws Exception {
+		long notExistingId = 99999L;
 
-        mockMvc.perform(get("/patients/{id}", notExistingId)
-                .header("Authorization", "Bearer " + token))
-            .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.error.message").value("Patient not found"));
-    }
+		mockMvc.perform(get("/patients/{id}", notExistingId).header("Authorization", "Bearer " + token))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.error.message").value("Patient not found"));
+	}
 
-    @Test
-    void shouldReturn400WhenValidationErrorsPresentWithCreate() throws Exception {
-        UserCreateDto invalidUser = new UserCreateDto("", "", "", "invalid-email", "");
+	@Test
+	void shouldReturn400WhenValidationErrorsPresentWithCreate() throws Exception {
+		UserCreateDto invalidUser = new UserCreateDto("", "", "", "invalid-email", "");
 
-        AddressCreateDto address = new AddressCreateDto("Street", "City", "1", "State", "10", "12345", "1234567890");
+		AddressCreateDto address = new AddressCreateDto("Street", "City", "1", "State", "10", "12345", "1234567890");
 
+		PatientCreateDto invalidDto = PatientCreateDto.builder()
+			.user(invalidUser)
+			.address(address)
+			.citizenship("")
+			.gender(Gender.MALE)
+			.birthDate(LocalDate.now().plusDays(1))
+			.build();
 
-        PatientCreateDto invalidDto = PatientCreateDto.builder()
-            .user(invalidUser)
-            .address(address)
-            .citizenship("")
-            .gender(Gender.MALE)
-            .birthDate(LocalDate.now().plusDays(1))
-            .build();
+		String json = objectMapper.writeValueAsString(invalidDto);
 
-        String json = objectMapper.writeValueAsString(invalidDto);
+		mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
+			.andExpect(jsonPath("$.error.message", Matchers.notNullValue()));
+	}
 
-        mockMvc.perform(post("/patients")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-            .andExpect(jsonPath("$.error.message", Matchers.notNullValue()));
-    }
+	@Test
+	void shouldReturnErrorWhenEmailAlreadyExists() throws Exception {
+		PatientCreateDto originalDto = generateValidPatientDto();
+		String json = objectMapper.writeValueAsString(originalDto);
 
-    @Test
-    void shouldReturnErrorWhenEmailAlreadyExists() throws Exception {
-        PatientCreateDto originalDto = generateValidPatientDto();
-        String json = objectMapper.writeValueAsString(originalDto);
+		mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isCreated());
 
-        mockMvc.perform(post("/patients")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isCreated());
+		mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(json))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.error.message").value("User with this email already exists"));
+	}
 
-        mockMvc.perform(post("/patients")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.error.message").value("User with this email already exists"));
-    }
+	private long createValidPatient() throws Exception {
+		PatientCreateDto createDto = generateValidPatientDto();
+		String createJson = objectMapper.writeValueAsString(createDto);
 
+		String createResponse = mockMvc
+			.perform(post("/patients").header("Authorization", "Bearer " + token)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(createJson))
+			.andExpect(status().isCreated())
+			.andReturn()
+			.getResponse()
+			.getContentAsString();
 
-    private long createValidPatient() throws Exception {
-        PatientCreateDto createDto = generateValidPatientDto();
-        String createJson = objectMapper.writeValueAsString(createDto);
+		return ((Number) JsonPath.read(createResponse, "$.data.id")).longValue();
+	}
 
-        String createResponse = mockMvc.perform(post("/patients")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(createJson))
-            .andExpect(status().isCreated())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+	private PatientCreateDto generateValidPatientDto() {
+		String uniqueEmail = "test" + UUID.randomUUID() + "@med.com";
 
-        return ((Number) JsonPath.read(createResponse, "$.data.id")).longValue();
-    }
+		UserCreateDto userDto = new UserCreateDto("John", "Doe", uniqueEmail, "securePassword123", "http://url.com");
 
+		AddressCreateDto addressDto = new AddressCreateDto("Baker Street", "London", "221B", "London", "1", "NW1 6XE",
+				"+44123456789");
 
-    private PatientCreateDto generateValidPatientDto() {
-        String uniqueEmail = "test" + UUID.randomUUID() + "@med.com";
+		return PatientCreateDto.builder()
+			.user(userDto)
+			.address(addressDto)
+			.citizenship("USA")
+			.gender(Gender.MALE)
+			.birthDate(LocalDate.of(1995, 10, 25))
+			.build();
+	}
 
-        UserCreateDto userDto = new UserCreateDto(
-            "John",
-            "Doe",
-             uniqueEmail,
-            "securePassword123",
-            "http://url.com"
-        );
-
-        AddressCreateDto addressDto = new AddressCreateDto(
-            "Baker Street",
-            "London",
-            "221B",
-            "London",
-            "1",
-            "NW1 6XE",
-            "+44123456789"
-        );
-
-        return PatientCreateDto.builder()
-            .user(userDto)
-            .address(addressDto)
-            .citizenship("USA")
-            .gender(Gender.MALE)
-            .birthDate(LocalDate.of(1995, 10, 25))
-            .build();
-    }
 }

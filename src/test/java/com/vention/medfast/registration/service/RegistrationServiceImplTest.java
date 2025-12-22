@@ -137,17 +137,17 @@ class RegistrationServiceImplTest {
 			return new Patient();
 		}
 
-        @Override
-        public PatientResponseDto create(PatientCreateDto patientCreateDto) {
-            return null;
-        }
+		@Override
+		public PatientResponseDto create(PatientCreateDto patientCreateDto) {
+			return null;
+		}
 
-        @Override
-        public PatientResponseDto getPatientById(Long id) {
-            return null;
-        }
+		@Override
+		public PatientResponseDto getPatientById(Long id) {
+			return null;
+		}
 
-        @Override
+		@Override
 		public Patient getPatientByUserId(Long userId) {
 			return null;
 		}

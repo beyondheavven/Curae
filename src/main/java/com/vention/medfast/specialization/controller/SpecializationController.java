@@ -35,78 +35,77 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Specializations", description = "Endpoints for managing doctor specializations")
 public class SpecializationController {
 
-    private final SpecializationService specializationService;
+	private final SpecializationService specializationService;
 
-    @Operation(summary = "Get all specializations")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved list of specializations",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = SpecializationResponseDto.class))),
-        @ApiResponse(responseCode = "204", description = "No specializations found") })
-    @GetMapping
-    public ResponseEntity<ResponseWrapper<List<SpecializationResponseDto>>> getAllSpecializations() {
-        List<SpecializationResponseDto> specializations = specializationService.getAll();
-        return ResponseEntity.ok(ResponseFactory.ok(specializations));
-    }
+	@Operation(summary = "Get all specializations")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Successfully retrieved list of specializations",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = SpecializationResponseDto.class))),
+			@ApiResponse(responseCode = "204", description = "No specializations found") })
+	@GetMapping
+	public ResponseEntity<ResponseWrapper<List<SpecializationResponseDto>>> getAllSpecializations() {
+		List<SpecializationResponseDto> specializations = specializationService.getAll();
+		return ResponseEntity.ok(ResponseFactory.ok(specializations));
+	}
 
-    @Operation(summary = "Get specialization by ID")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Specialization found",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = SpecializationResponseDto.class))),
-        @ApiResponse(responseCode = "404", description = "Specialization not found",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))) })
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseWrapper<SpecializationResponseDto>> getSpecializationById(
-        @Parameter(description = "ID of specialization to find") @PathVariable Long id) {
-        return ResponseEntity.ok(ResponseFactory.ok(specializationService.getById(id)));
-    }
+	@Operation(summary = "Get specialization by ID")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Specialization found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = SpecializationResponseDto.class))),
+			@ApiResponse(responseCode = "404", description = "Specialization not found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@GetMapping("/{id}")
+	public ResponseEntity<ResponseWrapper<SpecializationResponseDto>> getSpecializationById(
+			@Parameter(description = "ID of specialization to find") @PathVariable Long id) {
+		return ResponseEntity.ok(ResponseFactory.ok(specializationService.getById(id)));
+	}
 
-    @Operation(summary = "Create specialization")
-    @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Successfully created",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = SpecializationResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Validation error",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))) })
-    @PostMapping
-    public ResponseEntity<ResponseWrapper<Long>> createSpecialization(@Valid @RequestBody SpecializationCreateDto dto) {
-        long id = specializationService.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ResponseFactory.withStatus(HttpStatus.CREATED, id));
-    }
+	@Operation(summary = "Create specialization")
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "Successfully created",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = SpecializationResponseDto.class))),
+			@ApiResponse(responseCode = "400", description = "Validation error",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PostMapping
+	public ResponseEntity<ResponseWrapper<Long>> createSpecialization(@Valid @RequestBody SpecializationCreateDto dto) {
+		long id = specializationService.create(dto);
+		return ResponseEntity.status(HttpStatus.CREATED).body(ResponseFactory.withStatus(HttpStatus.CREATED, id));
+	}
 
-    @Operation(summary = "Delete a specialization")
-    @ApiResponses({ @ApiResponse(responseCode = "204", description = "Specialization successfully deleted"),
-        @ApiResponse(responseCode = "404", description = "Specialization not found",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))) })
-    @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteSpecialization(
-        @Parameter(description = "ID of the specialization to delete", required = true) @PathVariable Long id) {
-        specializationService.deleteById(id);
-    }
+	@Operation(summary = "Delete a specialization")
+	@ApiResponses({ @ApiResponse(responseCode = "204", description = "Specialization successfully deleted"),
+			@ApiResponse(responseCode = "404", description = "Specialization not found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@DeleteMapping("/{id}")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void deleteSpecialization(
+			@Parameter(description = "ID of the specialization to delete", required = true) @PathVariable Long id) {
+		specializationService.deleteById(id);
+	}
 
-    @Operation(summary = "Update an existing specialization")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Specialization successfully updated",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = SpecializationResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Validation error",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))),
-        @ApiResponse(responseCode = "404", description = "Specialization not found",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))) })
-    @PutMapping("/{id}")
-    public ResponseEntity<ResponseWrapper<Long>> updateSpecialization(
-        @Parameter(description = "ID of the specialization to update", required = true) @PathVariable Long id,
-        @Parameter(description = "Fields to update") @Valid @RequestBody SpecializationCreateDto dto) {
-        long updatedId = specializationService.update(id, dto);
-        return ResponseEntity.ok(ResponseFactory.ok(updatedId));
-    }
+	@Operation(summary = "Update an existing specialization")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Specialization successfully updated",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = SpecializationResponseDto.class))),
+			@ApiResponse(responseCode = "400", description = "Validation error",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))),
+			@ApiResponse(responseCode = "404", description = "Specialization not found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PutMapping("/{id}")
+	public ResponseEntity<ResponseWrapper<Long>> updateSpecialization(
+			@Parameter(description = "ID of the specialization to update", required = true) @PathVariable Long id,
+			@Parameter(description = "Fields to update") @Valid @RequestBody SpecializationCreateDto dto) {
+		long updatedId = specializationService.update(id, dto);
+		return ResponseEntity.ok(ResponseFactory.ok(updatedId));
+	}
 
 }
-

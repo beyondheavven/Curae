@@ -44,15 +44,14 @@ class PatientServiceImplTest {
 	@Mock
 	private PatientMapper patientMapper;
 
-    @Mock
-    private UserRepository userRepository;
+	@Mock
+	private UserRepository userRepository;
 
-    @Mock
-    private AddressRepository addressRepository;
+	@Mock
+	private AddressRepository addressRepository;
 
-    @InjectMocks
+	@InjectMocks
 	private PatientServiceImpl patientService;
-
 
 	@Test
 	void shouldCreatePatientProfileWhenNotExists() {
@@ -100,89 +99,91 @@ class PatientServiceImplTest {
 		verify(patientRepository, never()).save(any(Patient.class));
 	}
 
-    @Test
-    void shouldCreatePatientWhenInputIsValid() {
-        UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
-        AddressCreateDto addressDto = new AddressCreateDto("Street", "City", "123", "State", "1", "00000", "+1234567890");
-        PatientCreateDto createDto = new PatientCreateDto(userDto, addressDto, "USA", Gender.MALE, LocalDate.of(1990, 1, 1));
+	@Test
+	void shouldCreatePatientWhenInputIsValid() {
+		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
+		AddressCreateDto addressDto = new AddressCreateDto("Street", "City", "123", "State", "1", "00000",
+				"+1234567890");
+		PatientCreateDto createDto = new PatientCreateDto(userDto, addressDto, "USA", Gender.MALE,
+				LocalDate.of(1990, 1, 1));
 
-        User savedUser = new User();
-        savedUser.setId(100L);
-        savedUser.setEmail(userDto.email());
+		User savedUser = new User();
+		savedUser.setId(100L);
+		savedUser.setEmail(userDto.email());
 
-        Patient mappedPatient = new Patient();
-        mappedPatient.setCitizenship("USA");
+		Patient mappedPatient = new Patient();
+		mappedPatient.setCitizenship("USA");
 
-        Patient savedPatient = new Patient();
-        savedPatient.setId(1L);
-        savedPatient.setUser(savedUser);
-        savedPatient.setCitizenship("USA");
+		Patient savedPatient = new Patient();
+		savedPatient.setId(1L);
+		savedPatient.setUser(savedUser);
+		savedPatient.setCitizenship("USA");
 
-        PatientResponseDto responseDto = PatientResponseDto.builder().id(1L).firstName("John").lastName("Doe").build();
+		PatientResponseDto responseDto = PatientResponseDto.builder().id(1L).firstName("John").lastName("Doe").build();
 
-        when(userRepository.existsByEmail(userDto.email())).thenReturn(false);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
-        when(patientMapper.toEntity(createDto)).thenReturn(mappedPatient);
-        when(patientRepository.save(any(Patient.class))).thenReturn(savedPatient);
-        when(patientMapper.toDto(savedPatient)).thenReturn(responseDto);
+		when(userRepository.existsByEmail(userDto.email())).thenReturn(false);
+		when(userRepository.save(any(User.class))).thenReturn(savedUser);
+		when(patientMapper.toEntity(createDto)).thenReturn(mappedPatient);
+		when(patientRepository.save(any(Patient.class))).thenReturn(savedPatient);
+		when(patientMapper.toDto(savedPatient)).thenReturn(responseDto);
 
-        PatientResponseDto result = patientService.create(createDto);
+		PatientResponseDto result = patientService.create(createDto);
 
-        assertNotNull(result);
-        assertEquals(1L, result.id());
-        assertEquals("John", result.firstName());
+		assertNotNull(result);
+		assertEquals(1L, result.id());
+		assertEquals("John", result.firstName());
 
-        verify(userRepository).save(any(User.class));
-        verify(patientMapper).toEntity(createDto);
-        verify(patientRepository).save(any(Patient.class));
-        verify(patientMapper).toDto(savedPatient);
-    }
+		verify(userRepository).save(any(User.class));
+		verify(patientMapper).toEntity(createDto);
+		verify(patientRepository).save(any(Patient.class));
+		verify(patientMapper).toDto(savedPatient);
+	}
 
-    @Test
-    void shouldReturnPatientWhenIdExists() {
-        Long patientId = 1L;
-        Patient patient = new Patient();
-        patient.setId(patientId);
+	@Test
+	void shouldReturnPatientWhenIdExists() {
+		Long patientId = 1L;
+		Patient patient = new Patient();
+		patient.setId(patientId);
 
-        PatientResponseDto responseDto = PatientResponseDto.builder().id(patientId).build();
+		PatientResponseDto responseDto = PatientResponseDto.builder().id(patientId).build();
 
-        when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
-        when(patientMapper.toDto(patient)).thenReturn(responseDto);
+		when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
+		when(patientMapper.toDto(patient)).thenReturn(responseDto);
 
-        PatientResponseDto result = patientService.getPatientById(patientId);
+		PatientResponseDto result = patientService.getPatientById(patientId);
 
-        assertNotNull(result);
-        assertEquals(patientId, result.id());
+		assertNotNull(result);
+		assertEquals(patientId, result.id());
 
-        verify(patientRepository).findById(patientId);
-        verify(patientMapper).toDto(patient);
-    }
+		verify(patientRepository).findById(patientId);
+		verify(patientMapper).toDto(patient);
+	}
 
-    @Test
-    void shouldThrowExceptionWhenPatientNotFoundById() {
-        Long patientId = 999L;
-        when(patientRepository.findById(patientId)).thenReturn(Optional.empty());
+	@Test
+	void shouldThrowExceptionWhenPatientNotFoundById() {
+		Long patientId = 999L;
+		when(patientRepository.findById(patientId)).thenReturn(Optional.empty());
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> patientService.getPatientById(patientId));
+		EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+				() -> patientService.getPatientById(patientId));
 
-        assertEquals("Patient not found", exception.getMessage());
+		assertEquals("Patient not found", exception.getMessage());
 
-        verify(patientRepository).findById(patientId);
-        verifyNoInteractions(patientMapper);
-    }
+		verify(patientRepository).findById(patientId);
+		verifyNoInteractions(patientMapper);
+	}
 
-    @Test
-    void shouldThrowExceptionWhenEmailAlreadyExists() {
-        UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
-        PatientCreateDto createDto = new PatientCreateDto(userDto, null, "USA", Gender.MALE, LocalDate.now());
+	@Test
+	void shouldThrowExceptionWhenEmailAlreadyExists() {
+		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
+		PatientCreateDto createDto = new PatientCreateDto(userDto, null, "USA", Gender.MALE, LocalDate.now());
 
-        when(userRepository.existsByEmail(userDto.email())).thenReturn(true);
+		when(userRepository.existsByEmail(userDto.email())).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> patientService.create(createDto));
+		assertThrows(IllegalArgumentException.class, () -> patientService.create(createDto));
 
-        verify(userRepository, never()).save(any());
-        verify(patientRepository, never()).save(any());
-    }
+		verify(userRepository, never()).save(any());
+		verify(patientRepository, never()).save(any());
+	}
 
 }
