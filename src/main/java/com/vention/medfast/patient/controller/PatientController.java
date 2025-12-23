@@ -5,6 +5,8 @@ import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.wrapper.ResponseFactory;
+import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,9 +37,10 @@ public class PatientController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
-	public PatientResponseDto createPatient(@Valid @RequestBody PatientCreateDto request) {
-		return patientService.create(request);
+	public ResponseEntity<ResponseWrapper<PatientResponseDto>> createPatient(
+			@Valid @RequestBody PatientCreateDto request) {
+		PatientResponseDto response = patientService.create(request);
+		return ResponseEntity.status(HttpStatus.CREATED).body(ResponseFactory.withStatus(HttpStatus.CREATED, response));
 	}
 
 	@Operation(summary = "Get patient by ID")
@@ -48,9 +52,9 @@ public class PatientController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@GetMapping("/{id}")
-	public PatientResponseDto getPatientById(
+	public ResponseEntity<ResponseWrapper<PatientResponseDto>> getPatientById(
 			@Parameter(description = "ID of patient to find") @PathVariable(name = "id") Long id) {
-		return patientService.getPatientById(id);
+		return ResponseEntity.ok(ResponseFactory.ok(patientService.getPatientById(id)));
 	}
 
 }

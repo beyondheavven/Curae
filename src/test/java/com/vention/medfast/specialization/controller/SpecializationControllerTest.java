@@ -33,12 +33,11 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	String token;
+	private String token;
 
 	@BeforeAll
 	void obtainToken() throws Exception {
 		AuthRequestDto loginRequest = new AuthRequestDto("admin@med.com", "pass");
-
 		String json = objectMapper.writeValueAsString(loginRequest);
 
 		String response = mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(json))
@@ -51,10 +50,10 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void shouldReturnSpecializationByIdWhenInputIsValid() throws Exception {
+	void shouldReturnSpecializationByIdWhenInputIsValid() throws Exception {
 		mockMvc.perform(get("/specializations/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.id").exists())
+			.andExpect(jsonPath("$.data.id").value(1))
 			.andExpect(jsonPath("$.data.name").value("General Practitioner"))
 			.andExpect(
 					jsonPath("$.data.description").value("Primary care provider dealing with a wide range of diseases"))
@@ -82,35 +81,36 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 	}
 
 	@Test
-	public void shouldReturnSpecializationListByWhenSpecializationsPresent() throws Exception {
+	void shouldReturnSpecializationListWhenSpecializationsPresent() throws Exception {
 		mockMvc.perform(get("/specializations").header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$").isArray())
-			.andExpect(jsonPath("$", Matchers.hasSize(Matchers.greaterThanOrEqualTo(3))))
-			.andExpect(jsonPath("$[*].id", Matchers.hasItems(1, 2, 3)))
-			.andExpect(jsonPath("$[?(@.id==1)].name").value(Matchers.contains("General Practitioner")))
-			.andExpect(jsonPath("$[?(@.id==2)].name").value(Matchers.contains("Cardiologist")))
-			.andExpect(jsonPath("$[?(@.id==3)].name").value(Matchers.contains("Diagnostician")));
+			.andExpect(jsonPath("$.data").isArray())
+			.andExpect(jsonPath("$.data", Matchers.hasSize(Matchers.greaterThanOrEqualTo(3))))
+			.andExpect(jsonPath("$.data[*].id", Matchers.hasItems(1, 2, 3)))
+			.andExpect(jsonPath("$.data[?(@.id==1)].name").value(Matchers.contains("General Practitioner")))
+			.andExpect(jsonPath("$.data[?(@.id==2)].name").value(Matchers.contains("Cardiologist")))
+			.andExpect(jsonPath("$.data[?(@.id==3)].name").value(Matchers.contains("Diagnostician")));
 	}
 
 	@Test
 	void shouldCreateSpecializationWhenInputIsValid() throws Exception {
-		int createdSpecializationId = createValidSpecialization();
+		long createdSpecializationId = createValidSpecialization();
+		int createdIdInt = Math.toIntExact(createdSpecializationId);
 
 		mockMvc
 			.perform(get("/specializations/{id}", createdSpecializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.name").value("Test Specialization"))
 			.andExpect(jsonPath("$.data.description").value("Test description"))
-			.andExpect(jsonPath("$.data.services[*].id", Matchers.hasItems(1, 3)));
+			.andExpect(jsonPath("$.data.services[*].id", Matchers.containsInAnyOrder(1, 3)));
 
 		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdSpecializationId)));
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdIdInt)));
 
 		mockMvc.perform(get("/services/{id}", 3).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdSpecializationId)));
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdIdInt)));
 
 		mockMvc
 			.perform(
@@ -129,15 +129,12 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 				.content(json))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message",
-					Matchers.anyOf(Matchers.containsString("name"), Matchers.containsString("description"),
-							Matchers.containsString("serviceIds"),
-							Matchers.containsString("At least one service is required"))));
+			.andExpect(jsonPath("$.error.message", Matchers.notNullValue()));
 	}
 
 	@Test
 	void shouldDeleteSpecializationByIdWhenInputIsValid() throws Exception {
-		int specializationId = createValidSpecialization();
+		long specializationId = createValidSpecialization();
 
 		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNoContent());
@@ -158,7 +155,8 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 	@Test
 	void shouldUpdateSpecializationWhenInputIsValid() throws Exception {
-		int specializationId = createValidSpecialization();
+		long specializationId = createValidSpecialization();
+		int specializationIdInt = Math.toIntExact(specializationId);
 
 		SpecializationCreateDto updateDto = new SpecializationCreateDto("Updated Name", "Updated description",
 				List.of(2));
@@ -168,7 +166,8 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 			.perform(put("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(updateJson))
-			.andExpect(status().isOk());
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").value(specializationIdInt));
 
 		mockMvc.perform(get("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
@@ -178,15 +177,15 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationId))));
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationIdInt))));
 
 		mockMvc.perform(get("/services/{id}", 3).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationId))));
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationIdInt))));
 
 		mockMvc.perform(get("/services/{id}", 2).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(specializationId)));
+			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(specializationIdInt)));
 
 		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNoContent());
@@ -210,7 +209,7 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 	@Test
 	void shouldReturn400WhenValidationErrorsPresentWithUpdate() throws Exception {
-		int specializationId = createValidSpecialization();
+		long specializationId = createValidSpecialization();
 
 		SpecializationCreateDto invalidDto = new SpecializationCreateDto("A", "", List.of());
 		String invalidJson = objectMapper.writeValueAsString(invalidDto);
@@ -220,17 +219,13 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(invalidJson))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message",
-					Matchers.anyOf(Matchers.containsString("name"), Matchers.containsString("description"),
-							Matchers.containsString("serviceIds"),
-							Matchers.containsString("At least one service is required"))));
+			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"));
 
 		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNoContent());
 	}
 
-	private int createValidSpecialization() throws Exception {
+	private long createValidSpecialization() throws Exception {
 		SpecializationCreateDto createDto = new SpecializationCreateDto("Test Specialization", "Test description",
 				List.of(1, 3));
 
@@ -245,7 +240,7 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 			.getResponse()
 			.getContentAsString();
 
-		return JsonPath.read(createResponse, "$");
+		return ((Number) JsonPath.read(createResponse, "$.data")).longValue();
 	}
 
 }

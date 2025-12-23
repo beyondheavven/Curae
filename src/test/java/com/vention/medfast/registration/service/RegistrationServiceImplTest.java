@@ -2,6 +2,8 @@ package com.vention.medfast.registration.service;
 
 import com.vention.medfast.address.model.Address;
 import com.vention.medfast.address.service.AddressService;
+import com.vention.medfast.patient.dto.PatientCreateDto;
+import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
@@ -133,6 +135,16 @@ class RegistrationServiceImplTest {
 				throw new IllegalArgumentException("Patient profile already exists");
 			}
 			return new Patient();
+		}
+
+		@Override
+		public PatientResponseDto create(PatientCreateDto patientCreateDto) {
+			return null;
+		}
+
+		@Override
+		public PatientResponseDto getPatientById(Long id) {
+			return null;
 		}
 
 		@Override

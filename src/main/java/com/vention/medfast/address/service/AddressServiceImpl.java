@@ -24,11 +24,11 @@ public class AddressServiceImpl implements AddressService {
 	public Address createAddress(AddressDto dto) {
 
 		Address probe = new Address();
-		probe.setStreetName(trimToNull(dto.getStreet()));
-		probe.setCityName(trimToNull(dto.getCity()));
-		probe.setApartmentNumber(trimToNull(dto.getApartment()));
+		probe.setStreet(trimToNull(dto.getStreet()));
+		probe.setCity(trimToNull(dto.getCity()));
+		probe.setApartment(trimToNull(dto.getApartment()));
 		probe.setHouseNumber(trimToNull(dto.getHouseNumber()));
-		probe.setStateName(trimToNull(dto.getState()));
+		probe.setState(trimToNull(dto.getState()));
 		probe.setZipCode(trimToNull(dto.getZipCode()));
 
 		ExampleMatcher matcher = ExampleMatcher.matchingAll()

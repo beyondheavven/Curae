@@ -46,12 +46,6 @@ public class SpecializationController {
 	@GetMapping
 	public ResponseEntity<ResponseWrapper<List<SpecializationResponseDto>>> getAllSpecializations() {
 		List<SpecializationResponseDto> specializations = specializationService.getAll();
-
-		if (specializations.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NO_CONTENT)
-				.body(ResponseFactory.withStatus(HttpStatus.NO_CONTENT, List.of()));
-		}
-
 		return ResponseEntity.ok(ResponseFactory.ok(specializations));
 	}
 
@@ -80,7 +74,6 @@ public class SpecializationController {
 	@PostMapping
 	public ResponseEntity<ResponseWrapper<Long>> createSpecialization(@Valid @RequestBody SpecializationCreateDto dto) {
 		long id = specializationService.create(dto);
-
 		return ResponseEntity.status(HttpStatus.CREATED).body(ResponseFactory.withStatus(HttpStatus.CREATED, id));
 	}
 

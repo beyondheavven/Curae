@@ -1,6 +1,6 @@
 package com.vention.medfast.user.model;
 
-import com.vention.medfast.refreshToken.model.RefreshToken;
+import com.vention.medfast.refreshtoken.model.RefreshToken;
 import jakarta.persistence.*;
 
 import java.util.LinkedHashSet;

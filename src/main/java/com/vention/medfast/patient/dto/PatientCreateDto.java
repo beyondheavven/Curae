@@ -1,7 +1,7 @@
 package com.vention.medfast.patient.dto;
 
 import com.vention.medfast.address.dto.AddressCreateDto;
-import com.vention.medfast.patient.model.GenderType;
+import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.user.dto.UserCreateDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -28,7 +28,7 @@ public record PatientCreateDto(
 						message = "Name of citizenship should be between 2 and 50 characters") String citizenship,
 
 		@Schema(description = "Gender of the patient",
-				example = "NOT_SPECIFIED") @NotNull(message = "Citizenship is required") GenderType gender,
+				example = "NOT_SPECIFIED") @NotNull(message = "Citizenship is required") Gender gender,
 
 		@Schema(description = "Date of birth", example = "1995-10-25", format = "date") @NotNull(
 				message = "Date of birth is required") @Past(

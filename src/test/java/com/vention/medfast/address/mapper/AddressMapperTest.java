@@ -18,11 +18,11 @@ class AddressMapperTest {
 
 		assertThat(address).isNotNull();
 		assertThat(address.getId()).isNull();
-		assertThat(address.getStreetName()).isEqualTo(dto.getStreet());
-		assertThat(address.getCityName()).isEqualTo(dto.getCity());
-		assertThat(address.getApartmentNumber()).isEqualTo(dto.getApartment());
+		assertThat(address.getStreet()).isEqualTo(dto.getStreet());
+		assertThat(address.getCity()).isEqualTo(dto.getCity());
+		assertThat(address.getApartment()).isEqualTo(dto.getApartment());
 		assertThat(address.getHouseNumber()).isEqualTo(dto.getHouseNumber());
-		assertThat(address.getStateName()).isEqualTo(dto.getState());
+		assertThat(address.getState()).isEqualTo(dto.getState());
 		assertThat(address.getZipCode()).isEqualTo(dto.getZipCode());
 		assertThat(address.getPhone()).isEqualTo(dto.getPhoneNumber());
 	}

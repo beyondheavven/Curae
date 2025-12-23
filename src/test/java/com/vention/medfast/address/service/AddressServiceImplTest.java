@@ -40,11 +40,11 @@ class AddressServiceImplTest {
 	void shouldCreateAndSaveAddressWhenNotExisting() {
 		AddressDto dto = new AddressDto("  Main ", " City ", " 1A", "10 ", " State", "12345", "+123456789");
 		Address mapped = new Address();
-		mapped.setCityName("City");
+		mapped.setCity("City");
 
 		Address saved = new Address();
 		saved.setId(5L);
-		saved.setCityName("City");
+		saved.setCity("City");
 
 		when(addressRepository.findOne(ArgumentMatchers.<Example<Address>>any())).thenReturn(Optional.empty());
 		when(addressMapper.toEntity(dto)).thenReturn(mapped);
@@ -56,12 +56,12 @@ class AddressServiceImplTest {
 		Address probe = exampleCaptor.getValue().getProbe();
 
 		assertThat(result.getId()).isEqualTo(5L);
-		assertThat(result.getCityName()).isEqualTo("City");
-		assertThat(probe.getStreetName()).isEqualTo("Main");
-		assertThat(probe.getCityName()).isEqualTo("City");
-		assertThat(probe.getApartmentNumber()).isEqualTo("1A");
+		assertThat(result.getCity()).isEqualTo("City");
+		assertThat(probe.getStreet()).isEqualTo("Main");
+		assertThat(probe.getCity()).isEqualTo("City");
+		assertThat(probe.getApartment()).isEqualTo("1A");
 		assertThat(probe.getHouseNumber()).isEqualTo("10");
-		assertThat(probe.getStateName()).isEqualTo("State");
+		assertThat(probe.getState()).isEqualTo("State");
 		assertThat(probe.getZipCode()).isEqualTo("12345");
 		assertThat(probe.getPhone()).isNull();
 
