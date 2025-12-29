@@ -1,8 +1,8 @@
 package com.vention.medfast.email.mapper;
 
-import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.email.model.EmailTokenType;
-import com.vention.medfast.patient.model.Status;
+import com.vention.medfast.email.model.EmailVerificationToken;
+import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.user.model.User;
 import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +29,7 @@ class EmailVerificationTokenMapperTest {
 		assertThat(result.getTokenHash()).isEqualTo(tokenHash);
 		assertThat(result.getExpiresAt()).isEqualTo(expiresAt);
 		assertThat(result.getType()).isEqualTo(EmailTokenType.VERIFY_EMAIL);
-		assertThat(result.getStatus()).isEqualTo(Status.UNVERIFIED);
+		assertThat(result.getStatus()).isEqualTo(PatientStatus.UNVERIFIED);
 		assertThat(result.getCode()).isNull();
 		assertThat(result.getCreatedAt()).isNull();
 	}

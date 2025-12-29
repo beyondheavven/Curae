@@ -16,6 +16,7 @@ public interface UserMapper {
 	@Mapping(target = "passwordHash", ignore = true)
 	@Mapping(target = "role", constant = "PATIENT")
 	@Mapping(target = "firstName", source = "name")
+	@Mapping(target = "birthDate", source = "birthDate")
 	User toPatientUser(PersonDto dto, @Context PasswordEncoder passwordEncoder);
 
 	@AfterMapping

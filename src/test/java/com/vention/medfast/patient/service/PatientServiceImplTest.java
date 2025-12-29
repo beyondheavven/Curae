@@ -8,7 +8,7 @@ import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.mapper.PatientMapper;
 import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.model.Status;
+import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.registration.dto.PersonDto;
 import com.vention.medfast.user.dto.UserCreateDto;
@@ -62,10 +62,10 @@ class PatientServiceImplTest {
 		address.setId(2L);
 
 		PersonDto personDto = new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123",
-				"john@mail.com", "+123456789", "USA");
+				"john@mail.com", "USA");
 
 		Patient mapped = new Patient();
-		mapped.setStatus(Status.UNVERIFIED);
+		mapped.setPatientStatus(PatientStatus.UNVERIFIED);
 
 		when(patientRepository.existsByUser(user)).thenReturn(false);
 		when(patientMapper.toEntity(personDto, user, address)).thenReturn(mapped);
@@ -73,8 +73,8 @@ class PatientServiceImplTest {
 
 		Patient result = patientService.createPatientProfile(user, address, personDto);
 
-		assertThat(result.getStatus()).isEqualTo(Status.UNVERIFIED);
-		assertThat(mapped.getStatus()).isEqualTo(Status.UNVERIFIED);
+		assertThat(result.getPatientStatus()).isEqualTo(com.vention.medfast.patient.model.PatientStatus.UNVERIFIED);
+		assertThat(mapped.getPatientStatus()).isEqualTo(com.vention.medfast.patient.model.PatientStatus.UNVERIFIED);
 
 		verify(patientRepository, times(1)).existsByUser(user);
 		verify(patientMapper, times(1)).toEntity(personDto, user, address);
@@ -89,7 +89,7 @@ class PatientServiceImplTest {
 		when(patientRepository.existsByUser(user)).thenReturn(true);
 
 		PersonDto personDto = new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123",
-				"john@mail.com", "+123456789", "USA");
+				"john@mail.com", "USA");
 
 		assertThrows(IllegalArgumentException.class,
 				() -> patientService.createPatientProfile(user, new Address(), personDto));

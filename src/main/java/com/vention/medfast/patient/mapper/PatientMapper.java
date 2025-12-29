@@ -12,7 +12,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface PatientMapper {
 
-	@Mapping(target = "dateOfBirth", source = "dto.birthDate")
 	Patient toEntity(PatientCreateDto dto);
 
 	@Mapping(source = "user.firstName", target = "firstName")
@@ -21,8 +20,7 @@ public interface PatientMapper {
 	PatientResponseDto toDto(Patient entity);
 
 	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "status", constant = "UNVERIFIED")
-	@Mapping(target = "dateOfBirth", source = "dto.birthDate")
+	@Mapping(target = "patientStatus", constant = "UNVERIFIED")
 	@Mapping(target = "gender", source = "dto.gender")
 	@Mapping(target = "citizenship", source = "dto.citizenship")
 	Patient toEntity(PersonDto dto, User user, Address address);

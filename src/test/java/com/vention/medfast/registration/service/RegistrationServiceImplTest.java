@@ -32,9 +32,8 @@ class RegistrationServiceImplTest {
 		RegistrationServiceImpl service = new RegistrationServiceImpl(userService, addressService, patientService,
 				eventPublisher);
 
-		RegistrationRequestDto request = new RegistrationRequestDto(
-				new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123", "john@mail.com",
-						"+123456789", "USA"),
+		RegistrationRequestDto request = new RegistrationRequestDto(new PersonDto("John", "Doe",
+				LocalDate.of(1990, 1, 1), Gender.MALE, "Password123", "john@mail.com", "USA"),
 				new AddressDto("Main", "City", "1A", "10", "State", "12345", "+123456789"));
 
 		service.register(request);
@@ -60,9 +59,8 @@ class RegistrationServiceImplTest {
 		RegistrationServiceImpl service = new RegistrationServiceImpl(userService, addressService, patientService,
 				eventPublisher);
 
-		RegistrationRequestDto request = new RegistrationRequestDto(
-				new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123", "john@mail.com",
-						"+123456789", "USA"),
+		RegistrationRequestDto request = new RegistrationRequestDto(new PersonDto("John", "Doe",
+				LocalDate.of(1990, 1, 1), Gender.MALE, "Password123", "john@mail.com", "USA"),
 				new AddressDto("Main", "City", "1A", "10", "State", "12345", "+123456789"));
 
 		assertThatThrownBy(() -> service.register(request)).isInstanceOf(IllegalArgumentException.class);

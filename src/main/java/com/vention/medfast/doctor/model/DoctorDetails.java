@@ -1,0 +1,34 @@
+package com.vention.medfast.doctor.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.MapsId;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "doctor_details")
+public class DoctorDetails {
+
+	@Id
+	private Long id;
+
+	@Column(name = "phone_number", nullable = false)
+	private String phoneNumber;
+
+	@Column(name = "license_number", nullable = false, unique = true)
+	private String licenseNumber;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@MapsId
+	@JoinColumn(name = "doctor_id")
+	private Doctor doctor;
+
+}

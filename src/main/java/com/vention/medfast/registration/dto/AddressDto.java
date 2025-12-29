@@ -1,6 +1,7 @@
 package com.vention.medfast.registration.dto;
 
 import com.vention.medfast.api.validation.annotation.ValidZipCodeByCountry;
+import com.vention.medfast.api.validation.validator.ZipCountryAware;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @ValidZipCodeByCountry
-public class AddressDto {
+public class AddressDto implements ZipCountryAware {
 
 	@NotBlank(message = "Street is required")
 	@Size(max = 100)

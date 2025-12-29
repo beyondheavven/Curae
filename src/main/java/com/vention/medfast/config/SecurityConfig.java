@@ -2,6 +2,7 @@ package com.vention.medfast.config;
 
 import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.auth.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -68,6 +69,9 @@ public class SecurityConfig {
 
 				.requestMatchers(actuatorEndpoints)
 				.permitAll()
+
+				.requestMatchers(ApiPaths.PROFILE_ENDPOINT)
+				.authenticated()
 
 				.requestMatchers("/account/password-reset/request", "/account/password-reset/verify",
 						"/account/password-reset/confirm")

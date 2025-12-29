@@ -20,6 +20,8 @@ public final class ApiPaths {
 
 	public static final String TEST_ENDPOINT = "/test";
 
+	public static final String PROFILE_ENDPOINT = "/profile";
+
 	public static final String REGISTRATION_ENDPOINT = "/registration";
 
 }

@@ -6,7 +6,7 @@ import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.mapper.PatientMapper;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.model.Status;
+import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.registration.dto.PersonDto;
 import com.vention.medfast.user.model.RoleType;
@@ -39,13 +39,14 @@ public class PatientServiceImpl implements PatientService {
 		}
 
 		User user = buildUser(patientCreateDto);
+		user.setBirthDate(patientCreateDto.birthDate());
 		User savedUser = userRepository.save(user);
 
 		Address address = buildAddress(patientCreateDto);
 		Address savedAddress = addressRepository.save(address);
 
 		Patient patient = patientMapper.toEntity(patientCreateDto);
-		patient.setStatus(Status.ACTIVE);
+		patient.setPatientStatus(PatientStatus.ACTIVE);
 		patient.setAddress(savedAddress);
 		patient.setUser(savedUser);
 

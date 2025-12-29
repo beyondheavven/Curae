@@ -14,7 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
@@ -34,9 +33,6 @@ public class Patient {
 	@Column(name = "citizenship", nullable = false)
 	private String citizenship;
 
-	@Column(name = "date_of_birth", nullable = false)
-	private LocalDate dateOfBirth;
-
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "user_id", nullable = false)
@@ -53,6 +49,6 @@ public class Patient {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 50)
-	private Status status;
+	private PatientStatus patientStatus;
 
 }

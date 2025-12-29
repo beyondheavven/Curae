@@ -5,7 +5,7 @@ import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.email.properties.EmailVerificationProperties;
 import com.vention.medfast.email.repository.EmailVerificationTokenRepository;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.model.Status;
+import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.User;
@@ -110,7 +110,7 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 
 		Patient patient = patientService.getPatientByUserId(user.getId());
 
-		patient.setStatus(Status.ACTIVE);
+		patient.setPatientStatus(PatientStatus.ACTIVE);
 
 		emailVerificationTokenRepository.delete(token);
 	}

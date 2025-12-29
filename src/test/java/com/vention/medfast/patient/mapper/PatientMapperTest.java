@@ -1,9 +1,9 @@
 package com.vention.medfast.patient.mapper;
 
+import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.address.dto.AddressCreateDto;
 import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.dto.PatientResponseDto;
-import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.User;
@@ -63,7 +63,6 @@ public class PatientMapperTest {
 		assertThat(result).isNotNull();
 		assertThat(result.getCitizenship()).isEqualTo("Canada");
 		assertThat(result.getGender()).isEqualTo(Gender.FEMALE);
-		assertThat(result.getDateOfBirth()).isEqualTo(LocalDate.of(1995, 5, 20));
 
 		if (result.getUser() != null) {
 			assertThat(result.getUser().getFirstName()).isEqualTo("Jane");

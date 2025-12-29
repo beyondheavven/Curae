@@ -3,6 +3,7 @@ package com.vention.medfast.user.model;
 import com.vention.medfast.refreshtoken.model.RefreshToken;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import lombok.Getter;
@@ -35,6 +36,9 @@ public class User {
 
 	@Column(name = "profile_url", length = 255)
 	private String profileUrl;
+
+	@Column(name = "date_of_birth", nullable = false)
+	private LocalDate birthDate;
 
 	@Enumerated(EnumType.STRING)
 	@JdbcTypeCode(SqlTypes.NAMED_ENUM)

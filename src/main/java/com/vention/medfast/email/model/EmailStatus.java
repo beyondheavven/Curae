@@ -1,6 +1,6 @@
 package com.vention.medfast.email.model;
 
-public enum Status {
+public enum EmailStatus {
 
 	SENT, VERIFIED
 

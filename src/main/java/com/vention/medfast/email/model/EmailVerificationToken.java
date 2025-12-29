@@ -1,6 +1,6 @@
 package com.vention.medfast.email.model;
 
-import com.vention.medfast.patient.model.Status;
+import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -55,6 +55,6 @@ public class EmailVerificationToken {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 15)
-	private Status status;
+	private PatientStatus status;
 
 }

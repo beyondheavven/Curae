@@ -1,6 +1,6 @@
 package com.vention.medfast.patient.model;
 
-public enum Status {
+public enum PatientStatus {
 
 	ACTIVE, UNVERIFIED, BLOCKED
 
