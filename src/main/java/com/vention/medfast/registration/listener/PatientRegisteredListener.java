@@ -23,7 +23,7 @@ public class PatientRegisteredListener {
 	@TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
 	public void handle(PatientRegisteredEvent event) {
 		User user = userService.findById(event.userId());
-		String rawToken = emailVerificationTokenService.createForUser(user);
+		String rawToken = emailVerificationTokenService.createForPatient(user);
 		mailService.sendEmailVerification(user.getEmail(), rawToken);
 	}
 

@@ -1,5 +1,6 @@
 package com.vention.medfast.email.mapper;
 
+import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.user.model.User;
 import java.time.Instant;
@@ -11,9 +12,9 @@ public interface EmailVerificationTokenMapper {
 
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
-	@Mapping(target = "type", constant = "VERIFY_EMAIL")
+	@Mapping(target = "type", source = "type")
 	@Mapping(target = "code", ignore = true)
-	@Mapping(target = "status", constant = "UNVERIFIED")
-	EmailVerificationToken buildToken(User user, String tokenHash, Instant expiresAt);
+	@Mapping(target = "status", constant = "SENT")
+	EmailVerificationToken buildToken(User user, String tokenHash, Instant expiresAt, EmailTokenType type);
 
 }

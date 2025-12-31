@@ -22,7 +22,7 @@ public interface ProfileMapper {
 	@Mapping(target = "personalDetails", expression = "java(toPersonalDetails(user, patient))")
 	@Mapping(target = "profileAddress", source = "patient.address")
 	@Mapping(target = "contactsDto", expression = "java(toContacts(user, patient.getAddress()))")
-	@Mapping(target = "status", source = "patient.patientStatus")
+	@Mapping(target = "status", source = "user.status")
 	ProfileResponseDto toDto(User user, Patient patient);
 
 	@Mapping(target = "name", source = "user.firstName")

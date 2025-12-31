@@ -6,4 +6,6 @@ public interface MailService {
 
 	void sendPasswordResetCode(String toEmail, int code);
 
+	void sendDoctorWelcomeEmail(String toEmail, String tempPassword, String token);
+
 }

@@ -8,7 +8,7 @@ import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.mapper.PatientMapper;
 import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.model.PatientStatus;
+import com.vention.medfast.user.model.Status;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.registration.dto.PersonDto;
 import com.vention.medfast.user.dto.UserCreateDto;
@@ -57,6 +57,7 @@ class PatientServiceImplTest {
 	void shouldCreatePatientProfileWhenNotExists() {
 		User user = new User();
 		user.setId(1L);
+		user.setStatus(Status.UNVERIFIED);
 
 		Address address = new Address();
 		address.setId(2L);
@@ -65,7 +66,8 @@ class PatientServiceImplTest {
 				"john@mail.com", "USA");
 
 		Patient mapped = new Patient();
-		mapped.setPatientStatus(PatientStatus.UNVERIFIED);
+		mapped.setUser(user);
+		// mapped.setStatus(EmailTokenStatus.UNVERIFIED);
 
 		when(patientRepository.existsByUser(user)).thenReturn(false);
 		when(patientMapper.toEntity(personDto, user, address)).thenReturn(mapped);
@@ -73,8 +75,8 @@ class PatientServiceImplTest {
 
 		Patient result = patientService.createPatientProfile(user, address, personDto);
 
-		assertThat(result.getPatientStatus()).isEqualTo(com.vention.medfast.patient.model.PatientStatus.UNVERIFIED);
-		assertThat(mapped.getPatientStatus()).isEqualTo(com.vention.medfast.patient.model.PatientStatus.UNVERIFIED);
+		assertThat(result.getUser().getStatus()).isEqualTo(Status.UNVERIFIED);
+		assertThat(mapped.getUser().getStatus()).isEqualTo(Status.UNVERIFIED);
 
 		verify(patientRepository, times(1)).existsByUser(user);
 		verify(patientMapper, times(1)).toEntity(personDto, user, address);
@@ -101,15 +103,23 @@ class PatientServiceImplTest {
 
 	@Test
 	void shouldCreatePatientWhenInputIsValid() {
-		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
+		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password",
+				LocalDate.of(2000, 1, 1), "http://url");
 		AddressCreateDto addressDto = new AddressCreateDto("Street", "City", "123", "State", "1", "00000",
 				"+1234567890");
-		PatientCreateDto createDto = new PatientCreateDto(userDto, addressDto, "USA", Gender.MALE,
-				LocalDate.of(1990, 1, 1));
+
+		PatientCreateDto createDto = new PatientCreateDto(userDto, addressDto, "USA", Gender.MALE);
+
+		User userEntity = new User();
+		userEntity.setEmail("john@example.com");
 
 		User savedUser = new User();
 		savedUser.setId(100L);
-		savedUser.setEmail(userDto.email());
+		savedUser.setEmail("john@example.com");
+
+		Address addressEntity = new Address();
+		Address savedAddress = new Address();
+		savedAddress.setId(200L);
 
 		Patient mappedPatient = new Patient();
 		mappedPatient.setCitizenship("USA");
@@ -117,12 +127,19 @@ class PatientServiceImplTest {
 		Patient savedPatient = new Patient();
 		savedPatient.setId(1L);
 		savedPatient.setUser(savedUser);
+		savedPatient.setAddress(savedAddress);
 		savedPatient.setCitizenship("USA");
 
 		PatientResponseDto responseDto = PatientResponseDto.builder().id(1L).firstName("John").lastName("Doe").build();
 
 		when(userRepository.existsByEmail(userDto.email())).thenReturn(false);
-		when(userRepository.save(any(User.class))).thenReturn(savedUser);
+
+		when(patientMapper.toUser(createDto)).thenReturn(userEntity);
+		when(userRepository.save(userEntity)).thenReturn(savedUser);
+
+		when(patientMapper.toAddress(addressDto)).thenReturn(addressEntity);
+		when(addressRepository.save(addressEntity)).thenReturn(savedAddress);
+
 		when(patientMapper.toEntity(createDto)).thenReturn(mappedPatient);
 		when(patientRepository.save(any(Patient.class))).thenReturn(savedPatient);
 		when(patientMapper.toDto(savedPatient)).thenReturn(responseDto);
@@ -133,10 +150,13 @@ class PatientServiceImplTest {
 		assertEquals(1L, result.id());
 		assertEquals("John", result.firstName());
 
-		verify(userRepository).save(any(User.class));
-		verify(patientMapper).toEntity(createDto);
+		verify(patientMapper).toUser(createDto);
+		verify(userRepository).save(userEntity);
+
+		verify(patientMapper).toAddress(addressDto);
+		verify(addressRepository).save(addressEntity);
+
 		verify(patientRepository).save(any(Patient.class));
-		verify(patientMapper).toDto(savedPatient);
 	}
 
 	@Test
@@ -175,8 +195,9 @@ class PatientServiceImplTest {
 
 	@Test
 	void shouldThrowExceptionWhenEmailAlreadyExists() {
-		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password", "http://url");
-		PatientCreateDto createDto = new PatientCreateDto(userDto, null, "USA", Gender.MALE, LocalDate.now());
+		UserCreateDto userDto = new UserCreateDto("John", "Doe", "john@example.com", "password",
+				LocalDate.of(2000, 1, 1), "http://url");
+		PatientCreateDto createDto = new PatientCreateDto(userDto, null, "USA", Gender.MALE);
 
 		when(userRepository.existsByEmail(userDto.email())).thenReturn(true);
 

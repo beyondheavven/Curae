@@ -27,6 +27,8 @@ public class AppMailProperties {
 
 		private String resetPassword;
 
+		private String doctorWelcome;
+
 	}
 
 	@Getter
@@ -37,6 +39,8 @@ public class AppMailProperties {
 
 		private String resetPassword;
 
+		private String doctorWelcome;
+
 	}
 
 	@Getter
@@ -46,6 +50,8 @@ public class AppMailProperties {
 		private String verifyEmail;
 
 		private String resetPassword;
+
+		private String doctorWelcome;
 
 	}
 

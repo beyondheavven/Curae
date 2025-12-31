@@ -6,8 +6,9 @@ import com.vention.medfast.address.repository.AddressRepository;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.clinic.repository.ClinicRepository;
 import com.vention.medfast.doctor.model.Doctor;
-import com.vention.medfast.doctor.model.DoctorDetails;
 import com.vention.medfast.doctor.util.DataUtils;
+import com.vention.medfast.specialization.model.Specialization;
+import com.vention.medfast.specialization.repository.SpecializationRepository;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,9 @@ public class DoctorRepositoryIntegrationTest extends AbstractIntegrationTest {
 	@Autowired
 	private DoctorDetailsRepository doctorDetailsRepository;
 
+	@Autowired
+	private SpecializationRepository specializationRepository;
+
 	@Test
 	void shouldLoadExistingManyToManyData() {
 		Doctor doctor = doctorRepository.findById(1L).orElseThrow();
@@ -45,18 +49,20 @@ public class DoctorRepositoryIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	void shouldSaveNewDoctorWithRelationships() {
-		User user = userRepository.save(DataUtils.getDoctorUserTransient("new.doc@test.com"));
-		DoctorDetails details = DataUtils.getDoctorDetailsTransient("LIC-12345");
 		Clinic existingClinic = clinicRepository.findById(1L).orElseThrow();
+		Specialization specialization = specializationRepository.findAll().getFirst();
 
-		Doctor newDoc = DataUtils.getDoctorTransient(user, details);
-		newDoc.addClinic(existingClinic);
+		User savedUser = userRepository.save(DataUtils.getDoctorUserTransient());
 
-		Doctor savedDoctor = doctorRepository.save(newDoc);
+		Doctor doctorToSave = DataUtils.getDoctorForIntegration(savedUser, specialization);
+		doctorToSave.addClinic(existingClinic);
+
+		Doctor savedDoctor = doctorRepository.save(doctorToSave);
 
 		assertThat(savedDoctor.getId()).isNotNull();
 		assertThat(savedDoctor.getDetails().getId()).isEqualTo(savedDoctor.getId());
 		assertThat(savedDoctor.getClinics()).hasSize(1);
+		assertThat(savedDoctor.getSpecializations()).contains(specialization);
 	}
 
 	@Test
@@ -79,22 +85,21 @@ public class DoctorRepositoryIntegrationTest extends AbstractIntegrationTest {
 
 	@Test
 	void shouldCascadeDelete() {
-		User user = userRepository.save(DataUtils.getDoctorUserTransient("delete.me@test.com"));
-		DoctorDetails details = DataUtils.getDoctorDetailsTransient("7654321");
+		User user = userRepository.save(DataUtils.getDoctorUserTransient());
 		Clinic clinic = clinicRepository.findById(1L).orElseThrow();
+		Specialization specialization = specializationRepository.findAll().getFirst();
 
-		Doctor doctorToDelete = DataUtils.getDoctorTransient(user, details);
+		Doctor doctorToDelete = DataUtils.getDoctorForIntegration(user, specialization);
 		doctorToDelete.addClinic(clinic);
 
 		Doctor savedDoctor = doctorRepository.save(doctorToDelete);
 		Long doctorId = savedDoctor.getId();
-		Long userId = user.getId();
 
 		doctorRepository.deleteById(doctorId);
 
 		assertThat(doctorRepository.findById(doctorId)).isEmpty();
 		assertThat(doctorDetailsRepository.findById(doctorId)).isEmpty();
-		assertThat(userRepository.findById(userId)).isPresent();
+		assertThat(userRepository.findById(user.getId())).isPresent();
 		assertThat(clinicRepository.findById(1L)).isPresent();
 	}
 

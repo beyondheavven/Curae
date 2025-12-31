@@ -27,7 +27,7 @@ public class EmailChangedEventListener {
 
 		User user = userService.findById(event.userId());
 
-		String rawToken = emailVerificationTokenService.createForUser(user);
+		String rawToken = emailVerificationTokenService.createForPatient(user);
 
 		mailService.sendEmailVerification(event.newEmail(), rawToken);
 

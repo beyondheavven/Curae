@@ -78,6 +78,12 @@ public class SpecializationServiceImpl implements SpecializationService {
 		return specialization.getId();
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<Specialization> findAllByIds(Set<Long> ids) {
+		return specializationRepository.findAllById(ids);
+	}
+
 	private Specialization findById(Long id) {
 		return specializationRepository.findById(id)
 			.orElseThrow(() -> new EntityNotFoundException("Specialization not found"));

@@ -1,9 +1,12 @@
 package com.vention.medfast.registration.service;
 
-import com.vention.medfast.registration.dto.RegistrationRequestDto;
+import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
+import com.vention.medfast.registration.dto.PatientRegistrationRequestDto;
 
 public interface RegistrationService {
 
-	void register(RegistrationRequestDto request);
+	void registerPatient(PatientRegistrationRequestDto request);
+
+	void registerDoctor(DoctorRegistrationRequestDto request);
 
 }

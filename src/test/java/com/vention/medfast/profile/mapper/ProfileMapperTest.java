@@ -3,12 +3,12 @@ package com.vention.medfast.profile.mapper;
 import com.vention.medfast.address.model.Address;
 import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.profile.dto.request.ContactsUpdateDto;
 import com.vention.medfast.profile.dto.request.PersonalDetailsUpdateDto;
 import com.vention.medfast.profile.dto.request.ProfileAddressUpdateDto;
 import com.vention.medfast.profile.dto.response.ProfileResponseDto;
 import com.vention.medfast.user.model.RoleType;
+import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
 import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +49,7 @@ class ProfileMapperTest {
 
 		assertThat(result.getContactsDto().getEmail()).isEqualTo("john.doe@mail.com");
 		assertThat(result.getContactsDto().getPhone()).isEqualTo("+123456789");
-		assertThat(result.getStatus()).isEqualTo(PatientStatus.ACTIVE);
+		assertThat(result.getStatus()).isEqualTo(Status.ACTIVE);
 	}
 
 	@Test
@@ -100,6 +100,7 @@ class ProfileMapperTest {
 		user.setPasswordHash("hash");
 		user.setProfileUrl("photo.jpg");
 		user.setRole(RoleType.PATIENT);
+		user.setStatus(Status.ACTIVE);
 		return user;
 	}
 
@@ -110,7 +111,6 @@ class ProfileMapperTest {
 		patient.setAddress(buildAddress());
 		patient.getUser().setBirthDate(LocalDate.of(1990, 1, 1));
 		patient.setGender(Gender.MALE);
-		patient.setPatientStatus(PatientStatus.ACTIVE);
 		patient.setCitizenship("American");
 		return patient;
 	}

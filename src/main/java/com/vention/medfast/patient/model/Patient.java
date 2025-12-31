@@ -47,8 +47,4 @@ public class Patient {
 	@Column(name = "gender")
 	private Gender gender;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "status", nullable = false, length = 50)
-	private PatientStatus patientStatus;
-
 }

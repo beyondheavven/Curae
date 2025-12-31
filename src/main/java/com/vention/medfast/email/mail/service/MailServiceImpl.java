@@ -43,6 +43,16 @@ public class MailServiceImpl implements MailService {
 				mailProps.getTemplates().getResetPassword(), Map.of("resetCode", String.format("%04d", code)));
 	}
 
+	@Override
+	public void sendDoctorWelcomeEmail(String toEmail, String tempPassword, String token) {
+		String link = buildLink(mailProps.getPaths().getDoctorWelcome(), token);
+
+		Map<String, Object> variables = Map.of("tempPassword", tempPassword, "setupLink", link);
+
+		sendTemplateEmail(toEmail, mailProps.getSubjects().getDoctorWelcome(),
+				mailProps.getTemplates().getDoctorWelcome(), variables);
+	}
+
 	private void sendTemplateEmail(String toEmail, String subject, String template, Map<String, Object> vars) {
 		try {
 			Context context = new Context();

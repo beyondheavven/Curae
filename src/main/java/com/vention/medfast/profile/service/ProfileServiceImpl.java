@@ -2,12 +2,12 @@ package com.vention.medfast.profile.service;
 
 import com.vention.medfast.address.model.Address;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.profile.dto.request.ProfileRequestDto;
 import com.vention.medfast.profile.dto.response.ProfileResponseDto;
 import com.vention.medfast.profile.event.EmailChangedEvent;
 import com.vention.medfast.profile.mapper.ProfileMapper;
+import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.service.UserService;
 import lombok.AllArgsConstructor;
@@ -66,7 +66,7 @@ public class ProfileServiceImpl implements ProfileService {
 		boolean emailChanged = user.getEmail() != null && !user.getEmail().equalsIgnoreCase(oldEmail);
 
 		if (emailChanged) {
-			patient.setPatientStatus(PatientStatus.UNVERIFIED);
+			user.setStatus(Status.UNVERIFIED);
 			eventPublisher.publishEvent(new EmailChangedEvent(user.getId(), user.getEmail()));
 		}
 	}

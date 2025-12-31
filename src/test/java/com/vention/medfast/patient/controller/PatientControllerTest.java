@@ -91,7 +91,7 @@ class PatientControllerTest extends AbstractIntegrationTest {
 
 	@Test
 	void shouldReturn400WhenValidationErrorsPresentWithCreate() throws Exception {
-		UserCreateDto invalidUser = new UserCreateDto("", "", "", "invalid-email", "");
+		UserCreateDto invalidUser = new UserCreateDto("", "", "", "invalid-email", LocalDate.now().plusDays(1), "");
 
 		AddressCreateDto address = new AddressCreateDto("Street", "City", "1", "State", "10", "12345", "1234567890");
 
@@ -100,7 +100,6 @@ class PatientControllerTest extends AbstractIntegrationTest {
 			.address(address)
 			.citizenship("")
 			.gender(Gender.MALE)
-			.birthDate(LocalDate.now().plusDays(1))
 			.build();
 
 		String json = objectMapper.writeValueAsString(invalidDto);
@@ -152,7 +151,8 @@ class PatientControllerTest extends AbstractIntegrationTest {
 	private PatientCreateDto generateValidPatientDto() {
 		String uniqueEmail = "test" + UUID.randomUUID() + "@med.com";
 
-		UserCreateDto userDto = new UserCreateDto("John", "Doe", uniqueEmail, "securePassword123", "http://url.com");
+		UserCreateDto userDto = new UserCreateDto("John", "Doe", uniqueEmail, "securePassword123",
+				LocalDate.of(2000, 1, 1), "");
 
 		AddressCreateDto addressDto = new AddressCreateDto("Baker Street", "London", "221B", "London", "1", "NW1 6XE",
 				"+44123456789");
@@ -162,7 +162,6 @@ class PatientControllerTest extends AbstractIntegrationTest {
 			.address(addressDto)
 			.citizenship("USA")
 			.gender(Gender.MALE)
-			.birthDate(LocalDate.of(1995, 10, 25))
 			.build();
 	}
 

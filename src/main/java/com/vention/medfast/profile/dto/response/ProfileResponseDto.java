@@ -1,6 +1,6 @@
 package com.vention.medfast.profile.dto.response;
 
-import com.vention.medfast.patient.model.PatientStatus;
+import com.vention.medfast.user.model.Status;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +18,6 @@ public class ProfileResponseDto {
 
 	private ContactsDto contactsDto;
 
-	private PatientStatus status;
+	private Status status;
 
 }

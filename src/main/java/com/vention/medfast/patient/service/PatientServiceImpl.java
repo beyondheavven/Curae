@@ -6,10 +6,8 @@ import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.dto.PatientResponseDto;
 import com.vention.medfast.patient.mapper.PatientMapper;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.model.PatientStatus;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.registration.dto.PersonDto;
-import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,15 +36,13 @@ public class PatientServiceImpl implements PatientService {
 			throw new IllegalArgumentException("User with this email already exists");
 		}
 
-		User user = buildUser(patientCreateDto);
-		user.setBirthDate(patientCreateDto.birthDate());
+		User user = patientMapper.toUser(patientCreateDto);
 		User savedUser = userRepository.save(user);
 
-		Address address = buildAddress(patientCreateDto);
+		Address address = patientMapper.toAddress(patientCreateDto.address());
 		Address savedAddress = addressRepository.save(address);
 
 		Patient patient = patientMapper.toEntity(patientCreateDto);
-		patient.setPatientStatus(PatientStatus.ACTIVE);
 		patient.setAddress(savedAddress);
 		patient.setUser(savedUser);
 
@@ -78,29 +74,6 @@ public class PatientServiceImpl implements PatientService {
 
 	public Patient findById(Long id) {
 		return patientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patient not found"));
-	}
-
-	private User buildUser(PatientCreateDto dto) {
-		User user = new User();
-		user.setFirstName(dto.user().firstName());
-		user.setLastName(dto.user().lastName());
-		user.setProfileUrl(dto.user().profileUrl());
-		user.setEmail(dto.user().email());
-		user.setPasswordHash(dto.user().password());
-		user.setRole(RoleType.PATIENT);
-		return user;
-	}
-
-	private Address buildAddress(PatientCreateDto dto) {
-		Address address = new Address();
-		address.setStreet(dto.address().street());
-		address.setCity(dto.address().city());
-		address.setHouseNumber(dto.address().houseNumber());
-		address.setState(dto.address().state());
-		address.setApartment(dto.address().apartment());
-		address.setZipCode(dto.address().zipCode());
-		address.setPhone(dto.address().phone());
-		return address;
 	}
 
 }
