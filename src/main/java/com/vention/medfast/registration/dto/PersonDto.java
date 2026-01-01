@@ -46,9 +46,6 @@ public class PersonDto {
 	private String email;
 
 	@NotBlank
-	private String phoneNumber;
-
-	@NotBlank
 	@Size(max = 60)
 	@ExistingCitizenship
 	private String citizenship;

@@ -2,6 +2,7 @@ package com.vention.medfast.config;
 
 import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.auth.jwt.JwtAuthenticationFilter;
+import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,6 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
 	@Value("${custom.security.public-routes}")
@@ -69,9 +72,15 @@ public class SecurityConfig {
 				.requestMatchers(actuatorEndpoints)
 				.permitAll()
 
+				.requestMatchers(ApiPaths.PROFILE_ENDPOINT)
+				.authenticated()
+
 				.requestMatchers("/account/password-reset/request", "/account/password-reset/verify",
-						"/account/password-reset/confirm")
+						"/account/password-reset/confirm", "/account/set-password")
 				.permitAll()
+
+				.requestMatchers("/account/change-password")
+				.authenticated()
 
 				.anyRequest()
 				.authenticated())

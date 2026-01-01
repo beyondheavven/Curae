@@ -2,8 +2,10 @@ package com.vention.medfast.specialization.service;
 
 import com.vention.medfast.specialization.dto.SpecializationCreateDto;
 import com.vention.medfast.specialization.dto.SpecializationResponseDto;
+import com.vention.medfast.specialization.model.Specialization;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SpecializationService {
 
@@ -16,5 +18,7 @@ public interface SpecializationService {
 	void deleteById(Long id);
 
 	long update(Long id, SpecializationCreateDto dto);
+
+	List<Specialization> findAllByIds(Set<Long> ids);
 
 }

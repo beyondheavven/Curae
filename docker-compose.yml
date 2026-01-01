@@ -7,8 +7,15 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
-      - MEILISEARCH_HOST=http://meilisearch:7700
-      - MEILISEARCH_API_KEY=${MEILISEARCH_MASTER_KEY}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+      - MAIL_SMTP_STARTTLS=${MAIL_SMTP_STARTTLS}
+      - EMAIL_VERIFICATION_TTL_MS=${EMAIL_VERIFICATION_TTL_MS}
+      - EMAIL_VERIFICATION_VERIFY_URL=${EMAIL_VERIFICATION_VERIFY_URL}
+      - JWT_SECRET=${JWT_SECRET}
     ports:
       - "8080:8080"
     depends_on:
@@ -16,8 +23,6 @@ services:
         condition: service_healthy
       loki:
         condition: service_started
-      elasticsearch:
-        condition: service_healthy
 
   postgres:
     image: postgres:15-alpine

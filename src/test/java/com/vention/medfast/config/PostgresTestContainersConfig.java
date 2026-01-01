@@ -17,7 +17,7 @@ public class PostgresTestContainersConfig {
 
 	private static final String DB_PASSWORD = "medfast_password";
 
-	private static final String DB_NAME = "medfast_db_user";
+	private static final String DB_NAME = "medfast_db";
 
 	@Bean
 	@ServiceConnection

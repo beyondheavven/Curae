@@ -86,3 +86,4 @@ VALUES (3, 'https://zoom.us/j/987654321');
 -- Tests
 INSERT INTO tests (appointment_id, result_url, uploaded_at)
 VALUES (1, 'https://files.med.com/results/bloodwork.pdf', CURRENT_TIMESTAMP - INTERVAL '4 days');
+

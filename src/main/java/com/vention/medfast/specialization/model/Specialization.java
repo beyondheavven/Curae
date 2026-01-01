@@ -1,19 +1,14 @@
 package com.vention.medfast.specialization.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import com.vention.medfast.doctor.model.Doctor;
+import jakarta.persistence.*;
 import com.vention.medfast.service.model.ProvidedService;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -36,5 +31,22 @@ public class Specialization {
 	@JoinTable(name = "service_specializations", joinColumns = @JoinColumn(name = "specialization_id"),
 			inverseJoinColumns = @JoinColumn(name = "service_id"))
 	private List<ProvidedService> services;
+
+	@ManyToMany(mappedBy = "specializations")
+	private Set<Doctor> doctors = new HashSet<>();
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Specialization))
+			return false;
+		return id != null && id.equals(((Specialization) o).getId());
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 
 }

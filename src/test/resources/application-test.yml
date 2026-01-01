@@ -1,6 +1,6 @@
 testcontainers:
   reuse:
-    enable: false
+    enable: true
 
 spring:
 
@@ -10,11 +10,16 @@ spring:
   flyway:
     enabled: true
     locations:
-      - filesystem:${user.dir}/flyway/sql/schema
-      - classpath:flyway/sql/test
+      - filesystem:${user.dir}/flyway/sql
+    clean-disabled: false
+
 custom:
   security:
     public-routes: "/actuator/**"
+
+logging:
+  level:
+    org.flywaydb: DEBUG
 
 app:
   jwt:

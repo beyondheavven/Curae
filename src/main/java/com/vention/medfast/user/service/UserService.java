@@ -1,6 +1,7 @@
 package com.vention.medfast.user.service;
 
 import com.vention.medfast.registration.dto.PersonDto;
+import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.User;
 import java.util.Optional;
 
@@ -11,6 +12,8 @@ public interface UserService {
 	boolean existsByEmail(String email);
 
 	User createPatient(PersonDto personDto);
+
+	User createDoctor(UserCreateDto userCreateDto);
 
 	Optional<User> findByEmail(String email);
 

@@ -39,7 +39,7 @@ spring:
   mail:
     host: ${MAIL_HOST:smtp.gmail.com}
     port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:medfast.noreply@gmail.com}
+    username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
       mail:
@@ -64,14 +64,17 @@ app:
     templates:
       verify-email: mail/verify-email
       reset-password: mail/reset-password
+      doctor-welcome: mail/doctor-welcome
 
     subjects:
       verify-email: Email verification
       reset-password: Password reset code
+      doctor-welcome: Welcome to Medfast
 
     paths:
       verify-email: /auth/verify
       reset-password: /auth/reset-password
+      doctor-welcome: /account/set-password
 
 
   email-verification:

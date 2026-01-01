@@ -17,7 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -225,6 +227,24 @@ public class SpecializationServiceImplTest {
 		verify(specializationRepository).findById(id);
 		verify(specializationRepository).delete(entity);
 		verifyNoMoreInteractions(specializationRepository);
+	}
+
+	@Test
+	void shouldReturnSpecializationsWhenAllIdsExist() {
+		Set<Long> ids = Set.of(1L, 2L);
+
+		Specialization s1 = new Specialization();
+		s1.setId(1L);
+		Specialization s2 = new Specialization();
+		s2.setId(2L);
+
+		List<Specialization> foundEntities = List.of(s1, s2);
+
+		when(specializationRepository.findAllById(ids)).thenReturn(foundEntities);
+		List<Specialization> result = specializationService.findAllByIds(ids);
+
+		assertThat(result).hasSize(2);
+		verify(specializationRepository).findAllById(ids);
 	}
 
 }

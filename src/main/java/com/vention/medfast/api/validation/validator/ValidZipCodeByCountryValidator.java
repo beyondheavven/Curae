@@ -2,7 +2,6 @@ package com.vention.medfast.api.validation.validator;
 
 import com.vention.medfast.api.validation.annotation.ValidZipCodeByCountry;
 import com.vention.medfast.country.service.CountryService;
-import com.vention.medfast.registration.dto.AddressDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import java.util.Optional;
@@ -12,12 +11,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ValidZipCodeByCountryValidator implements ConstraintValidator<ValidZipCodeByCountry, AddressDto> {
+public class ValidZipCodeByCountryValidator implements ConstraintValidator<ValidZipCodeByCountry, ZipCountryAware> {
 
 	private final CountryService countryService;
 
 	@Override
-	public boolean isValid(AddressDto value, ConstraintValidatorContext context) {
+	public boolean isValid(ZipCountryAware value, ConstraintValidatorContext context) {
 		if (value == null)
 			return true;
 

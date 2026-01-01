@@ -1,171 +1,89 @@
 package com.vention.medfast.registration.service;
 
-import com.vention.medfast.address.model.Address;
 import com.vention.medfast.address.service.AddressService;
-import com.vention.medfast.patient.dto.PatientCreateDto;
-import com.vention.medfast.patient.dto.PatientResponseDto;
-import com.vention.medfast.patient.model.Gender;
-import com.vention.medfast.patient.model.Patient;
+import com.vention.medfast.doctor.dto.DoctorProfileCreateDto;
+import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.registration.dto.AddressDto;
-import com.vention.medfast.registration.dto.PersonDto;
-import com.vention.medfast.registration.dto.RegistrationRequestDto;
-import com.vention.medfast.registration.event.PatientRegisteredEvent;
+import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
+import com.vention.medfast.registration.event.DoctorRegisteredEvent;
+import com.vention.medfast.registration.mapper.RegistrationMapper;
+import com.vention.medfast.registration.util.DataUtils;
+import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.service.UserService;
-import java.time.LocalDate;
-import java.util.Optional;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import static com.vention.medfast.registration.util.DataUtils.getDoctorRegistrationRequestDto;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class RegistrationServiceImplTest {
 
-	@Test
-	void shouldInvokeAllDependenciesAndSendVerificationEmail() {
-		FakeUserService userService = new FakeUserService();
-		FakeAddressService addressService = new FakeAddressService();
-		FakePatientService patientService = new FakePatientService();
-		FakeEventPublisher eventPublisher = new FakeEventPublisher();
+	@Mock
+	private UserService userService;
 
-		RegistrationServiceImpl service = new RegistrationServiceImpl(userService, addressService, patientService,
-				eventPublisher);
+	@Mock
+	private AddressService addressService;
 
-		RegistrationRequestDto request = new RegistrationRequestDto(
-				new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123", "john@mail.com",
-						"+123456789", "USA"),
-				new AddressDto("Main", "City", "1A", "10", "State", "12345", "+123456789"));
+	@Mock
+	private PatientService patientService;
 
-		service.register(request);
+	@Mock
+	private DoctorService doctorService;
 
-		assertThat(userService.calledWith).isEqualTo(request.getPerson());
-		assertThat(addressService.calledWith).isEqualTo(request.getAddress());
-		assertThat(patientService.calledUser).isSameAs(userService.userToReturn);
-		assertThat(patientService.calledAddress).isSameAs(addressService.addressToReturn);
-		assertThat(patientService.calledPerson).isEqualTo(request.getPerson());
-		assertThat(eventPublisher.callCount).isOne();
-		assertThat(eventPublisher.publishedEvent).isInstanceOf(PatientRegisteredEvent.class);
-		assertThat(((PatientRegisteredEvent) eventPublisher.publishedEvent).userId()).isEqualTo(1L);
-	}
+	@Mock
+	private RegistrationMapper mapper;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
+
+	@InjectMocks
+	private RegistrationServiceImpl registrationService;
 
 	@Test
-	void shouldStopFlowWhenPatientCreationFails() {
-		FakeUserService userService = new FakeUserService();
-		FakeAddressService addressService = new FakeAddressService();
-		FakePatientService patientService = new FakePatientService();
-		patientService.throwOnCreate = true;
-		FakeEventPublisher eventPublisher = new FakeEventPublisher();
+	void shouldRegisterDoctorWhenRequestIsValid() {
+		DoctorRegistrationRequestDto request = getDoctorRegistrationRequestDto();
 
-		RegistrationServiceImpl service = new RegistrationServiceImpl(userService, addressService, patientService,
-				eventPublisher);
+		UserCreateDto userCreateDto = DataUtils.getUserCreateDto();
+		DoctorProfileCreateDto doctorProfileCreateDto = DataUtils.getDoctorProfileCreateDto();
 
-		RegistrationRequestDto request = new RegistrationRequestDto(
-				new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123", "john@mail.com",
-						"+123456789", "USA"),
-				new AddressDto("Main", "City", "1A", "10", "State", "12345", "+123456789"));
+		User mockedUser = new User();
+		mockedUser.setId(10L);
+		mockedUser.setEmail(request.email());
 
-		assertThatThrownBy(() -> service.register(request)).isInstanceOf(IllegalArgumentException.class);
+		given(mapper.toUserCreateDto(eq(request), anyString())).willReturn(userCreateDto);
+		given(mapper.toDoctorProfileDto(request)).willReturn(doctorProfileCreateDto);
+		given(userService.createDoctor(userCreateDto)).willReturn(mockedUser);
 
-		assertThat(patientService.calledUser).isSameAs(userService.userToReturn);
-		assertThat(eventPublisher.callCount).isZero();
+		registrationService.registerDoctor(request);
+
+		verify(userService).createDoctor(userCreateDto);
+		verify(doctorService).createDoctorProfile(mockedUser, doctorProfileCreateDto);
+		verify(eventPublisher).publishEvent(any(DoctorRegisteredEvent.class));
 	}
 
-	private static class FakeUserService implements UserService {
+	@Test
+	void shouldThrowExceptionAndStopFlowWhenUserServiceFails() {
+		DoctorRegistrationRequestDto request = getDoctorRegistrationRequestDto();
+		UserCreateDto userCreateDto = DataUtils.getUserCreateDto();
 
-		private final User userToReturn = new User();
+		given(mapper.toUserCreateDto(eq(request), anyString())).willReturn(userCreateDto);
+		given(userService.createDoctor(any())).willThrow(new IllegalArgumentException("Email exists"));
 
-		private PersonDto calledWith;
+		assertThatThrownBy(() -> registrationService.registerDoctor(request))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessage("Email exists");
 
-		@Override
-		public Optional<User> findByEmail(String email) {
-			return Optional.empty();
-		}
-
-		@Override
-		public User findById(Long id) {
-			return null;
-		}
-
-		@Override
-		public boolean existsByEmail(String email) {
-			return false;
-		}
-
-		@Override
-		public User createPatient(PersonDto personDto) {
-			this.calledWith = personDto;
-			userToReturn.setEmail(personDto.getEmail());
-			userToReturn.setId(1L);
-			return userToReturn;
-		}
-
-	}
-
-	private static class FakeAddressService implements AddressService {
-
-		private final Address addressToReturn = new Address();
-
-		private AddressDto calledWith;
-
-		@Override
-		public Address createAddress(AddressDto dto) {
-			this.calledWith = dto;
-			return addressToReturn;
-		}
-
-	}
-
-	private static class FakePatientService implements PatientService {
-
-		private User calledUser;
-
-		private Address calledAddress;
-
-		private PersonDto calledPerson;
-
-		private boolean throwOnCreate;
-
-		@Override
-		public Patient createPatientProfile(User user, Address address, PersonDto personDto) {
-			this.calledUser = user;
-			this.calledAddress = address;
-			this.calledPerson = personDto;
-			if (throwOnCreate) {
-				throw new IllegalArgumentException("Patient profile already exists");
-			}
-			return new Patient();
-		}
-
-		@Override
-		public PatientResponseDto create(PatientCreateDto patientCreateDto) {
-			return null;
-		}
-
-		@Override
-		public PatientResponseDto getPatientById(Long id) {
-			return null;
-		}
-
-		@Override
-		public Patient getPatientByUserId(Long userId) {
-			return null;
-		}
-
-	}
-
-	private static class FakeEventPublisher implements ApplicationEventPublisher {
-
-		private Object publishedEvent;
-
-		private int callCount;
-
-		@Override
-		public void publishEvent(Object event) {
-			this.publishedEvent = event;
-			this.callCount++;
-		}
-
+		verify(doctorService, never()).createDoctorProfile(any(), any());
+		verify(eventPublisher, never()).publishEvent(any());
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.vention.medfast.user.mapper;
 
 import com.vention.medfast.registration.dto.PersonDto;
+import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.User;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
@@ -15,12 +16,25 @@ public interface UserMapper {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "passwordHash", ignore = true)
 	@Mapping(target = "role", constant = "PATIENT")
+	@Mapping(target = "status", constant = "UNVERIFIED")
 	@Mapping(target = "firstName", source = "name")
+	@Mapping(target = "birthDate", source = "birthDate")
 	User toPatientUser(PersonDto dto, @Context PasswordEncoder passwordEncoder);
 
 	@AfterMapping
 	default void encodePassword(@MappingTarget User user, PersonDto dto, @Context PasswordEncoder passwordEncoder) {
 		user.setPasswordHash(passwordEncoder.encode(dto.getRawPassword()));
+	}
+
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "passwordHash", ignore = true)
+	@Mapping(target = "status", constant = "UNVERIFIED")
+	@Mapping(target = "role", constant = "DOCTOR")
+	User toDoctorUser(UserCreateDto userCreateDto, @Context PasswordEncoder passwordEncoder);
+
+	@AfterMapping
+	default void encodePassword(@MappingTarget User user, UserCreateDto dto, @Context PasswordEncoder passwordEncoder) {
+		user.setPasswordHash(passwordEncoder.encode(dto.password()));
 	}
 
 }

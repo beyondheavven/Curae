@@ -2,6 +2,7 @@ package com.vention.medfast.user.service;
 
 import com.vention.medfast.api.exception.EmailAlreadyExistsException;
 import com.vention.medfast.registration.dto.PersonDto;
+import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.mapper.UserMapper;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
@@ -45,6 +46,16 @@ public class UserServiceImpl implements UserService {
 		}
 
 		User user = userMapper.toPatientUser(personDto, passwordEncoder);
+		return userRepository.save(user);
+	}
+
+	@Override
+	public User createDoctor(UserCreateDto userCreateDto) {
+		if (userRepository.existsByEmail(userCreateDto.email())) {
+			throw new EmailAlreadyExistsException("User with this email already exists");
+		}
+
+		User user = userMapper.toDoctorUser(userCreateDto, passwordEncoder);
 		return userRepository.save(user);
 	}
 

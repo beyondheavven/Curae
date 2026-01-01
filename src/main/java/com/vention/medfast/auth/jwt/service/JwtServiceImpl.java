@@ -59,22 +59,19 @@ public class JwtServiceImpl implements JwtService {
 	}
 
 	private String buildToken(Map<String, Object> extraClaims, String subject, long expirationMs, String tokenType) {
-
 		Instant now = Instant.now();
 		Instant expiry = now.plusMillis(expirationMs);
+
 		extraClaims.put(CLAIM_TYPE, tokenType);
 
 		return Jwts.builder()
-
 			.header()
 			.type(HEADER_TYPE)
 			.and()
-
 			.claims(extraClaims)
 			.subject(subject)
 			.issuedAt(Date.from(now))
 			.expiration(Date.from(expiry))
-
 			.signWith(signingKey)
 			.compact();
 	}
@@ -83,15 +80,24 @@ public class JwtServiceImpl implements JwtService {
 		return Jwts.parser().verifyWith(signingKey).build().parseSignedClaims(token);
 	}
 
+	private Claims extractAllClaims(String token) {
+		return parseToken(token).getPayload();
+	}
+
 	@Override
 	public <T> T extractClaim(String token, Function<Claims, T> resolver) {
-		Claims claims = parseToken(token).getPayload();
+		Claims claims = extractAllClaims(token);
 		return resolver.apply(claims);
 	}
 
 	@Override
 	public String extractUsername(String token) {
 		return extractClaim(token, Claims::getSubject);
+	}
+
+	public Long extractUserId(String token) {
+		Number uid = extractClaim(token, c -> c.get(CLAIM_UID, Number.class));
+		return uid == null ? null : uid.longValue();
 	}
 
 	@Override
@@ -118,16 +124,14 @@ public class JwtServiceImpl implements JwtService {
 
 	@Override
 	public boolean isTokenValid(String token, CustomUserDetails userDetails) {
-		String usernameFromToken = extractUsername(token);
-		Long idFromToken = extractClaim(token, c -> c.get(CLAIM_UID, Long.class));
+		Long idFromToken = extractUserId(token);
 		String roleFromToken = extractClaim(token, c -> c.get(CLAIM_ROLE, String.class));
 
 		boolean notExpired = !isTokenExpired(token);
-		boolean usernameMatches = usernameFromToken.equals(userDetails.getUsername());
-		boolean idMatches = idFromToken.equals(userDetails.getId());
-		boolean roleMatches = roleFromToken.equals(userDetails.getRoleName());
+		boolean idMatches = idFromToken != null && idFromToken.equals(userDetails.getId());
+		boolean roleMatches = roleFromToken != null && roleFromToken.equals(userDetails.getRoleName());
 
-		return notExpired && usernameMatches && idMatches && roleMatches;
+		return notExpired && idMatches && roleMatches;
 	}
 
 }

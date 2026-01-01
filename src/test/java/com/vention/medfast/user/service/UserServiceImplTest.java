@@ -38,7 +38,7 @@ class UserServiceImplTest {
 	@Test
 	void shouldCreatePatientWhenEmailUnique() {
 		PersonDto person = new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123",
-				"john@mail.com", "+123456789", "USA");
+				"john@mail.com", "USA");
 
 		User mappedUser = new User();
 		mappedUser.setEmail(person.getEmail());
@@ -64,7 +64,7 @@ class UserServiceImplTest {
 	@Test
 	void shouldThrowWhenEmailAlreadyExists() {
 		PersonDto person = new PersonDto("John", "Doe", LocalDate.of(1990, 1, 1), Gender.MALE, "Password123",
-				"john@mail.com", "+123456789", "USA");
+				"john@mail.com", "USA");
 
 		when(userRepository.existsByEmail(person.getEmail())).thenReturn(true);
 

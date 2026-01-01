@@ -1,7 +1,8 @@
 package com.vention.medfast.registration.controller;
 
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.registration.dto.RegistrationRequestDto;
+import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
+import com.vention.medfast.registration.dto.PatientRegistrationRequestDto;
 import com.vention.medfast.registration.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,7 +31,7 @@ public class RegistrationController {
 	@Operation(summary = "Register new user",
 			description = "Registers a new user with personal and address information",
 			requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
-					content = @Content(schema = @Schema(implementation = RegistrationRequestDto.class),
+					content = @Content(schema = @Schema(implementation = PatientRegistrationRequestDto.class),
 							examples = @ExampleObject(name = "Registration request", value = """
 									{
 									  {
@@ -58,8 +60,19 @@ public class RegistrationController {
 			@ApiResponse(responseCode = "400", description = "Validation error"),
 			@ApiResponse(responseCode = "409", description = "User with this email already exists") })
 	@ResponseStatus(HttpStatus.CREATED)
-	public void register(@RequestBody @Valid RegistrationRequestDto request) {
-		registrationService.register(request);
+	public void registerPatient(@RequestBody @Valid PatientRegistrationRequestDto request) {
+		registrationService.registerPatient(request);
+	}
+
+	@Operation(summary = "Register a new doctor as admin")
+	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Doctor successfully registered"),
+			@ApiResponse(responseCode = "400", description = "Validation error"),
+			@ApiResponse(responseCode = "409", description = "Email already exists") })
+	@PostMapping(ApiPaths.ADMIN_DOCTOR_ENDPOINT)
+	@PreAuthorize("hasRole('ADMIN')")
+	@ResponseStatus(HttpStatus.CREATED)
+	public void registerDoctor(@RequestBody @Valid DoctorRegistrationRequestDto request) {
+		registrationService.registerDoctor(request);
 	}
 
 }
