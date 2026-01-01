@@ -22,4 +22,6 @@ public final class ApiPaths {
 
 	public static final String REGISTRATION_ENDPOINT = "/registration";
 
+    public static final String SEARCH_ENDPOINT = "/search";
+
 }

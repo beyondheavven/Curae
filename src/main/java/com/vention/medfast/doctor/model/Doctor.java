@@ -1,12 +1,15 @@
 package com.vention.medfast.doctor.model;
 
-import com.vention.medfast.address.model.Address;
+import com.vention.medfast.clinic.model.Clinic;
+import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.user.model.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,9 +30,17 @@ public class Doctor {
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
-	@OneToOne(fetch = FetchType.LAZY, optional = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	@JoinColumn(name = "address_id", nullable = false)
-	private Address address;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "clinic_id", nullable = false)
+	private Clinic clinic;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "doctor_specializations",
+        joinColumns = @JoinColumn(name = "doctor_id"),
+        inverseJoinColumns = @JoinColumn(name = "specialization_id")
+    )
+    private Set<Specialization> specializations;
+    
 }
