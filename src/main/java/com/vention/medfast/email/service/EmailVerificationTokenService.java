@@ -16,4 +16,6 @@ public interface EmailVerificationTokenService {
 
 	void deleteToken(EmailVerificationToken token);
 
+    String createForResetPassword(User user);
+
 }
