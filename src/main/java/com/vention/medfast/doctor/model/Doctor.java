@@ -32,7 +32,7 @@ public class Doctor {
 	private Long id;
 
 	@Column(name = "bio", nullable = false, length = 255)
-	private String biography;
+	private String bio;
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "user_id", nullable = false)
