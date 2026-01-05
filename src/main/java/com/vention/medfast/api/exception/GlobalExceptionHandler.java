@@ -137,6 +137,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return buildError(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.SERVER_ERROR, "Internal server error");
 	}
 
+    @ExceptionHandler(PasswordResetException.class)
+    public ResponseEntity<ResponseWrapper<?>> handlePasswordResetException(PasswordResetException ex) {
+        return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
+    }
+
 	private ResponseEntity<ResponseWrapper<?>> buildError(HttpStatus status, ErrorCode code, String message) {
 		return ResponseEntity.status(status)
 			.body(ResponseWrapper.builder().error(new ResponseError(code, message)).build());
