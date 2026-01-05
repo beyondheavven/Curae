@@ -1,6 +1,7 @@
 package com.vention.medfast.password.service;
 
 import com.vention.medfast.api.exception.PasswordResetException;
+import com.vention.medfast.email.mapper.EmailVerificationTokenMapper;
 import com.vention.medfast.email.model.EmailTokenStatus;
 import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
@@ -28,13 +29,16 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final EmailVerificationTokenRepository tokenRepository;
     private final EmailVerificationTokenService tokenService;
     private final ApplicationEventPublisher eventPublisher;
+    private final EmailVerificationTokenMapper emailVerificationTokenMapper;
 
     @Override
 	public void sendResetCode(String email) {
         User user = findUserByEmail(email);
         Instant now = Instant.now();
-        EmailVerificationToken token = getOrCreateToken(email, user, now);
-        generateAndFillToken(token, now);
+        EmailVerificationToken token = tokenRepository
+            .findTopByUserEmailAndTypeOrderByCreatedAtDesc(email, EmailTokenType.RESET_PASSWORD)
+            .map(existing -> updateExistingToken(existing, now))
+            .orElseGet(() -> createNewToken(user, now));
         tokenRepository.save(token);
         publishResetEvent(user, token.getCode());
 	}
@@ -55,20 +59,25 @@ public class PasswordResetServiceImpl implements PasswordResetService {
             .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 
-    private EmailVerificationToken getOrCreateToken(String email, User user, Instant now) {
-        return tokenRepository
-            .findTopByUserEmailAndTypeOrderByCreatedAtDesc(email, EmailTokenType.RESET_PASSWORD)
-            .map(token -> validateAndUpdateExistingToken(token, now))
-            .orElseGet(() -> createNewToken(user));
+    private EmailVerificationToken createNewToken(User user, Instant now) {
+        return emailVerificationTokenMapper.createResetPasswordToken(
+            user,
+            generateCode(),
+            generateTokenHash(),
+            now.plus(1, ChronoUnit.MINUTES)
+        );
     }
 
-    private EmailVerificationToken validateAndUpdateExistingToken(
-        EmailVerificationToken token, Instant now) {
+    private EmailVerificationToken updateExistingToken(EmailVerificationToken token, Instant now) {
         validateResendRules(token, now);
         token.setResendCount(token.getResendCount() + 1);
         if (token.getResendCount() >= 3) {
             token.setBlockedUntil(now.plus(30, ChronoUnit.MINUTES));
         }
+        token.setCode(generateCode());
+        token.setTokenHash(generateTokenHash());
+        token.setExpiresAt(now.plus(1, ChronoUnit.MINUTES));
+        token.setStatus(EmailTokenStatus.SENT);
         return token;
     }
 
@@ -81,27 +90,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
     }
 
-    private EmailVerificationToken createNewToken(User user) {
-        EmailVerificationToken token = new EmailVerificationToken();
-        token.setUser(user);
-        token.setType(EmailTokenType.RESET_PASSWORD);
-        token.setResendCount(0);
-        return token;
-    }
-
-    private void generateAndFillToken(EmailVerificationToken token, Instant now) {
-        token.setTokenHash(UUID.randomUUID().toString());
-        token.setCode(ThreadLocalRandom.current().nextInt(1000, 10000));
-        token.setExpiresAt(now.plus(1, ChronoUnit.MINUTES));
-        token.setStatus(EmailTokenStatus.SENT);
-    }
-
-    private void publishResetEvent(User user, Integer code) {
-        eventPublisher.publishEvent(
-            new PasswordResetCreatedEvent(user, EmailTokenType.RESET_PASSWORD, code, null)
-        );
-    }
-
     private EmailVerificationToken getLatestResetToken(String email) {
         return tokenRepository
             .findTopByUserEmailAndTypeOrderByCreatedAtDesc(email, EmailTokenType.RESET_PASSWORD)
@@ -110,7 +98,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     private void validateVerificationRules(EmailVerificationToken token, String code) {
         Instant now = Instant.now();
-
         if (token.getBlockedUntil() != null && token.getBlockedUntil().isAfter(now)) {
             throw new PasswordResetException("Too many attempts. Try again later");
         }
@@ -120,5 +107,19 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         if (!token.getCode().toString().equals(code)) {
             throw new PasswordResetException("Code is wrong");
         }
+    }
+
+    private Integer generateCode() {
+        return ThreadLocalRandom.current().nextInt(1000, 10000);
+    }
+
+    private String generateTokenHash() {
+        return UUID.randomUUID().toString();
+    }
+
+    private void publishResetEvent(User user, Integer code) {
+        eventPublisher.publishEvent(
+            new PasswordResetCreatedEvent(user, EmailTokenType.RESET_PASSWORD, code, null)
+        );
     }
 }

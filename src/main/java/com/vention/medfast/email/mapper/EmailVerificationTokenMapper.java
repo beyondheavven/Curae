@@ -17,4 +17,16 @@ public interface EmailVerificationTokenMapper {
 	@Mapping(target = "status", constant = "SENT")
 	EmailVerificationToken buildToken(User user, String tokenHash, Instant expiresAt, EmailTokenType type);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "blockedUntil", ignore = true)
+    @Mapping(target = "resendCount", constant = "0")
+    @Mapping(target = "status", constant = "SENT")
+    @Mapping(target = "type", constant = "RESET_PASSWORD")
+    EmailVerificationToken createResetPasswordToken(
+        User user,
+        Integer code,
+        String tokenHash,
+        Instant expiresAt
+    );
 }
