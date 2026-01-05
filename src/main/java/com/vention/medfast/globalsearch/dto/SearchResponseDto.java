@@ -1,4 +1,4 @@
-package com.vention.medfast.search.dto;
+package com.vention.medfast.globalsearch.dto;
 
 import com.vention.medfast.doctor.dto.DoctorBaseDto;
 import com.vention.medfast.service.dto.ProvidedServiceBaseDto;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Builder
 @Schema(description = "Global search response containing full objects")
-public record SearchResponse(
+public record SearchResponseDto(
 
 		@Schema(description = "List of doctors matching the criteria") List<DoctorBaseDto> doctors,
 
