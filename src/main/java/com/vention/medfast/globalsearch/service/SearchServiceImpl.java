@@ -16,9 +16,7 @@ import com.vention.medfast.user.model.QUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,12 +33,11 @@ public class SearchServiceImpl implements SearchService {
 	@Override
 	public SearchResponseDto performGlobalSearch(SearchRequest request) {
 
-        String searchText = request.query();
+		String searchText = request.query();
 
 		List<Doctor> doctorEntities = findDoctorEntities(searchText);
 
 		List<ProvidedService> serviceEntities = findServiceEntities(searchText);
-
 		return SearchResponseDto.builder()
 			.doctors(doctorMapper.toDtoList(doctorEntities))
 			.services(providedServiceMapper.toDtoList(serviceEntities))
@@ -52,38 +49,35 @@ public class SearchServiceImpl implements SearchService {
 		QUser qUser = QUser.user;
 		QSpecialization qSpecialization = QSpecialization.specialization;
 
-        BooleanBuilder builder = new BooleanBuilder();
+		BooleanBuilder builder = new BooleanBuilder();
 
-        if (searchText != null && !searchText.isBlank()) {
-            builder.or(qDoctor.user.firstName.containsIgnoreCase(searchText));
-            builder.or(qDoctor.user.lastName.containsIgnoreCase(searchText));
-            builder.or(qDoctor.specializations.any().name.containsIgnoreCase(searchText));
-        }
+		if (searchText != null && !searchText.isBlank()) {
+			builder.or(qDoctor.user.firstName.containsIgnoreCase(searchText));
+			builder.or(qDoctor.user.lastName.containsIgnoreCase(searchText));
+			builder.or(qDoctor.specializations.any().name.containsIgnoreCase(searchText));
+		}
 
-        return queryFactory.selectFrom(qDoctor)
-            .leftJoin(qDoctor.user, qUser).fetchJoin()
-            .leftJoin(qDoctor.specializations, qSpecialization).fetchJoin()
-            .where(builder)
-            .distinct()
-            .orderBy(qDoctor.user.firstName.asc())
-            .limit(10)
-            .fetch();
+		return queryFactory.selectFrom(qDoctor)
+			.leftJoin(qDoctor.user, qUser)
+			.fetchJoin()
+			.leftJoin(qDoctor.specializations, qSpecialization)
+			.fetchJoin()
+			.where(builder)
+			.distinct()
+			.orderBy(qDoctor.user.firstName.asc())
+			.limit(10)
+			.fetch();
 	}
 
 	private List<ProvidedService> findServiceEntities(String searchText) {
 		QProvidedService srv = QProvidedService.providedService;
 
-        BooleanBuilder builder = new BooleanBuilder();
-        if (searchText != null && !searchText.isBlank()) {
-            builder.and(srv.name.containsIgnoreCase(searchText));
-        }
+		BooleanBuilder builder = new BooleanBuilder();
+		if (searchText != null && !searchText.isBlank()) {
+			builder.and(srv.name.containsIgnoreCase(searchText));
+		}
 
-		return queryFactory.selectFrom(srv)
-            .where(builder)
-            .distinct()
-            .orderBy(srv.name.asc())
-            .limit(10)
-            .fetch();
+		return queryFactory.selectFrom(srv).where(builder).distinct().orderBy(srv.name.asc()).limit(10).fetch();
 	}
 
 }

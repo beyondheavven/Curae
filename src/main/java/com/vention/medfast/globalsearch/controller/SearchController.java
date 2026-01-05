@@ -26,32 +26,34 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Search", description = "Endpoints for searching doctors and services across the application")
 public class SearchController {
 
-    private final SearchService searchService;
+	private final SearchService searchService;
 
-    @Operation(summary = "Perform structured search",
-        description = "Searches for doctors and services using specific filters.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Search performed successfully",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = SearchResponseDto.class))),
-        @ApiResponse(responseCode = "400", description = "Validation error",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))),
-        @ApiResponse(responseCode = "404", description = "No results found",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponseDto.class))) })
-    @GetMapping
-    public ResponseEntity<ResponseWrapper<SearchResponseDto>> search(@Valid @ParameterObject @ModelAttribute SearchRequest request) {
+	@Operation(summary = "Perform structured search",
+			description = "Searches for doctors and services using specific filters.")
+	@ApiResponses({
+			@ApiResponse(responseCode = "200", description = "Search performed successfully",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = SearchResponseDto.class))),
+			@ApiResponse(responseCode = "400", description = "Validation error",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))),
+			@ApiResponse(responseCode = "404", description = "No results found",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@GetMapping
+	public ResponseEntity<ResponseWrapper<SearchResponseDto>> search(
+			@Valid @ParameterObject @ModelAttribute SearchRequest request) {
 
-        SearchResponseDto result = searchService.performGlobalSearch(request);
+		SearchResponseDto result = searchService.performGlobalSearch(request);
 
-        boolean isDoctorsEmpty = result.doctors() == null || result.doctors().isEmpty();
-        boolean isServicesEmpty = result.services() == null || result.services().isEmpty();
+		boolean isDoctorsEmpty = result.doctors() == null || result.doctors().isEmpty();
+		boolean isServicesEmpty = result.services() == null || result.services().isEmpty();
 
-        if (isDoctorsEmpty && isServicesEmpty) {
-            throw new EntityNotFoundException("Your search returned no results");
-        }
+		if (isDoctorsEmpty && isServicesEmpty) {
+			throw new EntityNotFoundException("Your search returned no results");
+		}
 
-        return ResponseEntity.ok(ResponseFactory.ok(result));
-    }
+		return ResponseEntity.ok(ResponseFactory.ok(result));
+	}
+
 }

@@ -28,8 +28,6 @@ public interface DoctorMapper {
 	@Mapping(source = "user.firstName", target = "firstName")
 	@Mapping(source = "user.lastName", target = "lastName")
 	@Mapping(source = "user.profileUrl", target = "profileUrl")
-	@Mapping(source = "specializations", target = "specializations", qualifiedByName = "mapSpecializationToName")
-	@Mapping(source = "clinics", target = "clinics", qualifiedByName = "mapClinicToName")
 	DoctorBaseDto toBaseDto(Doctor doctor);
 
 	List<DoctorBaseDto> toDtoList(List<Doctor> doctors);
@@ -38,20 +36,6 @@ public interface DoctorMapper {
 	default void linkSpecializationsAndGenerateBio(@MappingTarget Doctor doctor, List<Specialization> specializations) {
 		specializations.forEach(doctor::addSpecialization);
 		doctor.setBio("Specialist in " + specializations.getFirst().getName());
-	}
-
-	@Named("mapSpecializationToName")
-	default List<String> mapSpecializationToName(Set<Specialization> specializations) {
-		if (specializations == null)
-			return List.of();
-		return specializations.stream().map(Specialization::getName).collect(Collectors.toList());
-	}
-
-	@Named("mapClinicToName")
-	default List<String> mapClinicToName(Set<Clinic> clinics) {
-		if (clinics == null)
-			return List.of();
-		return clinics.stream().map(Clinic::getName).collect(Collectors.toList());
 	}
 
 }

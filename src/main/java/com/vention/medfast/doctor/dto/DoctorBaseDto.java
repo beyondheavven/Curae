@@ -2,15 +2,14 @@ package com.vention.medfast.doctor.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
+import lombok.Data;
 
 import java.util.List;
 
 @Builder
+@Data
 @Schema(description = "Base doctor details")
 public class DoctorBaseDto {
-
-	@Schema(description = "Doctor ID", example = "101")
-	private Long id;
 
 	@Schema(description = "First name from User profile", example = "Gregory")
 	private String firstName;
@@ -20,14 +19,5 @@ public class DoctorBaseDto {
 
 	@Schema(description = "Profile picture URL", example = "https://example/avatars/house.jpg")
 	private String profileUrl;
-
-	@Schema(description = "Short biography", example = "Expert in diagnostic medicine.")
-	private String bio;
-
-	@Schema(description = "List of specialization names", example = "[\"Cardiologist\", \"Diagnostician\"]")
-	private List<String> specializations;
-
-	@Schema(description = "List of clinic names where doctor works", example = "[\"Princeton-Plainsboro\"]")
-	private List<String> clinics;
 
 }
