@@ -1,10 +1,10 @@
 package com.vention.medfast.patient.mapper;
 
-import com.vention.medfast.address.model.Address;
-import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.address.dto.AddressCreateDto;
+import com.vention.medfast.address.model.Address;
 import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.dto.PatientResponseDto;
+import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.RoleType;

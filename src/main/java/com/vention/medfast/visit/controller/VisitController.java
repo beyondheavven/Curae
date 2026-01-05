@@ -1,0 +1,48 @@
+package com.vention.medfast.visit.controller;
+
+import com.vention.medfast.api.response.ErrorResponseDto;
+import com.vention.medfast.constants.ApiPaths;
+import com.vention.medfast.specialization.dto.SpecializationResponseDto;
+import com.vention.medfast.visit.dto.VisitCreateDto;
+import com.vention.medfast.visit.service.VisitService;
+import com.vention.medfast.wrapper.ResponseFactory;
+import com.vention.medfast.wrapper.ResponseWrapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping(ApiPaths.VISIT_ENDPOINT)
+@RequiredArgsConstructor
+@Tag(name = "Visits", description = "Endpoints for managing visits")
+public class VisitController {
+
+	private final VisitService visitService;
+
+	@Operation(summary = "Create visit")
+	@ApiResponses({
+			@ApiResponse(responseCode = "201", description = "Successfully created",
+					content = @Content(mediaType = "application/json", schema = @Schema(implementation = Long.class))),
+			@ApiResponse(responseCode = "400", description = "Validation error",
+					content = @Content(mediaType = "application/json",
+							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseWrapper<Long> createVisit(@Valid @RequestBody VisitCreateDto dto) {
+		long id = visitService.create(dto);
+		return ResponseFactory.withStatus(HttpStatus.CREATED, id);
+	}
+
+}

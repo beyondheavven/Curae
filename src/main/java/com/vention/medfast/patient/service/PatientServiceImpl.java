@@ -57,6 +57,11 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
+	public Patient getById(Long id) {
+		return patientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+	}
+
+	@Override
 	public Patient getPatientByUserId(Long userId) {
 		return patientRepository.findByUserId((userId))
 			.orElseThrow(() -> new IllegalArgumentException("Patient profile not found for user with ID: " + userId));

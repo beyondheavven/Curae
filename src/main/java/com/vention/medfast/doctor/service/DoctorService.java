@@ -8,4 +8,6 @@ public interface DoctorService {
 
 	Doctor createDoctorProfile(User user, DoctorProfileCreateDto dto);
 
+	Doctor getById(Long id);
+
 }
