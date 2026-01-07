@@ -56,10 +56,10 @@ public class EmailVerificationToken {
 	@Column(name = "status", nullable = false, length = 15)
 	private EmailTokenStatus status;
 
-    @Column(name = "resend_count", nullable = false)
-    private int resendCount;
+	@Column(name = "resend_count", nullable = false)
+	private int resendCount;
 
-    @Column(name = "blocked_until")
-    private Instant blockedUntil;
+	@Column(name = "blocked_until")
+	private Instant blockedUntil;
 
 }

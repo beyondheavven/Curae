@@ -4,12 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Builder
 @Data
 @Schema(description = "Base doctor details")
-public class DoctorBaseDto {
+public class DoctorSearchResponseDto {
 
 	@Schema(description = "First name from User profile", example = "Gregory")
 	private String firstName;
@@ -19,5 +17,8 @@ public class DoctorBaseDto {
 
 	@Schema(description = "Profile picture URL", example = "https://example/avatars/house.jpg")
 	private String profileUrl;
+
+	@Schema(description = "Doctors specialization", example = "Cardiologist")
+	private String specialization;
 
 }

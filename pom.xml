@@ -144,20 +144,6 @@
       <optional>true</optional>
     </dependency>
 
-    <!-- Query DSL -->
-    <dependency>
-      <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-jpa</artifactId>
-      <version>5.0.0</version>
-      <classifier>jakarta</classifier>
-    </dependency>
-
-    <dependency>
-      <groupId>com.querydsl</groupId>
-      <artifactId>querydsl-apt</artifactId>
-      <version>5.0.0</version>
-      <classifier>jakarta</classifier>
-    </dependency>
 
     <!-- Logging -->
     <dependency>
@@ -241,12 +227,6 @@
               <groupId>org.mapstruct</groupId>
               <artifactId>mapstruct-processor</artifactId>
               <version>${mapstruct.version}</version>
-            </path>
-            <path>
-              <groupId>com.querydsl</groupId>
-              <artifactId>querydsl-apt</artifactId>
-              <version>5.0.0</version>
-              <classifier>jakarta</classifier>
             </path>
             <path>
               <groupId>jakarta.persistence</groupId>

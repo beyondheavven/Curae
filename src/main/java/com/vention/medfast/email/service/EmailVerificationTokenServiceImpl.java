@@ -103,11 +103,11 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 		emailVerificationTokenRepository.delete(token);
 	}
 
-    @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public String createForResetPassword(User user) {
-        return generateAndSaveToken(user, EmailTokenType.RESET_PASSWORD);
-    }
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public String createForResetPassword(User user) {
+		return generateAndSaveToken(user, EmailTokenType.RESET_PASSWORD);
+	}
 
 	private String generateAndSaveToken(User user, EmailTokenType type) {
 		if (user.getId() == null) {
