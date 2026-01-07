@@ -1,7 +1,6 @@
 package com.vention.medfast.service.repository.specification;
 
 import com.vention.medfast.service.model.ProvidedService;
-import jakarta.persistence.criteria.Predicate;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
