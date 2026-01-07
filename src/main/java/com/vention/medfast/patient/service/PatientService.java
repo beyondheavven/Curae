@@ -18,4 +18,6 @@ public interface PatientService {
 
 	Patient createPatientProfile(User patientUser, Address address, @Valid PersonDto person);
 
+	Patient getById(Long id);
+
 }

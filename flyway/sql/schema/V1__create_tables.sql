@@ -157,6 +157,7 @@ CREATE TABLE appointments
 (
     id             bigserial PRIMARY KEY,
     scheduled_date date        NOT NULL,
+    scheduled_time time        NOT NULL,
 
     status         varchar(30) NOT NULL,
     doctor_id      bigint      NOT NULL,
@@ -198,9 +199,8 @@ CREATE TABLE tests
 -- Table: visits
 CREATE TABLE visits
 (
-    appointment_id bigint      NOT NULL PRIMARY KEY,
+    appointment_id bigint NOT NULL PRIMARY KEY,
     diagnosis      text,
     symptoms       text,
-    cabinet_number varchar(20) NOT NULL,
     medical_report text
 );

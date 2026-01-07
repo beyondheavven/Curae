@@ -5,8 +5,8 @@ import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.email.properties.EmailVerificationProperties;
 import com.vention.medfast.email.repository.EmailVerificationTokenRepository;
-import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.RoleType;
+import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -102,6 +102,12 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 	public void deleteToken(EmailVerificationToken token) {
 		emailVerificationTokenRepository.delete(token);
 	}
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public String createForResetPassword(User user) {
+        return generateAndSaveToken(user, EmailTokenType.RESET_PASSWORD);
+    }
 
 	private String generateAndSaveToken(User user, EmailTokenType type) {
 		if (user.getId() == null) {

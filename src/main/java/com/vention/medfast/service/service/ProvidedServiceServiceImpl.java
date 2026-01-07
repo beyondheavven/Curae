@@ -79,6 +79,11 @@ public class ProvidedServiceServiceImpl implements ProvidedServiceService {
 		return service.getId();
 	}
 
+	@Override
+	public ProvidedService getProvidedServiceById(Long id) {
+		return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Service not found"));
+	}
+
 	private ProvidedService findById(Long id) {
 		return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Service not found"));
 	}

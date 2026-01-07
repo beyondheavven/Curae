@@ -7,6 +7,7 @@ import com.vention.medfast.doctor.repository.DoctorRepository;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.specialization.service.SpecializationService;
 import com.vention.medfast.user.model.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,11 @@ public class DoctorServiceImpl implements DoctorService {
 		Doctor doctor = doctorMapper.toDoctor(user, dto, specializations);
 
 		return doctorRepository.save(doctor);
+	}
+
+	@Override
+	public Doctor getById(Long id) {
+		return doctorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
 	}
 
 }
