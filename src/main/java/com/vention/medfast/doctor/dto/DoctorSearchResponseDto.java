@@ -1,7 +1,9 @@
 package com.vention.medfast.doctor.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 
+@Builder
 public record DoctorSearchResponseDto(
 
 		@Schema(description = "First name from User profile", example = "Gregory") String firstName,
