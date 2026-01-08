@@ -3,6 +3,11 @@ package com.vention.medfast.doctor.repository.specification;
 import static lombok.AccessLevel.PRIVATE;
 
 import com.vention.medfast.doctor.model.Doctor;
+import com.vention.medfast.doctor.model.Doctor_;
+import com.vention.medfast.specialization.model.Specialization;
+import com.vention.medfast.specialization.model.Specialization_;
+import com.vention.medfast.user.model.User;
+import com.vention.medfast.user.model.User_;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -21,12 +26,12 @@ public class DoctorSpecification {
 			if (searchText.isBlank())
 				return cb.conjunction();
 
-			Join<Object, Object> specialization = root.join("specializations", JoinType.LEFT);
+			Join<Doctor, Specialization> specialization = root.join(Doctor_.SPECIALIZATIONS, JoinType.LEFT);
 
-			Join<Object, Object> user = root.join("user", JoinType.LEFT);
+			Join<Doctor, User> user = root.join(Doctor_.USER, JoinType.LEFT);
 
-			return createFtsPredicate(cb, searchText,
-					List.of(user.get("firstName"), user.get("lastName"), specialization.get("name")));
+			return createFtsPredicate(cb, searchText, List.of(user.get(User_.FIRST_NAME), user.get(User_.LAST_NAME),
+					specialization.get(Specialization_.NAME)));
 
 		};
 

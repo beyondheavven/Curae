@@ -1,6 +1,7 @@
 package com.vention.medfast.service.repository.specification;
 
 import com.vention.medfast.service.model.ProvidedService;
+import com.vention.medfast.service.model.ProvidedService_;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -15,7 +16,7 @@ public class ProvidedServiceSpecification {
 			if (searchText == null || searchText.isBlank())
 				return cb.conjunction();
 
-			return cb.like(cb.lower(root.get("name")), "%" + searchText.toLowerCase() + "%");
+			return cb.like(cb.lower(root.get(ProvidedService_.NAME)), "%" + searchText.toLowerCase() + "%");
 		};
 	}
 
