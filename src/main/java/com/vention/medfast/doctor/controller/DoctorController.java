@@ -2,18 +2,14 @@ package com.vention.medfast.doctor.controller;
 
 import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.doctor.dto.DoctorProfileCreateDto;
 import com.vention.medfast.doctor.dto.DoctorSearchResponseDto;
 import com.vention.medfast.doctor.service.DoctorService;
-import com.vention.medfast.wrapper.ResponseFactory;
-import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springdoc.core.annotations.ParameterObject;
@@ -44,14 +40,14 @@ public class DoctorController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@GetMapping()
-	public ResponseEntity<ResponseWrapper<Page<DoctorSearchResponseDto>>> search(
+	public ResponseEntity<Page<DoctorSearchResponseDto>> search(
 			@Parameter(description = "Search query text (part of name, surname or specialization)") @RequestParam(
 					required = true) String query,
 			@ParameterObject @PageableDefault(size = 10, sort = { "user.firstName", "user.lastName" },
 					direction = Sort.Direction.ASC) Pageable pageable) {
 		Page<DoctorSearchResponseDto> result = doctorService.search(query, pageable);
 
-		return ResponseEntity.ok(ResponseFactory.ok(result));
+		return ResponseEntity.ok((result));
 	}
 
 }

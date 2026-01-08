@@ -16,7 +16,7 @@ public class ProvidedServiceSpecification {
 			if (searchText == null || searchText.isBlank())
 				return cb.conjunction();
 
-			return cb.like(cb.lower(root.get(ProvidedService_.NAME)), "%" + searchText.toLowerCase() + "%");
+			return cb.like(cb.lower(root.get(ProvidedService_.name)), "%" + searchText.toLowerCase() + "%");
 		};
 	}
 

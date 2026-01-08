@@ -4,8 +4,6 @@ import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.service.dto.ProvidedServiceCreateDto;
 import com.vention.medfast.service.dto.ProvidedServiceResponseDto;
 import com.vention.medfast.service.service.ProvidedServiceService;
-import com.vention.medfast.wrapper.ResponseFactory;
-import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -98,12 +96,12 @@ public class ProvidedServiceController {
 	@Operation(summary = "Search services", description = "Search services by name with pagination")
 	@ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
 	@GetMapping("/search")
-	public ResponseEntity<ResponseWrapper<Page<ProvidedServiceResponseDto>>> searchServices(
+	public ResponseEntity<Page<ProvidedServiceResponseDto>> searchServices(
 			@Parameter(description = "Search query text (searches in service name)") @RequestParam(
 					required = false) String query,
 			@ParameterObject @PageableDefault(size = 10, sort = "name",
 					direction = Sort.Direction.ASC) Pageable pageable) {
-		return ResponseEntity.ok(ResponseFactory.ok(providedServiceService.search(query, pageable)));
+		return ResponseEntity.ok(providedServiceService.search(query, pageable));
 	}
 
 }

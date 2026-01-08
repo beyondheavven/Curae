@@ -28,10 +28,10 @@ public class DoctorSpecification {
 
 			Join<Doctor, Specialization> specialization = root.join(Doctor_.SPECIALIZATIONS, JoinType.LEFT);
 
-			Join<Doctor, User> user = root.join(Doctor_.USER, JoinType.LEFT);
+			Join<Doctor, User> user = root.join(Doctor_.user, JoinType.LEFT);
 
-			return createFtsPredicate(cb, searchText, List.of(user.get(User_.FIRST_NAME), user.get(User_.LAST_NAME),
-					specialization.get(Specialization_.NAME)));
+			return createFtsPredicate(cb, searchText, List.of(user.get(User_.firstName), user.get(User_.lastName),
+					specialization.get(Specialization_.name)));
 
 		};
 
