@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
 import java.util.List;
 
 @RequestMapping(ApiPaths.SERVICE_ENDPOINT)

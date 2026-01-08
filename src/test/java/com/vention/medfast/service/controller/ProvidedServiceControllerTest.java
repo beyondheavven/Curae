@@ -76,9 +76,9 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 				.param("size", "10"))
 
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.content", Matchers.hasSize(1)))
-			.andExpect(jsonPath("$.data.content[0].name").value(uniqueName))
-			.andExpect(jsonPath("$.data.totalElements").value(1));
+			.andExpect(jsonPath("$.content", Matchers.hasSize(1)))
+			.andExpect(jsonPath("$.content[0].name").value(uniqueName))
+			.andExpect(jsonPath("$.totalElements").value(1));
 	}
 
 	@Test
@@ -87,7 +87,7 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 			.perform(get(ApiPaths.SERVICE_ENDPOINT + "/search").header("Authorization", "Bearer " + token)
 				.param("query", "NonExistentServiceXYZ"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.content").isEmpty());
+			.andExpect(jsonPath("$.content").isEmpty());
 	}
 
 	@Test
