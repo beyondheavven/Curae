@@ -26,13 +26,16 @@ public class Clinic {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false)
 	private Long id;
 
-	@Column(name = "name", nullable = false)
+	@Column(name = "name", nullable = false, length = 255)
 	private String name;
 
+	@Column(name = "logoUrl", nullable = false, length = 255)
 	private String logoUrl;
 
+	@Column(name = "description", nullable = false, length = 255)
 	private String description;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

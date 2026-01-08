@@ -13,6 +13,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -21,8 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -245,6 +249,52 @@ public class ProvidedServiceServiceImplTest {
 		verifyNoInteractions(specializationRepository);
 		verify(providedServiceRepository).delete(service);
 		verifyNoMoreInteractions(providedServiceRepository);
+	}
+
+	@Test
+	public void shouldReturnPagedServicesWhenSearchQueryIsValid() {
+		String query = "Checkup";
+		Pageable pageable = PageRequest.of(0, 10);
+
+		ProvidedService service = new ProvidedService();
+		service.setId(1L);
+		service.setName("General Checkup");
+		service.setPrice(BigDecimal.valueOf(50.0));
+
+		ProvidedServiceResponseDto responseDto = new ProvidedServiceResponseDto(1L, "General Checkup", "Desc", 50.0, 30,
+				new ArrayList<>());
+
+		List<ProvidedService> entityList = List.of(service);
+		Page<ProvidedService> entityPage = new PageImpl<>(entityList, pageable, 1);
+
+		when(providedServiceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(entityPage);
+		when(providedServiceMapper.toDto(service)).thenReturn(responseDto);
+
+		Page<ProvidedServiceResponseDto> result = providedServiceService.search(query, pageable);
+
+		assertEquals(1, result.getTotalElements());
+		assertEquals("General Checkup", result.getContent().get(0).name());
+
+		verify(providedServiceRepository).findAll(any(Specification.class), eq(pageable));
+		verify(providedServiceMapper).toDto(service);
+	}
+
+	@Test
+	public void shouldReturnEmptyPageWhenSearchReturnsNoResults() {
+		String query = "Unknown Service";
+		Pageable pageable = PageRequest.of(0, 10);
+
+		Page<ProvidedService> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+
+		when(providedServiceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(emptyPage);
+
+		Page<ProvidedServiceResponseDto> result = providedServiceService.search(query, pageable);
+
+		assertEquals(0, result.getTotalElements());
+		assertEquals(0, result.getContent().size());
+
+		verify(providedServiceRepository).findAll(any(Specification.class), eq(pageable));
+		verifyNoInteractions(providedServiceMapper);
 	}
 
 }

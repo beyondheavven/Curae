@@ -5,10 +5,13 @@ import com.vention.medfast.service.dto.ProvidedServiceResponseDto;
 import com.vention.medfast.service.mapper.ProvidedServiceMapper;
 import com.vention.medfast.service.repository.ProvidedServiceRepository;
 import com.vention.medfast.service.model.ProvidedService;
+import com.vention.medfast.service.repository.specification.ProvidedServiceSpecification;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.specialization.repository.SpecializationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,6 +85,12 @@ public class ProvidedServiceServiceImpl implements ProvidedServiceService {
 	@Override
 	public ProvidedService getProvidedServiceById(Long id) {
 		return serviceRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Service not found"));
+	}
+
+	@Override
+	public Page<ProvidedServiceResponseDto> search(String query, Pageable pageable) {
+		return serviceRepository.findAll(ProvidedServiceSpecification.searchService(query), pageable)
+			.map(serviceMapper::toDto);
 	}
 
 	private ProvidedService findById(Long id) {

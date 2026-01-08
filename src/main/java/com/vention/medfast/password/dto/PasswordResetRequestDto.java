@@ -8,7 +8,7 @@ import lombok.Data;
 public class PasswordResetRequestDto {
 
 	@NotBlank
-    @Email
+	@Email
 	private String email;
 
 }

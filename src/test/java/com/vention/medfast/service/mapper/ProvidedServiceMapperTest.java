@@ -1,5 +1,6 @@
 package com.vention.medfast.service.mapper;
 
+import com.vention.medfast.service.dto.ProvidedServiceBaseDto;
 import com.vention.medfast.service.dto.ProvidedServiceCreateDto;
 import com.vention.medfast.service.dto.ProvidedServiceResponseDto;
 import com.vention.medfast.service.model.ProvidedService;
@@ -121,6 +122,31 @@ public class ProvidedServiceMapperTest {
 		assertEquals("Updated Description", entity.getDescription());
 		assertEquals(10.5, entity.getPrice().doubleValue());
 		assertEquals(10, entity.getDuration());
+	}
+
+	@Test
+	void shouldMapEntityListToDtoList() {
+		ProvidedService service1 = new ProvidedService();
+		service1.setId(1L);
+		service1.setName("Service 1");
+		service1.setPrice(BigDecimal.TEN);
+
+		ProvidedService service2 = new ProvidedService();
+		service2.setId(2L);
+		service2.setName("Service 2");
+		service2.setPrice(BigDecimal.ONE);
+
+		List<ProvidedService> entities = List.of(service1, service2);
+
+		List<ProvidedServiceBaseDto> dtos = providedServiceMapper.toDtoList(entities);
+
+		assertThat(dtos.size()).isNotNull().isEqualTo(2);
+
+		assertThat(dtos.get(0).id()).isEqualTo(1L);
+		assertThat(dtos.get(0).name()).isEqualTo("Service 1");
+
+		assertThat(dtos.get(1).id()).isEqualTo(2L);
+		assertThat(dtos.get(1).name()).isEqualTo("Service 2");
 	}
 
 }

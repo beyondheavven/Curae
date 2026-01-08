@@ -28,9 +28,10 @@ public class Doctor {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false)
 	private Long id;
 
-	@Column(name = "bio", nullable = false)
+	@Column(name = "bio", nullable = false, length = 255)
 	private String bio;
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false)

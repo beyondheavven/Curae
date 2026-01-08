@@ -24,6 +24,8 @@ public final class ApiPaths {
 
 	public static final String PROFILE_ENDPOINT = "/profile";
 
+	public static final String DOCTOR_ENDPOINT = "/doctor";
+
 	public static final String REGISTRATION_ENDPOINT = "/registration";
 
 	public static final String ADMIN_DOCTOR_ENDPOINT = "/admin/doctors";

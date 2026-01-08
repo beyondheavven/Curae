@@ -11,6 +11,6 @@ public interface EmailVerificationTokenRepository extends JpaRepository<EmailVer
 
 	Optional<EmailVerificationToken> findByTokenHash(String tokenHash);
 
-    Optional<EmailVerificationToken> findTopByUserEmailAndTypeOrderByCreatedAtDesc(String email, EmailTokenType type);
+	Optional<EmailVerificationToken> findTopByUserEmailAndTypeOrderByCreatedAtDesc(String email, EmailTokenType type);
 
 }
