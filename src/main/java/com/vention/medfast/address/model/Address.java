@@ -1,11 +1,11 @@
 package com.vention.medfast.address.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,25 +20,25 @@ public class Address {
 	@Column(nullable = false)
 	private Long id;
 
-	@Column(name = "street_name", nullable = false, length = 255)
+	@Column(name = "street_name", nullable = false)
 	private String street;
 
-	@Column(name = "city_name", nullable = false, length = 255)
+	@Column(name = "city_name", nullable = false)
 	private String city;
 
-	@Column(name = "house_number", nullable = false, length = 255)
+	@Column(name = "house_number", nullable = false)
 	private String houseNumber;
 
-	@Column(name = "state_name", nullable = false, length = 255)
+	@Column(name = "state_name", nullable = false)
 	private String state;
 
-	@Column(name = "apartment_number", nullable = false, length = 255)
+	@Column(name = "apartment_number", nullable = false)
 	private String apartment;
 
-	@Column(name = "zip_code", nullable = false, length = 255)
+	@Column(name = "zip_code", nullable = false)
 	private String zipCode;
 
-	@Column(name = "phone", nullable = false, length = 255)
+	@Column(name = "phone", nullable = false)
 	private String phone;
 
 }

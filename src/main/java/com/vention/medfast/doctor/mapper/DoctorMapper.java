@@ -6,11 +6,17 @@ import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.model.DoctorDetails;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.user.model.User;
-import org.mapstruct.*;
+import org.mapstruct.AfterMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 @Mapper(componentModel = "spring")
 public interface DoctorMapper {
@@ -38,7 +44,7 @@ public interface DoctorMapper {
 
 	@Named("specializationsToString")
 	default String specializationsToString(Set<Specialization> specializations) {
-		if (specializations == null || specializations.isEmpty()) {
+		if (isEmpty(specializations)) {
 			return null;
 		}
 		return specializations.stream().map(Specialization::getName).collect(Collectors.joining(", "));

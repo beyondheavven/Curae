@@ -1,11 +1,9 @@
 package com.vention.medfast.api.exception;
 
 import com.vention.medfast.wrapper.ErrorCode;
-import com.vention.medfast.wrapper.ResponseError;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +19,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import java.util.Objects;
 
 @Slf4j
 @RestControllerAdvice
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			.orElse("Validation error");
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(ResponseWrapper.builder().error(new ResponseError(ErrorCode.VALIDATION_ERROR, message)).build());
+			.body(ResponseWrapper.withError(HttpStatus.BAD_REQUEST, message, ErrorCode.VALIDATION_ERROR));
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)
@@ -97,9 +97,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			HttpHeaders headers, org.springframework.http.HttpStatusCode status,
 			org.springframework.web.context.request.WebRequest request) {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(ResponseWrapper.builder()
-				.error(new ResponseError(ErrorCode.BAD_REQUEST, "Malformed JSON or invalid field type/format"))
-				.build());
+			.body(ResponseWrapper.withError(HttpStatus.BAD_REQUEST, "Malformed JSON or invalid field type/format",
+					ErrorCode.BAD_REQUEST));
 	}
 
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -114,7 +113,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		String message = ex.getParameterName() + ": missing required parameter";
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(ResponseWrapper.builder().error(new ResponseError(ErrorCode.BAD_REQUEST, message)).build());
+			.body(ResponseWrapper.withError(HttpStatus.BAD_REQUEST, message, ErrorCode.BAD_REQUEST));
 	}
 
 	@ExceptionHandler(DataIntegrityViolationException.class)
@@ -143,8 +142,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	private ResponseEntity<ResponseWrapper<?>> buildError(HttpStatus status, ErrorCode code, String message) {
-		return ResponseEntity.status(status)
-			.body(ResponseWrapper.builder().error(new ResponseError(code, message)).build());
+		return ResponseEntity.status(status).body(ResponseWrapper.withError(status, message, code));
 	}
 
 	private String getRootMessage(Throwable ex) {

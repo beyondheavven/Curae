@@ -1,8 +1,16 @@
 package com.vention.medfast.specialization.model;
 
 import com.vention.medfast.doctor.model.Doctor;
-import jakarta.persistence.*;
 import com.vention.medfast.service.model.ProvidedService;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 

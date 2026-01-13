@@ -2,10 +2,8 @@ package com.vention.medfast.visit.controller;
 
 import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.specialization.dto.SpecializationResponseDto;
 import com.vention.medfast.visit.dto.VisitCreateDto;
 import com.vention.medfast.visit.service.VisitService;
-import com.vention.medfast.wrapper.ResponseFactory;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,9 +37,9 @@ public class VisitController {
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<Long> createVisit(@Valid @RequestBody VisitCreateDto dto) {
+	public ResponseWrapper<Long> create(@Valid @RequestBody VisitCreateDto dto) {
 		long id = visitService.create(dto);
-		return ResponseFactory.withStatus(HttpStatus.CREATED, id);
+		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
 	}
 
 }

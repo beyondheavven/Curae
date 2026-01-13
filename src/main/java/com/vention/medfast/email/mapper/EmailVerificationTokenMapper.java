@@ -3,9 +3,10 @@ package com.vention.medfast.email.mapper;
 import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.user.model.User;
-import java.time.Instant;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.time.Instant;
 
 @Mapper(componentModel = "spring")
 public interface EmailVerificationTokenMapper {

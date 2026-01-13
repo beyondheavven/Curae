@@ -6,11 +6,11 @@ import com.vention.medfast.doctor.dto.DoctorProfileCreateDto;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
+import com.vention.medfast.registration.dto.PatientRegistrationRequestDto;
 import com.vention.medfast.registration.event.DoctorRegisteredEvent;
+import com.vention.medfast.registration.event.PatientRegisteredEvent;
 import com.vention.medfast.registration.mapper.RegistrationMapper;
 import com.vention.medfast.registration.util.RandomPasswordGenerator;
-import com.vention.medfast.registration.dto.PatientRegistrationRequestDto;
-import com.vention.medfast.registration.event.PatientRegisteredEvent;
 import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.service.UserService;
@@ -43,7 +43,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		User patientUser = userService.createPatient(request.getPerson());
 
-		Address address = addressService.createAddress(request.getAddress());
+		Address address = addressService.create(request.getAddress());
 
 		patientService.createPatientProfile(patientUser, address, request.getPerson());
 

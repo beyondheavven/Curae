@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
 
 import java.util.Optional;
 
@@ -34,10 +33,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public boolean existsByEmail(String email) {
-		if (userRepository.existsByEmail(email)) {
-			return true;
-		}
-		return false;
+		return userRepository.existsByEmail(email);
 	}
 
 	@Override

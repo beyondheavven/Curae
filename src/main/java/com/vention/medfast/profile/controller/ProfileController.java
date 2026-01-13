@@ -5,7 +5,6 @@ import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.profile.dto.request.ProfileRequestDto;
 import com.vention.medfast.profile.dto.response.ProfileResponseDto;
 import com.vention.medfast.profile.service.ProfileService;
-import com.vention.medfast.wrapper.ResponseFactory;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -27,13 +26,12 @@ public class ProfileController {
 
 	@GetMapping
 	public ResponseWrapper<ProfileResponseDto> getProfile(@AuthenticationPrincipal CustomUserDetails user) {
-
-		return ResponseFactory.ok(profileService.getProfile(user.getId()));
+		return ResponseWrapper.ok(profileService.getProfile(user.getId()));
 	}
 
 	@PutMapping
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateProfile(@AuthenticationPrincipal CustomUserDetails user,
+	public void update(@AuthenticationPrincipal CustomUserDetails user,
 			@Valid @RequestBody ProfileRequestDto profileRequestDto) {
 		profileService.updateProfile(user.getId(), profileRequestDto);
 	}

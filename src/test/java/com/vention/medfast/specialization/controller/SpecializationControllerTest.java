@@ -106,11 +106,11 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdIdInt)));
+			.andExpect(jsonPath("$.data.specializations[*].id", Matchers.hasItem(createdIdInt)));
 
 		mockMvc.perform(get("/services/{id}", 3).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(createdIdInt)));
+			.andExpect(jsonPath("$.data.specializations[*].id", Matchers.hasItem(createdIdInt)));
 
 		mockMvc
 			.perform(
@@ -177,15 +177,15 @@ class SpecializationControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(get("/services/{id}", 1).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationIdInt))));
+			.andExpect(jsonPath("$.data.specializations[*].id", Matchers.not(Matchers.hasItem(specializationIdInt))));
 
 		mockMvc.perform(get("/services/{id}", 3).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.not(Matchers.hasItem(specializationIdInt))));
+			.andExpect(jsonPath("$.data.specializations[*].id", Matchers.not(Matchers.hasItem(specializationIdInt))));
 
 		mockMvc.perform(get("/services/{id}", 2).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.specializations[*].id", Matchers.hasItem(specializationIdInt)));
+			.andExpect(jsonPath("$.data.specializations[*].id", Matchers.hasItem(specializationIdInt)));
 
 		mockMvc.perform(delete("/specializations/{id}", specializationId).header("Authorization", "Bearer " + token))
 			.andExpect(status().isNoContent());

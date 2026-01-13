@@ -8,7 +8,6 @@ import com.vention.medfast.password.dto.SetPasswordRequestDto;
 import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.service.UserService;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;

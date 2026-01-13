@@ -50,7 +50,7 @@ class AddressServiceImplTest {
 		when(addressMapper.toEntity(dto)).thenReturn(mapped);
 		when(addressRepository.save(mapped)).thenReturn(saved);
 
-		Address result = addressService.createAddress(dto);
+		Address result = addressService.create(dto);
 
 		verify(addressRepository).findOne(exampleCaptor.capture());
 		Address probe = exampleCaptor.getValue().getProbe();
@@ -80,7 +80,7 @@ class AddressServiceImplTest {
 		when(addressRepository.findOne(ArgumentMatchers.<Example<Address>>any())).thenReturn(Optional.of(existing));
 		when(addressRepository.save(existing)).thenReturn(existing);
 
-		Address result = addressService.createAddress(dto);
+		Address result = addressService.create(dto);
 
 		assertThat(result.getId()).isEqualTo(2L);
 		assertThat(result.getPhone()).isEqualTo("+123456789");
@@ -101,7 +101,7 @@ class AddressServiceImplTest {
 
 		when(addressRepository.findOne(ArgumentMatchers.<Example<Address>>any())).thenReturn(Optional.of(existing));
 
-		Address result = addressService.createAddress(dto);
+		Address result = addressService.create(dto);
 
 		assertThat(result).isSameAs(existing);
 		assertThat(result.getPhone()).isEqualTo("+111");

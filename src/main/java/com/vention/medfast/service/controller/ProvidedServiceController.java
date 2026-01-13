@@ -4,6 +4,7 @@ import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.service.dto.ProvidedServiceCreateDto;
 import com.vention.medfast.service.dto.ProvidedServiceResponseDto;
 import com.vention.medfast.service.service.ProvidedServiceService;
+import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,16 +19,16 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class ProvidedServiceController {
 	@ApiResponses({ @ApiResponse(responseCode = "200"),
 			@ApiResponse(responseCode = "204", description = "No services found") })
 	@GetMapping
-	public ResponseEntity<List<ProvidedServiceResponseDto>> getAllServices() {
+	public ResponseEntity<List<ProvidedServiceResponseDto>> getAll() {
 		List<ProvidedServiceResponseDto> services = providedServiceService.getAll();
 
 		if (services.isEmpty()) {
@@ -57,9 +58,9 @@ public class ProvidedServiceController {
 	@ApiResponses({ @ApiResponse(responseCode = "200"),
 			@ApiResponse(responseCode = "404", description = "Service not found") })
 	@GetMapping("/{id}")
-	public ProvidedServiceResponseDto getServiceById(
+	public ResponseWrapper<ProvidedServiceResponseDto> getById(
 			@Parameter(description = "ID of service to find") @PathVariable(name = "id") Long id) {
-		return providedServiceService.getById(id);
+		return ResponseWrapper.ok(providedServiceService.getById(id));
 	}
 
 	@Operation(summary = "Create service")
@@ -67,8 +68,8 @@ public class ProvidedServiceController {
 			@ApiResponse(responseCode = "400", description = "Validation error") })
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Long createSpecialization(@Valid @RequestBody ProvidedServiceCreateDto dto) {
-		return providedServiceService.create(dto);
+	public ResponseWrapper<Long> create(@Valid @RequestBody ProvidedServiceCreateDto dto) {
+		return ResponseWrapper.ok(providedServiceService.create(dto));
 	}
 
 	@Operation(summary = "Delete a service")
@@ -76,7 +77,7 @@ public class ProvidedServiceController {
 			@ApiResponse(responseCode = "404", description = "Service not found") })
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteSpecialization(@Parameter(description = "ID of the service to delete",
+	public void delete(@Parameter(description = "ID of the service to delete",
 			required = true) @PathVariable(name = "id") Long id) {
 		providedServiceService.deleteById(id);
 	}
@@ -86,21 +87,21 @@ public class ProvidedServiceController {
 			@ApiResponse(responseCode = "400", description = "Validation error"),
 			@ApiResponse(responseCode = "404", description = "Service not found") })
 	@PutMapping("/{id}")
-	public long updateSpecialization(
+	public ResponseWrapper<Long> update(
 			@Parameter(description = "ID of the service to update", required = true) @PathVariable(name = "id") Long id,
 			@Parameter(description = "Fields to update") @Valid @RequestBody ProvidedServiceCreateDto dto) {
-		return providedServiceService.update(id, dto);
+		return ResponseWrapper.ok(providedServiceService.update(id, dto));
 	}
 
 	@Operation(summary = "Search services", description = "Search services by name with pagination")
 	@ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
 	@GetMapping("/search")
-	public ResponseEntity<Page<ProvidedServiceResponseDto>> searchServices(
+	public ResponseWrapper<Page<ProvidedServiceResponseDto>> search(
 			@Parameter(description = "Search query text (searches in service name)") @RequestParam(
 					required = false) String query,
 			@ParameterObject @PageableDefault(size = 10, sort = "name",
 					direction = Sort.Direction.ASC) Pageable pageable) {
-		return ResponseEntity.ok(providedServiceService.search(query, pageable));
+		return ResponseWrapper.ok(providedServiceService.search(query, pageable));
 	}
 
 }

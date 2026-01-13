@@ -4,12 +4,15 @@ import com.vention.medfast.address.mapper.AddressMapper;
 import com.vention.medfast.address.model.Address;
 import com.vention.medfast.address.repository.AddressRepository;
 import com.vention.medfast.registration.dto.AddressDto;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+import static org.apache.commons.lang3.StringUtils.trimToNull;
 
 @Service
 @RequiredArgsConstructor
@@ -21,8 +24,30 @@ public class AddressServiceImpl implements AddressService {
 
 	@Override
 	@Transactional
-	public Address createAddress(AddressDto dto) {
+	public Address create(AddressDto dto) {
+		Optional<Address> existingOpt = findExistingAddress(dto);
 
+		if (existingOpt.isPresent()) {
+			Address existing = existingOpt.get();
+
+			String phoneTrimmed = trimToNull(dto.getPhoneNumber());
+			if (phoneTrimmed != null) {
+				existing.setPhone(phoneTrimmed);
+				return addressRepository.save(existing);
+			}
+			return existing;
+		}
+
+		Address toCreate = addressMapper.toEntity(dto);
+		return addressRepository.save(toCreate);
+	}
+
+	/**
+	 * Tries to find existing address.
+	 * @param dto with data for address
+	 * @return optional value of an entity
+	 */
+	private Optional<Address> findExistingAddress(AddressDto dto) {
 		Address probe = new Address();
 		probe.setStreet(trimToNull(dto.getStreet()));
 		probe.setCity(trimToNull(dto.getCity()));
@@ -41,29 +66,7 @@ public class AddressServiceImpl implements AddressService {
 			.withMatcher("houseNumber", ExampleMatcher.GenericPropertyMatchers.exact())
 			.withMatcher("apartmentNumber", ExampleMatcher.GenericPropertyMatchers.exact());
 
-		Optional<Address> existingOpt = addressRepository.findOne(Example.of(probe, matcher));
-
-		if (existingOpt.isPresent()) {
-			Address existing = existingOpt.get();
-
-			String incomingPhone = trimToNull(dto.getPhoneNumber());
-			if (incomingPhone != null && (existing.getPhone() == null || existing.getPhone().isBlank())) {
-				existing.setPhone(incomingPhone);
-				return addressRepository.save(existing);
-			}
-
-			return existing;
-		}
-
-		Address toCreate = addressMapper.toEntity(dto);
-		return addressRepository.save(toCreate);
-	}
-
-	private String trimToNull(String s) {
-		if (s == null)
-			return null;
-		String t = s.trim();
-		return t.isEmpty() ? null : t;
+		return addressRepository.findOne(Example.of(probe, matcher));
 	}
 
 }

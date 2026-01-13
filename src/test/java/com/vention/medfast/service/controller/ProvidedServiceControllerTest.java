@@ -5,6 +5,7 @@ import com.vention.medfast.AbstractIntegrationTest;
 import com.vention.medfast.auth.dto.AuthRequestDto;
 import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.service.dto.ProvidedServiceCreateDto;
+import com.vention.medfast.wrapper.ResponseWrapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -14,13 +15,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -61,7 +67,7 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(json))
 			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$").isNumber());
+			.andExpect(jsonPath("$.data").isNumber());
 	}
 
 	@Test
@@ -76,9 +82,9 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 				.param("size", "10"))
 
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.content", Matchers.hasSize(1)))
-			.andExpect(jsonPath("$.content[0].name").value(uniqueName))
-			.andExpect(jsonPath("$.totalElements").value(1));
+			.andExpect(jsonPath("$.data.content", Matchers.hasSize(1)))
+			.andExpect(jsonPath("$.data.content[0].name").value(uniqueName))
+			.andExpect(jsonPath("$.data.totalElements").value(1));
 	}
 
 	@Test
@@ -87,7 +93,7 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 			.perform(get(ApiPaths.SERVICE_ENDPOINT + "/search").header("Authorization", "Bearer " + token)
 				.param("query", "NonExistentServiceXYZ"))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.content").isEmpty());
+			.andExpect(jsonPath("$.data.content").isEmpty());
 	}
 
 	@Test
@@ -96,7 +102,7 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(get(ApiPaths.SERVICE_ENDPOINT + "/{id}", id).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name").value("X-Ray"));
+			.andExpect(jsonPath("$.data.name").value("X-Ray"));
 	}
 
 	@Test
@@ -115,8 +121,8 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 
 		mockMvc.perform(get(ApiPaths.SERVICE_ENDPOINT + "/{id}", id).header("Authorization", "Bearer " + token))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.name").value("New Name"))
-			.andExpect(jsonPath("$.price").value(200.00));
+			.andExpect(jsonPath("$.data.name").value("New Name"))
+			.andExpect(jsonPath("$.data.price").value(200.00));
 	}
 
 	@Test
@@ -143,7 +149,9 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 			.getResponse()
 			.getContentAsString();
 
-		return Long.parseLong(response);
+		ResponseWrapper<Long> result = objectMapper.readValue(response, new TypeReference<ResponseWrapper<Long>>() {
+		});
+		return result.getData();
 	}
 
 	private ProvidedServiceCreateDto generateDto(String name) {

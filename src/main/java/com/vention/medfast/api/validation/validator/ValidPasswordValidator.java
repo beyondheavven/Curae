@@ -4,9 +4,12 @@ import com.vention.medfast.api.validation.annotation.ValidPassword;
 import com.vention.medfast.api.validation.properties.PasswordValidationProperties;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+
+import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Component
 @RequiredArgsConstructor
@@ -16,7 +19,7 @@ public class ValidPasswordValidator implements ConstraintValidator<ValidPassword
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		if (value == null || value.isBlank()) {
+		if (isBlank(value)) {
 			return true;
 		}
 

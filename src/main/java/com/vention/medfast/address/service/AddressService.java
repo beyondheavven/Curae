@@ -5,6 +5,6 @@ import com.vention.medfast.registration.dto.AddressDto;
 
 public interface AddressService {
 
-	Address createAddress(AddressDto dto);
+	Address create(AddressDto dto);
 
 }

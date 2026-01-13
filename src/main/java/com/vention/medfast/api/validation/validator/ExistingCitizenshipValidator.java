@@ -7,6 +7,8 @@ import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 @Component
 @RequiredArgsConstructor
 public class ExistingCitizenshipValidator implements ConstraintValidator<ExistingCitizenship, String> {
@@ -15,7 +17,7 @@ public class ExistingCitizenshipValidator implements ConstraintValidator<Existin
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		if (value == null || value.isBlank()) {
+		if (isBlank(value)) {
 			return true;
 		}
 		return countryService.existsByCitizenshipIgnoreCase(value.trim());

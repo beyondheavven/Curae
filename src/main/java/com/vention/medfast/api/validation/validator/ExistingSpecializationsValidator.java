@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Set;
 
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 @Component
 @RequiredArgsConstructor
 public class ExistingSpecializationsValidator implements ConstraintValidator<ExistingSpecializations, Set<Long>> {
@@ -19,7 +21,7 @@ public class ExistingSpecializationsValidator implements ConstraintValidator<Exi
 
 	@Override
 	public boolean isValid(Set<Long> specializationIds, ConstraintValidatorContext constraintValidatorContext) {
-		if (specializationIds == null || specializationIds.isEmpty()) {
+		if (isEmpty(specializationIds)) {
 			return true;
 		}
 
