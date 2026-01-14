@@ -20,6 +20,7 @@ public class ExistingCitizenshipValidator implements ConstraintValidator<Existin
 		if (isBlank(value)) {
 			return true;
 		}
+
 		return countryService.existsByCitizenshipIgnoreCase(value.trim());
 	}
 

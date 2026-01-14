@@ -1,14 +1,17 @@
 package com.vention.medfast.doctor.util;
 
-import com.vention.medfast.doctor.dto.DoctorProfileCreateDto;
+import com.vention.medfast.doctor.dto.DoctorResponseDto;
+import com.vention.medfast.doctor.dto.DoctorUpdateDto;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.model.DoctorDetails;
+import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 public class DataUtils {
@@ -33,10 +36,24 @@ public class DataUtils {
 
 	public static final String SPECIALIZATION_NAME = "Cardiology";
 
-	public static DoctorProfileCreateDto getDoctorProfileCreateRequestDto() {
-		return DoctorProfileCreateDto.builder()
-			.specializationIds(Set.of(SPECIALIZATION_ID))
+	public static final Long DR_HOUSE_ID = 1L;
+
+	public static final Long DR_WATSON_ID = 2L;
+
+	public static final String HOUSE_EMAIL = "house@med.com";
+
+	public static final String ADMIN_EMAIL = "admin@med.com";
+
+	public static final String ADMIN_PASSWORD = "pass";
+
+	public static DoctorRegistrationRequestDto getDoctorRegistrationRequestDto() {
+		return DoctorRegistrationRequestDto.builder()
+			.firstName(FIRST_NAME)
+			.lastName(LAST_NAME)
+			.email(EMAIL)
 			.phoneNumber(PHONE_NUMBER)
+			.birthDate(BIRTH_DATE)
+			.specializationIds(Set.of(SPECIALIZATION_ID))
 			.licenseNumber(LICENSE_NUMBER)
 			.build();
 	}
@@ -109,6 +126,43 @@ public class DataUtils {
 		}
 
 		return doctor;
+	}
+
+	public static DoctorResponseDto getDoctorResponseDto() {
+		return DoctorResponseDto.builder()
+			.id(DOCTOR_ID)
+			.firstName(FIRST_NAME)
+			.lastName(LAST_NAME)
+			.email(EMAIL)
+			.licenseNumber(LICENSE_NUMBER)
+			.phoneNumber(PHONE_NUMBER)
+			.bio("Specialist in " + SPECIALIZATION_NAME)
+			.specializations(List.of())
+			.clinics(List.of())
+			.build();
+	}
+
+	public static DoctorUpdateDto getDoctorUpdateDto() {
+		return DoctorUpdateDto.builder()
+			.firstName("UpdatedJohn")
+			.lastName("UpdatedDoe")
+			.phoneNumber("+1987654321")
+			.licenseNumber("7654321")
+			.specializationIds(Set.of(10L))
+			.clinicIds(Set.of(20L))
+			.build();
+	}
+
+	public static DoctorUpdateDto getDoctorUpdateDtoIntegration() {
+		return DoctorUpdateDto.builder()
+			.firstName("GregoryUPDATED")
+			.lastName("HouseUPDATED")
+			.bio("Updated bio")
+			.phoneNumber("+19998887777")
+			.licenseNumber("LIC-99999")
+			.specializationIds(Set.of(2L))
+			.clinicIds(Set.of(1L))
+			.build();
 	}
 
 }

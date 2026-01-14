@@ -1,11 +1,13 @@
 package com.vention.medfast.user.mapper;
 
 import com.vention.medfast.patient.model.Gender;
+import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.registration.dto.PersonDto;
-import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.User;
 import java.time.LocalDate;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -51,10 +53,18 @@ class UserMapperTest {
 
 	@Test
 	void shouldMapUserCreateDtoToDoctorUserWhenValidDataProvided() {
-		UserCreateDto dto = new UserCreateDto("Jane", "Doe", "jone_doe@med.com", "asd32fr4", LocalDate.of(2000, 1, 1),
-				"");
+		DoctorRegistrationRequestDto dto = DoctorRegistrationRequestDto.builder()
+			.firstName("John")
+			.lastName("Doe")
+			.email("john@med.com")
+			.phoneNumber("+1123456789")
+			.birthDate(LocalDate.of(2000, 1, 1))
+			.specializationIds(Set.of(1L))
+			.licenseNumber("1234567")
+			.build();
+		String tempPassword = "1234567";
 
-		User user = mapper.toDoctorUser(dto, passwordEncoder);
+		User user = mapper.toDoctorUser(dto, tempPassword, passwordEncoder);
 
 		assertThat(user).isNotNull();
 		assertThat(user.getId()).isNull();
@@ -63,12 +73,12 @@ class UserMapperTest {
 		assertThat(user.getEmail()).isEqualTo(dto.email());
 		assertThat(user.getBirthDate()).isEqualTo(dto.birthDate());
 		assertThat(user.getRole()).isEqualTo(RoleType.DOCTOR);
-		assertThat(passwordEncoder.matches(dto.password(), user.getPasswordHash())).isTrue();
+		assertThat(passwordEncoder.matches(tempPassword, user.getPasswordHash())).isTrue();
 	}
 
 	@Test
 	void shouldReturnNullWhenUserCreateDtoIsNull() {
-		assertThat(mapper.toDoctorUser(null, passwordEncoder)).isNull();
+		assertThat(mapper.toDoctorUser(null, null, passwordEncoder)).isNull();
 	}
 
 }

@@ -6,6 +6,7 @@ ALTER TABLE appointments
     ADD CONSTRAINT fk_appointment_doctor
         FOREIGN KEY (doctor_id)
             REFERENCES doctors (id)
+            ON DELETE CASCADE
             NOT DEFERRABLE
                 INITIALLY IMMEDIATE;
 

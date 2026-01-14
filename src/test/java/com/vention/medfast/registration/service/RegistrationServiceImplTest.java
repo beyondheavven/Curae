@@ -1,14 +1,11 @@
 package com.vention.medfast.registration.service;
 
 import com.vention.medfast.address.service.AddressService;
-import com.vention.medfast.doctor.dto.DoctorProfileCreateDto;
+import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.registration.event.DoctorRegisteredEvent;
-import com.vention.medfast.registration.mapper.RegistrationMapper;
-import com.vention.medfast.registration.util.DataUtils;
-import com.vention.medfast.user.dto.UserCreateDto;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -43,9 +40,6 @@ class RegistrationServiceImplTest {
 	private DoctorService doctorService;
 
 	@Mock
-	private RegistrationMapper mapper;
-
-	@Mock
 	private ApplicationEventPublisher eventPublisher;
 
 	@InjectMocks
@@ -55,37 +49,32 @@ class RegistrationServiceImplTest {
 	void shouldRegisterDoctorWhenRequestIsValid() {
 		DoctorRegistrationRequestDto request = getDoctorRegistrationRequestDto();
 
-		UserCreateDto userCreateDto = DataUtils.getUserCreateDto();
-		DoctorProfileCreateDto doctorProfileCreateDto = DataUtils.getDoctorProfileCreateDto();
-
 		User mockedUser = new User();
 		mockedUser.setId(10L);
 		mockedUser.setEmail(request.email());
 
-		given(mapper.toUserCreateDto(eq(request), anyString())).willReturn(userCreateDto);
-		given(mapper.toDoctorProfileDto(request)).willReturn(doctorProfileCreateDto);
-		given(userService.createDoctor(userCreateDto)).willReturn(mockedUser);
+		Doctor mockedDoctor = new Doctor();
 
+		given(userService.createDoctor(eq(request), anyString())).willReturn(mockedUser);
+		given(doctorService.createProfile(mockedUser, request)).willReturn(mockedDoctor);
 		registrationService.registerDoctor(request);
 
-		verify(userService).createDoctor(userCreateDto);
-		verify(doctorService).createDoctorProfile(mockedUser, doctorProfileCreateDto);
+		verify(userService).createDoctor(eq(request), anyString());
+		verify(doctorService).createProfile(mockedUser, request);
 		verify(eventPublisher).publishEvent(any(DoctorRegisteredEvent.class));
 	}
 
 	@Test
 	void shouldThrowExceptionAndStopFlowWhenUserServiceFails() {
 		DoctorRegistrationRequestDto request = getDoctorRegistrationRequestDto();
-		UserCreateDto userCreateDto = DataUtils.getUserCreateDto();
 
-		given(mapper.toUserCreateDto(eq(request), anyString())).willReturn(userCreateDto);
-		given(userService.createDoctor(any())).willThrow(new IllegalArgumentException("Email exists"));
+		given(userService.createDoctor(any(), anyString())).willThrow(new IllegalArgumentException("Email exists"));
 
 		assertThatThrownBy(() -> registrationService.registerDoctor(request))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessage("Email exists");
 
-		verify(doctorService, never()).createDoctorProfile(any(), any());
+		verify(doctorService, never()).createProfile(any(), any());
 		verify(eventPublisher, never()).publishEvent(any());
 	}
 

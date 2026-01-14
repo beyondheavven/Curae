@@ -31,7 +31,7 @@ public class VisitServiceImpl implements VisitService {
 	@Override
 	@Transactional
 	public long create(VisitCreateDto dto) {
-		Doctor doctor = doctorService.getById(dto.doctorId());
+		Doctor doctor = doctorService.findDoctorById(dto.doctorId());
 		Patient patient = patientService.getById(dto.patientId());
 		ProvidedService service = providedServiceService.getProvidedServiceById(dto.serviceId());
 

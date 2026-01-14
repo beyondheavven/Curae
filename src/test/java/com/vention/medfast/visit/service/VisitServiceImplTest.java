@@ -75,7 +75,7 @@ public class VisitServiceImplTest {
 
 		when(visitMapper.toEntity(dto, doctor, patient, providedService)).thenReturn(entity);
 		when(providedServiceService.getProvidedServiceById(anyLong())).thenReturn(providedService);
-		when(doctorService.getById(anyLong())).thenReturn(doctor);
+		when(doctorService.findDoctorById(anyLong())).thenReturn(doctor);
 		when(patientService.getById(anyLong())).thenReturn(patient);
 		when(visitRepository.save(entity)).thenReturn(entity);
 
@@ -85,7 +85,7 @@ public class VisitServiceImplTest {
 
 		verify(visitMapper).toEntity(dto, doctor, patient, providedService);
 		verify(providedServiceService).getProvidedServiceById(anyLong());
-		verify(doctorService).getById(anyLong());
+		verify(doctorService).findDoctorById(anyLong());
 		verify(patientService).getById(anyLong());
 		verify(visitRepository).save(entity);
 	}

@@ -28,6 +28,7 @@
     <spring.javaformat.plugin.version>0.0.39</spring.javaformat.plugin.version>
     <jacoco.version>0.8.14</jacoco.version>
     <maven.surefire.version>3.5.4</maven.surefire.version>
+    <hibernate.processor.version>7.2.0.Final</hibernate.processor.version>
   </properties>
 
   <dependencies>
@@ -109,14 +110,6 @@
       <artifactId>micrometer-registry-prometheus</artifactId>
     </dependency>
 
-    <!-- Jpa Modelgen -->
-    <dependency>
-      <groupId>org.hibernate.orm</groupId>
-      <artifactId>hibernate-processor</artifactId>
-      <version>7.2.0.Final</version>
-      <scope>provided</scope>
-    </dependency>
-
     <!-- Mail / Templates -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -151,7 +144,6 @@
       <artifactId>lombok</artifactId>
       <optional>true</optional>
     </dependency>
-
 
     <!-- Logging -->
     <dependency>
@@ -217,6 +209,13 @@
       <version>3.20.0</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-processor</artifactId>
+      <version>${hibernate.processor.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -244,7 +243,7 @@
             <path>
               <groupId>org.hibernate.orm</groupId>
               <artifactId>hibernate-processor</artifactId>
-              <version>${hibernate.version}</version>
+              <version>${hibernate.processor.version}</version>
             </path>
           </annotationProcessorPaths>
         </configuration>

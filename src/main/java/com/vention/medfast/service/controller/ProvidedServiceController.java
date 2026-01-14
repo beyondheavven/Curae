@@ -95,7 +95,7 @@ public class ProvidedServiceController {
 
 	@Operation(summary = "Search services", description = "Search services by name with pagination")
 	@ApiResponse(responseCode = "200", description = "Successfully retrieved search results")
-	@GetMapping("/search")
+	@GetMapping(ApiPaths.SEARCH_ENDPOINT)
 	public ResponseWrapper<Page<ProvidedServiceResponseDto>> search(
 			@Parameter(description = "Search query text (searches in service name)") @RequestParam(
 					required = false) String query,

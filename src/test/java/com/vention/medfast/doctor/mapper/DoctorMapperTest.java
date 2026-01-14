@@ -1,9 +1,13 @@
 package com.vention.medfast.doctor.mapper;
 
-import com.vention.medfast.doctor.dto.DoctorProfileCreateDto;
+import com.vention.medfast.address.model.Address;
+import com.vention.medfast.clinic.model.Clinic;
+import com.vention.medfast.doctor.dto.DoctorResponseDto;
 import com.vention.medfast.doctor.dto.DoctorSearchResponseDto;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.model.DoctorDetails;
+import com.vention.medfast.doctor.util.DataUtils;
+import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.user.model.User;
 import org.junit.jupiter.api.Test;
@@ -25,7 +29,9 @@ class DoctorMapperTest {
 		user.setId(1L);
 		user.setEmail("doctor@med.com");
 
-		DoctorProfileCreateDto dto = DoctorProfileCreateDto.builder()
+		DoctorRegistrationRequestDto dto = DoctorRegistrationRequestDto.builder()
+			.firstName("John")
+			.lastName("Doe")
 			.licenseNumber("1234567")
 			.phoneNumber("+1123456789")
 			.specializationIds(Set.of(1L, 2L))
@@ -56,6 +62,51 @@ class DoctorMapperTest {
 
 		assertThat(specialization.getDoctors()).contains(doctor);
 		assertThat(specialization2.getDoctors()).contains(doctor);
+	}
+
+	@Test
+	void shouldMapToDoctorResponseDtoWithFullGraph() {
+		Doctor doctor = DataUtils.getDoctorPersisted();
+
+		Clinic clinic = new Clinic();
+		clinic.setId(50L);
+		clinic.setName("City Clinic");
+		Address address = new Address();
+		address.setStreet("Baker St");
+		clinic.setAddress(address);
+
+		doctor.addClinic(clinic);
+
+		DoctorResponseDto res = mapper.toDoctorResponseDto(doctor);
+
+		assertThat(res.id()).isEqualTo(DataUtils.DOCTOR_ID);
+		assertThat(res.firstName()).isEqualTo(DataUtils.FIRST_NAME);
+		assertThat(res.licenseNumber()).isEqualTo(DataUtils.LICENSE_NUMBER);
+
+		assertThat(res.specializations()).hasSize(1);
+		assertThat(res.specializations().getFirst().name()).isEqualTo(DataUtils.SPECIALIZATION_NAME);
+
+		assertThat(res.clinics()).hasSize(1);
+		assertThat(res.clinics().getFirst().name()).isEqualTo("City Clinic");
+		assertThat(res.clinics().getFirst().address().street()).isEqualTo("Baker St");
+	}
+
+	@Test
+	void shouldReturnNullWhenInputsAreNull() {
+		assertThat(mapper.toDoctor(null, null, null)).isNull();
+		assertThat(mapper.toDoctorDetails(null)).isNull();
+		assertThat(mapper.toDoctorResponseDto(null)).isNull();
+		assertThat(mapper.toSpecializationBaseDto(null)).isNull();
+		assertThat(mapper.toClinicBaseDto(null)).isNull();
+		assertThat(mapper.toAddressDto(null)).isNull();
+
+		mapper.updateDoctorFromDto(null, new Doctor());
+		mapper.updateUserFromDto(null, new User());
+		mapper.updateDetailsFromDto(null, new DoctorDetails());
+
+		Doctor d = new Doctor();
+		mapper.linkSpecializationsAndGenerateBio(d, null);
+		assertThat(d.getSpecializations()).isEmpty();
 	}
 
 	@Test
@@ -90,26 +141,6 @@ class DoctorMapperTest {
 
 		assertThat(nullResult).isNull();
 		assertThat(emptyResult).isNull();
-	}
-
-	@Test
-	void shouldMapToDoctorDetailsWhenInputIsValid() {
-		DoctorProfileCreateDto dto = DoctorProfileCreateDto.builder()
-			.licenseNumber("ABC-123")
-			.phoneNumber("+441234567")
-			.build();
-
-		DoctorDetails details = mapper.toDoctorDetails(dto);
-
-		assertThat(details).isNotNull();
-		assertThat(details.getLicenseNumber()).isEqualTo("ABC-123");
-		assertThat(details.getPhoneNumber()).isEqualTo("+441234567");
-	}
-
-	@Test
-	void shouldReturnNullWhenInputsAreNull() {
-		Doctor result = mapper.toDoctor(null, null, null);
-		assertThat(result).isNull();
 	}
 
 }

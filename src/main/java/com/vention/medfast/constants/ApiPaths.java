@@ -18,11 +18,13 @@ public final class ApiPaths {
 
 	public static final String PATIENT_ENDPOINT = "/patients";
 
+	public static final String DOCTOR_ENDPOINT = "/doctors";
+
 	public static final String SERVICE_ENDPOINT = "/services";
 
-	public static final String PROFILE_ENDPOINT = "/profile";
+	public static final String CLINIC_ENDPOINT = "/clinics";
 
-	public static final String DOCTOR_ENDPOINT = "/doctor";
+	public static final String PROFILE_ENDPOINT = "/profile";
 
 	public static final String REGISTRATION_ENDPOINT = "/registration";
 
@@ -37,5 +39,7 @@ public final class ApiPaths {
 	public static final String RESET_PASSWORD_CONFIRM_ENDPOINT = "password-reset/confirm";
 
 	public static final String RESET_PASSWORD_VERIFY_ENDPOINT = "password-reset/verify";
+
+	public static final String SEARCH_ENDPOINT = "/search";
 
 }
