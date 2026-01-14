@@ -1,0 +1,3 @@
+ALTER TABLE appointments ALTER COLUMN doctor_id DROP NOT NULL;
+
+ALTER TABLE appointments ALTER COLUMN service_id DROP NOT NULL;
