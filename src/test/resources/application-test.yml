@@ -21,6 +21,10 @@ logging:
   level:
     org.flywaydb: DEBUG
 
+validation:
+  password:
+    regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
+
 app:
   jwt:
     secret: "very-long-secret-should-be-at-least-256-bit"

@@ -1,12 +1,15 @@
 package com.vention.medfast.doctor.mapper;
 
 import com.vention.medfast.doctor.dto.DoctorProfileCreateDto;
+import com.vention.medfast.doctor.dto.DoctorSearchResponseDto;
 import com.vention.medfast.doctor.model.Doctor;
+import com.vention.medfast.doctor.model.DoctorDetails;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -53,6 +56,60 @@ class DoctorMapperTest {
 
 		assertThat(specialization.getDoctors()).contains(doctor);
 		assertThat(specialization2.getDoctors()).contains(doctor);
+	}
+
+	@Test
+	void shouldMapToDoctorSearchResponseDtoWheInputIsValid() {
+		User user = new User();
+		user.setFirstName("John");
+		user.setLastName("Doe");
+		user.setProfileUrl("http://example.com/photo.jpg");
+
+		Specialization spec1 = new Specialization();
+		spec1.setName("Cardiology");
+		Specialization spec2 = new Specialization();
+		spec2.setName("Neurology");
+
+		Doctor doctor = new Doctor();
+		doctor.setUser(user);
+		doctor.setSpecializations(Set.of(spec1, spec2));
+
+		DoctorSearchResponseDto result = mapper.toDoctorSearchResponseDto(doctor);
+
+		assertThat(result).isNotNull();
+		assertThat(result.firstName()).isEqualTo("John");
+		assertThat(result.lastName()).isEqualTo("Doe");
+		assertThat(result.profileUrl()).isEqualTo("http://example.com/photo.jpg");
+		assertThat(result.specialization()).contains("Cardiology", "Neurology");
+	}
+
+	@Test
+	void shouldReturnNullWhenSpecializationsAreEmptyOrNull() {
+		String nullResult = mapper.specializationsToString(null);
+		String emptyResult = mapper.specializationsToString(Collections.emptySet());
+
+		assertThat(nullResult).isNull();
+		assertThat(emptyResult).isNull();
+	}
+
+	@Test
+	void shouldMapToDoctorDetailsWhenInputIsValid() {
+		DoctorProfileCreateDto dto = DoctorProfileCreateDto.builder()
+			.licenseNumber("ABC-123")
+			.phoneNumber("+441234567")
+			.build();
+
+		DoctorDetails details = mapper.toDoctorDetails(dto);
+
+		assertThat(details).isNotNull();
+		assertThat(details.getLicenseNumber()).isEqualTo("ABC-123");
+		assertThat(details.getPhoneNumber()).isEqualTo("+441234567");
+	}
+
+	@Test
+	void shouldReturnNullWhenInputsAreNull() {
+		Doctor result = mapper.toDoctor(null, null, null);
+		assertThat(result).isNull();
 	}
 
 }

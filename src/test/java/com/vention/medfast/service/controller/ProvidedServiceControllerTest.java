@@ -1,108 +1,69 @@
 package com.vention.medfast.service.controller;
 
-import com.jayway.jsonpath.JsonPath;
-import com.vention.medfast.AbstractIntegrationTest;
-import com.vention.medfast.auth.dto.AuthRequestDto;
+import com.vention.medfast.AbstractControllerIntegrationTest;
 import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.service.dto.ProvidedServiceCreateDto;
-import com.vention.medfast.wrapper.ResponseWrapper;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeAll;
+import com.vention.medfast.service.model.ProvidedService;
+import com.vention.medfast.specialization.model.Specialization;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpMethod;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class ProvidedServiceControllerTest extends AbstractIntegrationTest {
-
-	@Autowired
-	MockMvc mockMvc;
-
-	@Autowired
-	ObjectMapper objectMapper;
-
-	private String token;
+class ProvidedServiceControllerTest extends AbstractControllerIntegrationTest {
 
 	private final List<Integer> specializationIds = List.of(1);
 
-	@BeforeAll
-	void obtainToken() throws Exception {
-		AuthRequestDto loginRequest = new AuthRequestDto("admin@med.com", "pass");
-		String json = objectMapper.writeValueAsString(loginRequest);
-
-		String response = mockMvc.perform(post("/auth/login").contentType(MediaType.APPLICATION_JSON).content(json))
-			.andExpect(status().isOk())
-			.andReturn()
-			.getResponse()
-			.getContentAsString();
-
-		token = JsonPath.read(response, "$.data.accessToken");
-	}
-
 	@Test
 	void shouldCreateServiceWhenInputIsValid() throws Exception {
-		ProvidedServiceCreateDto dto = generateDto("Basic Checkup");
-		String json = objectMapper.writeValueAsString(dto);
+		ProvidedServiceCreateDto dto = new ProvidedServiceCreateDto("Basic Checkup", "Description for Basic Checkup",
+				100.00, 30, specializationIds);
 
-		mockMvc
-			.perform(post(ApiPaths.SERVICE_ENDPOINT).header("Authorization", "Bearer " + token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(json))
-			.andExpect(status().isCreated())
+		performRequest(HttpMethod.POST, ApiPaths.SERVICE_ENDPOINT, dto).andExpect(status().isCreated())
 			.andExpect(jsonPath("$.data").isNumber());
 	}
 
 	@Test
-	void shouldFindServiceByName() throws Exception {
-		String uniqueName = "MRI Scan " + UUID.randomUUID().toString().substring(0, 5);
-		createServiceInDb(uniqueName);
-
-		mockMvc
-			.perform(get(ApiPaths.SERVICE_ENDPOINT + "/search").header("Authorization", "Bearer " + token)
-				.param("query", uniqueName)
-				.param("page", "0")
-				.param("size", "10"))
+	void shouldReturnAllServicesWhenTheyExist() throws Exception {
+		performRequest(HttpMethod.GET, "/services", null)
 
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.content", Matchers.hasSize(1)))
+			.andExpect(jsonPath("$", hasSize(3)))
+			.andExpect(jsonPath("$[0].name").value("General Checkup"))
+			.andExpect(jsonPath("$[1].name").value("Complex Diagnosis"))
+			.andExpect(jsonPath("$[2].name").value("Quick Consultation"));
+	}
+
+	@Test
+	void shouldFindServiceByName() throws Exception {
+		String uniqueName = "General Checkup";
+
+		performRequest(HttpMethod.GET, ApiPaths.SERVICE_ENDPOINT + "/search?query={q}&page=0&size=10", null, uniqueName)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.content", hasSize(1)))
 			.andExpect(jsonPath("$.data.content[0].name").value(uniqueName))
 			.andExpect(jsonPath("$.data.totalElements").value(1));
 	}
 
 	@Test
 	void shouldReturnEmptySearchWhenNoMatch() throws Exception {
-		mockMvc
-			.perform(get(ApiPaths.SERVICE_ENDPOINT + "/search").header("Authorization", "Bearer " + token)
-				.param("query", "NonExistentServiceXYZ"))
+		String nonExistingName = "NonExistentServiceXYZ";
+
+		performRequest(HttpMethod.GET, ApiPaths.SERVICE_ENDPOINT + "/search?query={q}", null, nonExistingName)
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.content").isEmpty());
 	}
 
 	@Test
 	void shouldGetById() throws Exception {
-		Long id = createServiceInDb("X-Ray");
-
-		mockMvc.perform(get(ApiPaths.SERVICE_ENDPOINT + "/{id}", id).header("Authorization", "Bearer " + token))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.name").value("X-Ray"));
+		performRequest(HttpMethod.GET, ApiPaths.SERVICE_ENDPOINT + "/{id}", null, 1).andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.name").value("General Checkup"));
 	}
 
 	@Test
@@ -111,51 +72,45 @@ class ProvidedServiceControllerTest extends AbstractIntegrationTest {
 
 		ProvidedServiceCreateDto updateDto = new ProvidedServiceCreateDto("New Name", "Updated Description", 200.00, 45,
 				specializationIds);
-		String json = objectMapper.writeValueAsString(updateDto);
 
-		mockMvc
-			.perform(put(ApiPaths.SERVICE_ENDPOINT + "/{id}", id).header("Authorization", "Bearer " + token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(json))
-			.andExpect(status().isOk());
+		performRequest(HttpMethod.PUT, ApiPaths.SERVICE_ENDPOINT + "/{id}", updateDto, id).andExpect(status().isOk());
 
-		mockMvc.perform(get(ApiPaths.SERVICE_ENDPOINT + "/{id}", id).header("Authorization", "Bearer " + token))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.name").value("New Name"))
-			.andExpect(jsonPath("$.data.price").value(200.00));
+		ProvidedService service = em.find(ProvidedService.class, id);
+
+		assertThat(service).isNotNull();
+		assertThat(service.getName()).isEqualTo("New Name");
+		assertThat(service.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(200.00));
 	}
 
 	@Test
 	void shouldDeleteService() throws Exception {
 		Long id = createServiceInDb("To Be Deleted");
 
-		mockMvc.perform(delete(ApiPaths.SERVICE_ENDPOINT + "/{id}", id).header("Authorization", "Bearer " + token))
+		performRequest(HttpMethod.DELETE, ApiPaths.SERVICE_ENDPOINT + "/{id}", null, id)
 			.andExpect(status().isNoContent());
 
-		mockMvc.perform(get(ApiPaths.SERVICE_ENDPOINT + "/{id}", id).header("Authorization", "Bearer " + token))
-			.andExpect(status().isNotFound());
+		ProvidedService service = em.find(ProvidedService.class, id);
+
+		assertThat(service).isNull();
 	}
 
-	private Long createServiceInDb(String name) throws Exception {
-		ProvidedServiceCreateDto dto = generateDto(name);
-		String json = objectMapper.writeValueAsString(dto);
+	private Long createServiceInDb(String name) {
+		ProvidedService service = new ProvidedService();
+		service.setName(name);
+		service.setDescription("Description for " + name);
+		service.setPrice(BigDecimal.valueOf(100.00));
+		service.setDuration(30);
 
-		String response = mockMvc
-			.perform(post(ApiPaths.SERVICE_ENDPOINT).header("Authorization", "Bearer " + token)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(json))
-			.andExpect(status().isCreated())
-			.andReturn()
-			.getResponse()
-			.getContentAsString();
+		List<Specialization> specs = specializationIds.stream()
+			.map(id -> em.getReference(Specialization.class, id))
+			.toList();
+		service.setSpecializations(specs);
 
-		ResponseWrapper<Long> result = objectMapper.readValue(response, new TypeReference<ResponseWrapper<Long>>() {
-		});
-		return result.getData();
-	}
+		em.persist(service);
+		em.flush();
+		em.clear();
 
-	private ProvidedServiceCreateDto generateDto(String name) {
-		return new ProvidedServiceCreateDto(name, "Description for " + name, 100.00, 30, specializationIds);
+		return service.getId();
 	}
 
 }
