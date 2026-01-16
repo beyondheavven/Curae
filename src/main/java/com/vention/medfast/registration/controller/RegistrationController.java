@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Registration", description = "Endpoints for new users registration")
 @RestController
 @AllArgsConstructor
 @RequestMapping(ApiPaths.REGISTRATION_ENDPOINT)
@@ -28,7 +30,7 @@ public class RegistrationController {
 	private final RegistrationService registrationService;
 
 	@PostMapping
-	@Operation(summary = "Register new user",
+	@Operation(summary = "Register new user with PATIENT role",
 			description = "Registers a new user with personal and address information",
 			requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
 					content = @Content(schema = @Schema(implementation = PatientRegistrationRequestDto.class),
@@ -64,7 +66,7 @@ public class RegistrationController {
 		registrationService.registerPatient(request);
 	}
 
-	@Operation(summary = "Register a new doctor as admin")
+	@Operation(summary = "Register a new user with role DOCTOR")
 	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Doctor successfully registered"),
 			@ApiResponse(responseCode = "400", description = "Validation error"),
 			@ApiResponse(responseCode = "409", description = "Email already exists") })
