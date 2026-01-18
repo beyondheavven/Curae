@@ -35,7 +35,6 @@ public class RegistrationController {
 			requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true,
 					content = @Content(schema = @Schema(implementation = PatientRegistrationRequestDto.class),
 							examples = @ExampleObject(name = "Registration request", value = """
-									{
 									  {
 									    "person": {
 									      "name": "John",

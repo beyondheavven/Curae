@@ -312,3 +312,21 @@ From the Grafana home dashboard, you can quickly filter logs using the dedicated
 For precise filtering and searching, use the LogQL in Grafana's Explore view.
 
 - `{container="medfast_api"} |= "Database connected"`: find logs containing text
+
+---
+
+## API Testing with Postman
+
+### How to Setup
+1. **Install Postman:** Download it from [postman.com/downloads](https://www.postman.com/downloads/)
+2. **Import Collection and Environment:**
+   * To import your data into Postman, click Import in the sidebar
+   * Drag and drop the `postman/medfast-api-postman-collection.json` and `postman/dev-postman-env.json` files
+
+### How to Run Tests
+1. **Select Environment:** in the top right corner of Postman, change the dropdown from "No Environment" to **Dev** (environment you imported).
+2. **Run the Collection:**
+   * Select the **Medfast API** collection folder.
+   * Click the **Run** button (top right).
+   * **IMPORTANT:** In the Runner settings, set **Delay** to `200ms`. This prevents database race conditions during token rotation.
+   * Click **Run the Medfast API**.

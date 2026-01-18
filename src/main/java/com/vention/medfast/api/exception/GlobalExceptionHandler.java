@@ -2,6 +2,7 @@ package com.vention.medfast.api.exception;
 
 import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseWrapper;
+import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -128,6 +129,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		}
 
 		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, "Request violates database constraints");
+	}
+
+	@ExceptionHandler(JwtException.class)
+	public ResponseEntity<ResponseWrapper<?>> handleJwtException(JwtException ex) {
+		return buildError(HttpStatus.UNAUTHORIZED, ErrorCode.AUTH_ERROR, "Invalid or expired token");
 	}
 
 	@ExceptionHandler(Exception.class)
