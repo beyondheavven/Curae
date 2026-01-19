@@ -11,6 +11,7 @@ springdoc:
     - group: "Actuator"
       paths-to-match: "/actuator/**"
 
+stripe
 spring:
   profiles:
     active: dev
