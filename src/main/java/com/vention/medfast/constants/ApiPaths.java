@@ -42,4 +42,6 @@ public final class ApiPaths {
 
 	public static final String SEARCH_ENDPOINT = "/search";
 
+	public static final String APPOINTMENT_ENDPOINT = "/appointments";
+
 }
