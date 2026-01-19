@@ -1,8 +1,8 @@
 package com.vention.medfast.appointment.model;
 
+import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.service.model.ProvidedService;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,7 +12,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -52,9 +51,13 @@ public class Appointment {
 	@JoinColumn(name = "patient_id", nullable = false)
 	private Patient patient;
 
-	@OneToOne(optional = false)
-	@JoinColumn(name = "service_id", nullable = false)
-	private ProvidedService service;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AppointmentType type;
+
+	@ManyToOne
+	@JoinColumn(name = "referral_id")
+    private Referral referral;
 
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false, nullable = false)

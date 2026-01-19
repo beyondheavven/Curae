@@ -1,5 +1,6 @@
 package com.vention.medfast.doctor.service;
 
+import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.doctor.dto.DoctorClinicAssignmentRequestDto;
 import com.vention.medfast.doctor.mapper.DoctorMapper;
 import com.vention.medfast.clinic.model.Clinic;
@@ -19,6 +20,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -140,4 +143,14 @@ public class DoctorServiceImpl implements DoctorService {
 		return doctorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
 	}
 
+    @Override
+    public Doctor getCurrentDoctor() {
+        Authentication authentication =
+            SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails user =
+            (CustomUserDetails) authentication.getPrincipal();
+        Long userId = user.getId();
+        return doctorRepository.findByUserId(userId)
+            .orElseThrow(() -> new IllegalStateException("Doctor profile not found"));
+    }
 }

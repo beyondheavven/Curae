@@ -1,11 +1,10 @@
 package com.vention.medfast.visit.service;
 
-import com.vention.medfast.doctor.model.Doctor;
-import com.vention.medfast.doctor.service.DoctorService;
-import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.service.model.ProvidedService;
-import com.vention.medfast.service.service.ProvidedServiceService;
+import com.vention.medfast.api.exception.AppointmentException;
+import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentType;
+import com.vention.medfast.appointment.model.Status;
+import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.visit.dto.VisitCreateDto;
 import com.vention.medfast.visit.mapper.VisitMapper;
 import com.vention.medfast.visit.model.Visit;
@@ -22,22 +21,22 @@ public class VisitServiceImpl implements VisitService {
 
 	private final VisitMapper visitMapper;
 
-	private final DoctorService doctorService;
-
-	private final PatientService patientService;
-
-	private final ProvidedServiceService providedServiceService;
+    private final AppointmentService appointmentService;
 
 	@Override
 	@Transactional
 	public long create(VisitCreateDto dto) {
-		Doctor doctor = doctorService.findDoctorById(dto.doctorId());
-		Patient patient = patientService.getById(dto.patientId());
-		ProvidedService service = providedServiceService.getProvidedServiceById(dto.serviceId());
-
-		Visit visit = visitMapper.toEntity(dto, doctor, patient, service);
-		Visit saved = visitRepository.save(visit);
-		return saved.getId();
+        Appointment appointment = appointmentService.getConfirmed(dto.appointmentId());
+        if (appointment.getType() != AppointmentType.VISIT) {
+            throw new AppointmentException("Appointment is not a visit");
+        }
+        if (visitRepository.existsById(appointment.getId())) {
+            throw new AppointmentException("Visit already exists for this appointment");
+        }
+        Visit visit = visitMapper.toEntity(dto, appointment);
+        Visit saved = visitRepository.save(visit);
+        appointment.setStatus(Status.COMPLETED);
+        return saved.getId();
 	}
 
 }

@@ -20,4 +20,6 @@ public interface PatientService {
 
 	Patient getById(Long id);
 
+    Patient getCurrentPatient();
+
 }

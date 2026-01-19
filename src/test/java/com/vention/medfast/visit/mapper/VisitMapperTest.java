@@ -1,9 +1,8 @@
 package com.vention.medfast.visit.mapper;
 
+import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.model.Status;
-import com.vention.medfast.doctor.model.Doctor;
-import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.visit.dto.VisitCreateDto;
 import com.vention.medfast.visit.model.Visit;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,32 +25,29 @@ public class VisitMapperTest {
 
 	@Test
 	void shouldMapDtoToEntityWhenInputIsValid() {
-		VisitCreateDto dto = new VisitCreateDto(LocalDate.of(2030, 10, 12), LocalTime.of(14, 30), 1L, 1L, 1L);
+        VisitCreateDto dto = new VisitCreateDto(1L, "Diagnosis", "Symptoms", "Medical report");
+        Appointment appointment = new Appointment();
+        appointment.setId(1L);
+        appointment.setDate(LocalDate.of(2030, 10, 12));
+        appointment.setTime(LocalTime.of(14, 30));
+        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+        appointment.setType(AppointmentType.VISIT);
 
-		Doctor doctor = new Doctor();
-		doctor.setId(1L);
-		Patient patient = new Patient();
-		patient.setId(1L);
-		ProvidedService service = new ProvidedService();
-		service.setId(1L);
-
-		Visit visit = visitMapper.toEntity(dto, doctor, patient, service);
+		Visit visit = visitMapper.toEntity(dto, appointment);
 
 		assertThat(visit).isNotNull();
 		assertThat(visit.getId()).isNull();
 		assertThat(visit.getAppointment()).isNotNull();
 
-		assertThat(visit.getAppointment().getDate()).isEqualTo(dto.scheduledDate());
-		assertThat(visit.getAppointment().getTime()).isEqualTo(dto.scheduledTime());
-		assertThat(visit.getAppointment().getDoctor()).isEqualTo(doctor);
-		assertThat(visit.getAppointment().getPatient()).isEqualTo(patient);
-		assertThat(visit.getAppointment().getService()).isEqualTo(service);
-		assertThat(visit.getAppointment().getStatus()).isEqualTo(Status.SCHEDULED);
+        assertThat(visit.getAppointment()).isEqualTo(appointment);
+        assertThat(visit.getDiagnosis()).isEqualTo(dto.diagnosis());
+        assertThat(visit.getSymptoms()).isEqualTo(dto.symptoms());
+        assertThat(visit.getMedicalReport()).isEqualTo(dto.medicalReport());
 	}
 
 	@Test
 	void shouldReturnNullWhenDtoIsNull() {
-		assertThat(visitMapper.toEntity(null, null, null, null)).isNull();
+		assertThat(visitMapper.toEntity(null, null)).isNull();
 	}
 
 }
