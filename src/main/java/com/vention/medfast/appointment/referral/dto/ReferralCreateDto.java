@@ -1,4 +1,4 @@
-package com.vention.medfast.appointment.dto;
+package com.vention.medfast.appointment.referral.dto;
 
 import com.vention.medfast.appointment.model.AppointmentType;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
 @Schema(description = "DTO for creating prescription (referral)")
-public record PrescriptionCreateDto(
+public record ReferralCreateDto(
 
     @Schema(description = "Patient id")
     @NotNull(message = "Patient id is required")

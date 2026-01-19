@@ -1,7 +1,7 @@
 package com.vention.medfast.appointment.service;
 
 import com.vention.medfast.api.exception.AppointmentException;
-import com.vention.medfast.appointment.dto.PrescriptionCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.referral.mapper.ReferralMapper;
 import com.vention.medfast.appointment.referral.model.Referral;
@@ -21,8 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Optional;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +48,7 @@ public class ReferralServiceImplTest {
 
     @Test
     void shouldCreateReferral_whenInputIsValid() {
-        PrescriptionCreateDto dto = new PrescriptionCreateDto(
+        ReferralCreateDto dto = new ReferralCreateDto(
             1L,
             2L,
             AppointmentType.VISIT,
@@ -72,7 +73,6 @@ public class ReferralServiceImplTest {
     void shouldMarkReferralAsUsed() {
         Referral referral = new Referral();
         referral.setStatus(ReferralStatus.ACTIVE);
-        when(referralRepository.save(referral)).thenReturn(referral);
         Referral result = referralService.markUsed(referral);
         assertThat(result.getStatus()).isEqualTo(ReferralStatus.USED);
     }

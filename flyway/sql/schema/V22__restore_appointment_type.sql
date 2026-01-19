@@ -1,5 +1,11 @@
+CREATE TYPE appointment_type_enum AS ENUM (
+    'VISIT',
+    'TEST',
+    'ONLINE'
+);
+
 ALTER TABLE appointments
-ADD COLUMN type VARCHAR(20);
+    ADD COLUMN type appointment_type_enum;
 
 UPDATE appointments
 SET type = 'VISIT'

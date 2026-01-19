@@ -1,7 +1,8 @@
 package com.vention.medfast.appointment.referral.service;
 
 import com.vention.medfast.api.exception.AppointmentException;
-import com.vention.medfast.appointment.dto.PrescriptionCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralResponseDto;
 import com.vention.medfast.appointment.referral.mapper.ReferralMapper;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.model.ReferralStatus;
@@ -31,16 +32,17 @@ public class ReferralServiceImpl implements ReferralService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Referral> getActiveByPatient(Long patientId) {
+    public List<ReferralResponseDto> getActiveByPatient(Long patientId) {
         return referralRepository
             .findByPatientIdAndStatusOrderByExpiresAtAsc(patientId, ReferralStatus.ACTIVE)
             .stream()
             .filter(referral -> !isExpired(referral))
+            .map(referralMapper::toDto)
             .toList();
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public Referral getActiveById(Long referralId) {
         Referral referral = referralRepository.findById(referralId)
             .orElseThrow(() -> new EntityNotFoundException("Referral not found"));
@@ -60,12 +62,12 @@ public class ReferralServiceImpl implements ReferralService {
             throw new AppointmentException("Only active referral can be used");
         }
         referral.setStatus(ReferralStatus.USED);
-        return referralRepository.save(referral);
+        return referral;
     }
 
     @Override
     @Transactional
-    public Long create(PrescriptionCreateDto dto) {
+    public Long create(ReferralCreateDto dto) {
         Patient patient = patientService.getById(dto.patientId());
         ProvidedService service =
             providedServiceService.getProvidedServiceById(dto.serviceId());
@@ -76,11 +78,6 @@ public class ReferralServiceImpl implements ReferralService {
     }
 
     private boolean isExpired(Referral referral) {
-        boolean expired = referral.getExpiresAt().isBefore(LocalDate.now());
-        if (expired && referral.getStatus() == ReferralStatus.ACTIVE) {
-            referral.setStatus(ReferralStatus.EXPIRED);
-            referralRepository.save(referral);
-        }
-        return expired;
+        return referral.getExpiresAt().isBefore(LocalDate.now());
     }
 }

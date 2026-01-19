@@ -151,6 +151,6 @@ public class DoctorServiceImpl implements DoctorService {
             (CustomUserDetails) authentication.getPrincipal();
         Long userId = user.getId();
         return doctorRepository.findByUserId(userId)
-            .orElseThrow(() -> new IllegalStateException("Doctor profile not found"));
+            .orElseThrow(() -> new EntityNotFoundException("Doctor profile not found"));
     }
 }

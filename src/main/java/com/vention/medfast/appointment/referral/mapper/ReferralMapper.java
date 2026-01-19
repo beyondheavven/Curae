@@ -1,6 +1,6 @@
 package com.vention.medfast.appointment.referral.mapper;
 
-import com.vention.medfast.appointment.dto.PrescriptionCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
 import com.vention.medfast.appointment.referral.dto.ReferralResponseDto;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.doctor.model.Doctor;
@@ -19,7 +19,7 @@ public interface ReferralMapper {
     @Mapping(target = "expiresAt", source = "dto.expiresAt")
     @Mapping(target = "appointmentType", source = "dto.appointmentType")
     @Mapping(target = "status", constant = "ACTIVE")
-    Referral toEntity(PrescriptionCreateDto dto, Patient patient, Doctor doctor, ProvidedService service);
+    Referral toEntity(ReferralCreateDto dto, Patient patient, Doctor doctor, ProvidedService service);
 
     @Mapping(target = "serviceId", source = "service.id")
     ReferralResponseDto toDto(Referral referral);

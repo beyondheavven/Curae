@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "DTO for creating a visit")
 public record VisitCreateDto(
+
     @NotNull(message = "Appointment id is required")
     Long appointmentId,
 
@@ -16,5 +17,7 @@ public record VisitCreateDto(
     String symptoms,
 
     @NotBlank(message = "Medical report is required")
-    String medicalReport) {
+    String medicalReport
+
+) {
 }

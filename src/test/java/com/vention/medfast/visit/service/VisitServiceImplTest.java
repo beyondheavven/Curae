@@ -1,24 +1,43 @@
 package com.vention.medfast.visit.service;
 
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.model.Status;
 import com.vention.medfast.appointment.service.AppointmentService;
+import com.vention.medfast.patient.model.Patient;
+import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.visit.dto.VisitCreateDto;
+import com.vention.medfast.visit.dto.VisitResponseDto;
 import com.vention.medfast.visit.mapper.VisitMapper;
 import com.vention.medfast.visit.model.Visit;
+import com.vention.medfast.visit.model.VisitType;
 import com.vention.medfast.visit.repository.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import com.vention.medfast.appointment.model.AppointmentType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class VisitServiceImplTest {
+class VisitServiceImplTest {
+
+    @Mock
+    private VisitRepository visitRepository;
 
 	@Mock
 	private VisitMapper visitMapper;
@@ -26,8 +45,14 @@ public class VisitServiceImplTest {
     @Mock
     private AppointmentService appointmentService;
 
-	@Mock
-	private VisitRepository visitRepository;
+    @Mock
+    private PatientService patientService;
+
+    @Mock
+    private Authentication authentication;
+
+    @Mock
+    private SecurityContext securityContext;
 
 	@InjectMocks
 	private VisitServiceImpl visitService;
@@ -44,13 +69,13 @@ public class VisitServiceImplTest {
         when(appointmentService.getConfirmed(1L)).thenReturn(appointment);
         when(visitRepository.existsById(1L)).thenReturn(false);
         when(visitMapper.toEntity(dto, appointment)).thenReturn(visit);
-        when(visitRepository.save(visit)).thenAnswer(invocation -> {
-            Visit v = invocation.getArgument(0);
+        when(visitRepository.save(any())).thenAnswer(inv -> {
+            Visit v = inv.getArgument(0);
             v.setId(1L);
             return v;
         });
-        long resultId = visitService.create(dto);
-        assertEquals(1L, resultId);
+        long result = visitService.create(dto);
+        assertEquals(1L, result);
         assertEquals(Status.COMPLETED, appointment.getStatus());
         verify(appointmentService).getConfirmed(1L);
         verify(visitRepository).existsById(1L);
@@ -58,4 +83,54 @@ public class VisitServiceImplTest {
         verify(visitRepository).save(visit);
 	}
 
+    @Test
+    void shouldReturnUpcomingVisitsForPatient() {
+        String email = "patient@mail.com";
+        Patient patient = new Patient();
+        patient.setId(1L);
+        Visit visit = new Visit();
+        VisitResponseDto responseDto = mock(VisitResponseDto.class);
+        Pageable pageable = mock(Pageable.class);
+        Page<Visit> page = new PageImpl<>(List.of(visit));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn(email);
+        when(patientService.getPatientByEmail(email)).thenReturn(patient);
+        when(visitRepository.findUpcomingByPatient(
+            eq(1L), any(LocalDate.class), any(LocalTime.class), eq(pageable))
+        ).thenReturn(page);
+        when(visitMapper.toVisitResponseDto(visit)).thenReturn(responseDto);
+        Page<VisitResponseDto> result =
+            visitService.findAllForPatient(VisitType.UPCOMING, pageable);
+        assertThat(result.getContent()).containsExactly(responseDto);
+        verify(patientService).getPatientByEmail(email);
+        verify(visitRepository).findUpcomingByPatient(
+            any(), any(), any(), any()
+        );
+    }
+
+    @Test
+    void shouldReturnPastVisitsForPatient() {
+        String email = "patient@mail.com";
+        Patient patient = new Patient();
+        patient.setId(1L);
+        Visit visit = new Visit();
+        VisitResponseDto responseDto = mock(VisitResponseDto.class);
+        Pageable pageable = mock(Pageable.class);
+        Page<Visit> page = new PageImpl<>(List.of(visit));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn(email);
+        when(patientService.getPatientByEmail(email)).thenReturn(patient);
+        when(visitRepository.findPastByPatient(
+            eq(1L), any(LocalDate.class), any(LocalTime.class), eq(pageable))
+        ).thenReturn(page);
+        when(visitMapper.toVisitResponseDto(visit)).thenReturn(responseDto);
+        Page<VisitResponseDto> result = visitService.findAllForPatient(VisitType.PAST, pageable);
+        assertThat(result.getContent()).containsExactly(responseDto);
+        verify(patientService).getPatientByEmail(email);
+        verify(visitRepository).findPastByPatient(
+            any(), any(), any(), any()
+        );
+    }
 }

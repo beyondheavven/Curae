@@ -22,4 +22,5 @@ public interface PatientService {
 
     Patient getCurrentPatient();
 
+    Patient getPatientByEmail(String email);
 }

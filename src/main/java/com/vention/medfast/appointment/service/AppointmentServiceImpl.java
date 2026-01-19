@@ -2,19 +2,31 @@ package com.vention.medfast.appointment.service;
 
 import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
+import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
+import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.model.Status;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
+import com.vention.medfast.labresult.mapper.LabResultMapper;
+import com.vention.medfast.labresult.service.LabResultService;
+import com.vention.medfast.labtest.model.LabTest;
+import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
 import jakarta.persistence.EntityNotFoundException;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +35,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
-    private final ReferralService referralService;
-    private final DoctorService doctorService;
     private final AppointmentMapper appointmentMapper;
     private final PatientService patientService;
+    private final DoctorService doctorService;
+    private final ReferralService referralService;
+    private final LabTestService labTestService;
+    private final LabResultService labResultService;
+    private final LabResultMapper labResultMapper;
 
     @Override
     @Transactional
@@ -60,8 +75,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public void confirm(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-            .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+        Appointment appointment = findAppointment(appointmentId);
         if (appointment.getStatus() != Status.SCHEDULED) {
             throw new AppointmentException("Only draft appointment can be confirmed");
         }
@@ -74,11 +88,40 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public Appointment getConfirmed(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-            .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+        Appointment appointment = findAppointment(appointmentId);
         if (appointment.getStatus() != Status.SCHEDULED_CONFIRMED) {
             throw new AppointmentException("Appointment is not confirmed");
         }
         return appointment;
+    }
+
+    @Override
+    @Transactional
+    public void createWithLabs(AppointmentCreateWithLabsDto req) {
+        Patient patient = patientService.getById(req.patientId());
+        Doctor doctor = doctorService.getCurrentDoctor();
+
+        Set<Long> uniqueIds = new LinkedHashSet<>(req.labTestIds());
+        List<LabTest> tests = labTestService.findAllById(uniqueIds);
+
+        Appointment appointment = appointmentMapper.toLabAppointment(req, doctor, patient);
+        appointment.setType(AppointmentType.TEST);
+        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+
+        appointmentRepository.save(appointment);
+        labResultService.createForAppointment(appointment, tests);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable) {
+        return appointmentRepository
+            .findLabHistoryPage(userId, pageable)
+            .map(labResultMapper::toHistoryDto);
+    }
+
+    private Appointment findAppointment(Long appointmentId) {
+        return appointmentRepository.findById(appointmentId)
+            .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
     }
 }
