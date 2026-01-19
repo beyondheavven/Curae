@@ -158,9 +158,4 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return Objects.toString(root.getMessage(), "");
 	}
 
-	@ExceptionHandler(JwtException.class)
-	public ResponseEntity<ResponseWrapper<?>> handleJwtException(JwtException ex) {
-		return buildError(HttpStatus.UNAUTHORIZED, ErrorCode.AUTH_ERROR, "Invalid or expired token");
-	}
-
 }
