@@ -19,6 +19,6 @@ public record VisitCreateDto(
 
 		@NotNull(message = "Patient id is required") @Positive(message = "Patient id must be positive") Long patientId,
 
-		@NotNull(message = "Patient id is required") @Positive(
-				message = "Patient id must be positive") Long serviceId) {
+		@NotNull(message = "Patient id is required") @Positive(message = "Patient id must be positive") Long serviceId,
+		@NotNull(message = "Clinic id is required") @Positive(message = "Clinic id must be positive") Long clinicId) {
 }

@@ -9,4 +9,6 @@ public interface ClinicService {
 
 	List<Clinic> findAllByIds(Set<Long> clinicIds);
 
+	Clinic findById(Long clinicId);
+
 }

@@ -68,6 +68,12 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
+	public Patient getPatientByEmail(String email) {
+		return patientRepository.findByEmail(email)
+			.orElseThrow(() -> new IllegalArgumentException("Patient not found"));
+	}
+
+	@Override
 	public Patient createPatientProfile(User user, Address address, PersonDto personDto) {
 		if (patientRepository.existsByUser(user)) {
 			throw new IllegalArgumentException("Patient profile already exists for user with ID: " + user.getId());
