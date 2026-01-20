@@ -1,6 +1,5 @@
 package com.vention.medfast.stripe.controller;
 
-import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.stripe.dto.PaymentRequestDto;
@@ -15,8 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-//acumen-heaven-champ-hero
 
 @RestController
 @RequestMapping(ApiPaths.PAYMENT_ENDPOINT)

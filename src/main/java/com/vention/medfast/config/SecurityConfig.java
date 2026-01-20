@@ -82,6 +82,9 @@ public class SecurityConfig {
 				.requestMatchers("/account/change-password")
 				.authenticated()
 
+				.requestMatchers("/payment-success.html", "/payment-cancel.html")
+				.permitAll()
+
 				.requestMatchers(ApiPaths.WEBHOOK_ENDPOINT)
 				.permitAll()
 

@@ -5,6 +5,6 @@ import lombok.Builder;
 
 @Builder
 @Schema(description = "DTO for creating payment")
-public record PaymentRequestDto(Long serviceId, String currency) {
+public record PaymentRequestDto(Long serviceId, Long patientId, String currency) {
 
 }

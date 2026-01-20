@@ -1,14 +1,13 @@
 package com.vention.medfast.stripe.service.payment;
 
-import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
-import com.vention.medfast.constants.ApiPaths;
+import com.vention.medfast.patient.model.Patient;
+import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.repository.ProvidedServiceRepository;
 import com.vention.medfast.stripe.dto.PaymentRequestDto;
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,15 +22,22 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private final ProvidedServiceRepository providedServiceRepository;
 
-    public static final String PAYMENT_SUCCESS_URL = "http://localhost:8080/payment-success.html";
+	private final PatientRepository patientRepository;
 
-    public static final String PAYMENT_CANCEL_URL = "http://localhost:8080/payment-cancel.html";
+	@Value("${PAYMENT_SUCCESS_URL}")
+	private String PAYMENT_SUCCESS_URL;
+
+	@Value("${PAYMENT_CANCEL_URL}")
+	private String PAYMENT_CANCEL_URL;
 
 	@Transactional(readOnly = true)
 	@Override
 	public String createCheckoutSession(PaymentRequestDto requestDto) throws StripeException {
 		ProvidedService providedService = providedServiceRepository.findById(requestDto.serviceId())
 			.orElseThrow(() -> new EntityNotFoundException("Service not found"));
+
+		Patient patient = patientRepository.findById(requestDto.patientId())
+			.orElseThrow(() -> new EntityNotFoundException("Patient not found"));
 
 		Long amountInCents = providedService.getPrice().multiply(BigDecimal.valueOf(100)).longValue();
 
@@ -42,7 +48,7 @@ public class PaymentServiceImpl implements PaymentService {
 			.addLineItem(SessionCreateParams.LineItem.builder()
 				.setQuantity(1L)
 				.setPriceData(SessionCreateParams.LineItem.PriceData.builder()
-                    .setCurrency(requestDto.currency())
+					.setCurrency(requestDto.currency())
 					.setUnitAmount(amountInCents)
 					.setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
 						.setName(providedService.getName())
@@ -51,6 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
 					.build())
 				.build())
 			.putMetadata("serviceId", providedService.getId().toString())
+			.putMetadata("patientId", patient.getId().toString())
 			.putMetadata("serviceName", providedService.getName())
 			.build();
 

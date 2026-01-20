@@ -8,11 +8,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class StripeConfig {
 
-    @Value("${STRIPE_SECRET_KEY}")
-    private String secretKey;
+	@Value("${STRIPE_SECRET_KEY}")
+	private String secretKey;
 
-    @PostConstruct
-    public void init() {
-        Stripe.apiKey = secretKey;
-    }
+	@PostConstruct
+	public void init() {
+		Stripe.apiKey = secretKey;
+	}
+
 }
