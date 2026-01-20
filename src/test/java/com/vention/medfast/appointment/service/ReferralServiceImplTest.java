@@ -28,63 +28,59 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ReferralServiceImplTest {
-    @Mock
-    private ReferralRepository referralRepository;
 
-    @Mock
-    private ReferralMapper referralMapper;
+	@Mock
+	private ReferralRepository referralRepository;
 
-    @Mock
-    private PatientService patientService;
+	@Mock
+	private ReferralMapper referralMapper;
 
-    @Mock
-    private DoctorService doctorService;
+	@Mock
+	private PatientService patientService;
 
-    @Mock
-    private ProvidedServiceService providedServiceService;
+	@Mock
+	private DoctorService doctorService;
 
-    @InjectMocks
-    private ReferralServiceImpl referralService;
+	@Mock
+	private ProvidedServiceService providedServiceService;
 
-    @Test
-    void shouldCreateReferral_whenInputIsValid() {
-        ReferralCreateDto dto = new ReferralCreateDto(
-            1L,
-            2L,
-            AppointmentType.VISIT,
-            LocalDate.now().plusDays(5)
-        );
-        Patient patient = new Patient();
-        Doctor doctor = new Doctor();
-        ProvidedService service = new ProvidedService();
-        Referral referral = new Referral();
-        referral.setStatus(ReferralStatus.ACTIVE);
-        when(patientService.getById(1L)).thenReturn(patient);
-        when(doctorService.getCurrentDoctor()).thenReturn(doctor);
-        when(providedServiceService.getProvidedServiceById(2L)).thenReturn(service);
-        when(referralMapper.toEntity(dto, patient, doctor, service)).thenReturn(referral);
-        when(referralRepository.save(referral)).thenReturn(referral);
-        Long result = referralService.create(dto);
-        assertThat(result).isNull();
-        assertThat(referral.getStatus()).isEqualTo(ReferralStatus.ACTIVE);
-    }
+	@InjectMocks
+	private ReferralServiceImpl referralService;
 
-    @Test
-    void shouldMarkReferralAsUsed() {
-        Referral referral = new Referral();
-        referral.setStatus(ReferralStatus.ACTIVE);
-        Referral result = referralService.markUsed(referral);
-        assertThat(result.getStatus()).isEqualTo(ReferralStatus.USED);
-    }
+	@Test
+	void shouldCreateReferral_whenInputIsValid() {
+		ReferralCreateDto dto = new ReferralCreateDto(1L, 2L, AppointmentType.VISIT, LocalDate.now().plusDays(5));
+		Patient patient = new Patient();
+		Doctor doctor = new Doctor();
+		ProvidedService service = new ProvidedService();
+		Referral referral = new Referral();
+		referral.setStatus(ReferralStatus.ACTIVE);
+		when(patientService.getById(1L)).thenReturn(patient);
+		when(doctorService.getCurrentDoctor()).thenReturn(doctor);
+		when(providedServiceService.getProvidedServiceById(2L)).thenReturn(service);
+		when(referralMapper.toEntity(dto, patient, doctor, service)).thenReturn(referral);
+		when(referralRepository.save(referral)).thenReturn(referral);
+		Long result = referralService.create(dto);
+		assertThat(result).isNull();
+		assertThat(referral.getStatus()).isEqualTo(ReferralStatus.ACTIVE);
+	}
 
-    @Test
-    void shouldThrowException_whenReferralIsExpired() {
-        Referral referral = new Referral();
-        referral.setStatus(ReferralStatus.ACTIVE);
-        referral.setExpiresAt(LocalDate.now().minusDays(1));
-        when(referralRepository.findById(1L)).thenReturn(Optional.of(referral));
-        assertThatThrownBy(() -> referralService.getActiveById(1L))
-            .isInstanceOf(AppointmentException.class)
-            .hasMessageContaining("expired");
-    }
+	@Test
+	void shouldMarkReferralAsUsed() {
+		Referral referral = new Referral();
+		referral.setStatus(ReferralStatus.ACTIVE);
+		Referral result = referralService.markUsed(referral);
+		assertThat(result.getStatus()).isEqualTo(ReferralStatus.USED);
+	}
+
+	@Test
+	void shouldThrowException_whenReferralIsExpired() {
+		Referral referral = new Referral();
+		referral.setStatus(ReferralStatus.ACTIVE);
+		referral.setExpiresAt(LocalDate.now().minusDays(1));
+		when(referralRepository.findById(1L)).thenReturn(Optional.of(referral));
+		assertThatThrownBy(() -> referralService.getActiveById(1L)).isInstanceOf(AppointmentException.class)
+			.hasMessageContaining("expired");
+	}
+
 }

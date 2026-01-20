@@ -34,45 +34,46 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "appointments")
 public class Appointment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "scheduled_date", nullable = false)
-    private LocalDate date;
+	@Column(name = "scheduled_date", nullable = false)
+	private LocalDate date;
 
-    @Column(name = "scheduled_time", nullable = false)
-    private LocalTime time;
+	@Column(name = "scheduled_time", nullable = false)
+	private LocalTime time;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private AppointmentStatus status;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "status", nullable = false)
+	private AppointmentStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "doctor_id", nullable = false)
-    private Doctor doctor;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "doctor_id", nullable = false)
+	private Doctor doctor;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "patient_id", nullable = false)
-    private Patient patient;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "patient_id", nullable = false)
+	private Patient patient;
 
-    @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "type", nullable = false)
-    private AppointmentType type;
+	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+	@Column(name = "type", nullable = false)
+	private AppointmentType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "referral_id")
-    private Referral referral;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "referral_id")
+	private Referral referral;
 
-    @OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
-    private List<LabResult> labResults = new ArrayList<>();
+	@OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
+	private List<LabResult> labResults = new ArrayList<>();
 
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false, nullable = false)
-    private LocalDateTime createdAt;
+	@CreationTimestamp
+	@Column(name = "created_at", updatable = false, nullable = false)
+	private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+	@UpdateTimestamp
+	@Column(name = "updated_at", nullable = false)
+	private LocalDateTime updatedAt;
+
 }

@@ -6,11 +6,10 @@ import com.vention.medfast.profile.dto.request.ProfileAddressUpdateDto;
 import com.vention.medfast.profile.dto.request.ProfileRequestDto;
 import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,8 +74,11 @@ class ProfileControllerTest extends AbstractControllerIntegrationTest {
 		ProfileRequestDto requestDto = new ProfileRequestDto(null, invalidAddress, null);
 
 		performRequest(HttpMethod.PUT, "/profile", requestDto).andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message", Matchers.containsString("Unknown country")));
+			.andExpect(jsonPath("$.error.message").value("Validation failed"))
+			.andExpect(jsonPath("$.error.validationErrors").isArray())
+			.andExpect(jsonPath("$.error.validationErrors", Matchers.not(Matchers.empty())))
+			.andExpect(jsonPath("$.error.validationErrors[*].message",
+					Matchers.hasItem(Matchers.containsString("Unknown country"))));
 	}
 
 	@Test

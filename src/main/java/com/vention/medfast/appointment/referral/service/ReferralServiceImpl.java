@@ -24,58 +24,61 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReferralServiceImpl implements ReferralService {
 
-    private final ReferralRepository referralRepository;
-    private final ReferralMapper referralMapper;
-    private final PatientService patientService;
-    private final DoctorService doctorService;
-    private final ProvidedServiceService providedServiceService;
+	private final ReferralRepository referralRepository;
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ReferralResponseDto> getActiveByPatient(Long patientId) {
-        return referralRepository.findActiveByPatient(patientId, ReferralStatus.ACTIVE, LocalDate.now())
-            .stream()
-            .map(referralMapper::toDto)
-            .toList();
-    }
+	private final ReferralMapper referralMapper;
 
-    @Override
-    @Transactional(readOnly = true)
-    public Referral getActiveById(Long referralId) {
-        Referral referral = referralRepository.findById(referralId)
-            .orElseThrow(() -> new EntityNotFoundException("Referral not found"));
-        if (referral.getStatus() != ReferralStatus.ACTIVE) {
-            throw new AppointmentException("Referral is not active");
-        }
-        if (isExpired(referral)) {
-            throw new AppointmentException("Referral expired");
-        }
-        return referral;
-    }
+	private final PatientService patientService;
 
-    @Override
-    @Transactional
-    public Referral markUsed(Referral referral) {
-        if (referral.getStatus() != ReferralStatus.ACTIVE) {
-            throw new AppointmentException("Only active referral can be used");
-        }
-        referral.setStatus(ReferralStatus.USED);
-        return referral;
-    }
+	private final DoctorService doctorService;
 
-    @Override
-    @Transactional
-    public Long create(ReferralCreateDto dto) {
-        Patient patient = patientService.getById(dto.patientId());
-        ProvidedService service =
-            providedServiceService.getProvidedServiceById(dto.serviceId());
-        Doctor doctor = doctorService.getCurrentDoctor();
-        Referral referral =
-            referralMapper.toEntity(dto, patient, doctor, service);
-        return referralRepository.save(referral).getId();
-    }
+	private final ProvidedServiceService providedServiceService;
 
-    private boolean isExpired(Referral referral) {
-        return referral.getExpiresAt().isBefore(LocalDate.now());
-    }
+	@Override
+	@Transactional(readOnly = true)
+	public List<ReferralResponseDto> getActiveByPatient(Long patientId) {
+		return referralRepository.findActiveByPatient(patientId, ReferralStatus.ACTIVE, LocalDate.now())
+			.stream()
+			.map(referralMapper::toDto)
+			.toList();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Referral getActiveById(Long referralId) {
+		Referral referral = referralRepository.findById(referralId)
+			.orElseThrow(() -> new EntityNotFoundException("Referral not found"));
+		if (referral.getStatus() != ReferralStatus.ACTIVE) {
+			throw new AppointmentException("Referral is not active");
+		}
+		if (isExpired(referral)) {
+			throw new AppointmentException("Referral expired");
+		}
+		return referral;
+	}
+
+	@Override
+	@Transactional
+	public Referral markUsed(Referral referral) {
+		if (referral.getStatus() != ReferralStatus.ACTIVE) {
+			throw new AppointmentException("Only active referral can be used");
+		}
+		referral.setStatus(ReferralStatus.USED);
+		return referral;
+	}
+
+	@Override
+	@Transactional
+	public Long create(ReferralCreateDto dto) {
+		Patient patient = patientService.getById(dto.patientId());
+		ProvidedService service = providedServiceService.getProvidedServiceById(dto.serviceId());
+		Doctor doctor = doctorService.getCurrentDoctor();
+		Referral referral = referralMapper.toEntity(dto, patient, doctor, service);
+		return referralRepository.save(referral).getId();
+	}
+
+	private boolean isExpired(Referral referral) {
+		return referral.getExpiresAt().isBefore(LocalDate.now());
+	}
+
 }

@@ -28,33 +28,34 @@ import java.time.LocalDateTime;
 @Table(name = "referrals")
 public class Referral {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "patient_id", nullable = false)
-    private Patient patient;
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "patient_id", nullable = false)
+	private Patient patient;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "issued_by", nullable = false)
-    private Doctor issuedBy;
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "issued_by", nullable = false)
+	private Doctor issuedBy;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "service_id", nullable = false)
-    private ProvidedService service;
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "service_id", nullable = false)
+	private ProvidedService service;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "appointment_type", nullable = false, length = 20)
-    private AppointmentType appointmentType;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "appointment_type", nullable = false, length = 20)
+	private AppointmentType appointmentType;
 
-    @Column(nullable = false)
-    private LocalDate expiresAt;
+	@Column(nullable = false)
+	private LocalDate expiresAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ReferralStatus status;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private ReferralStatus status;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+	@CreationTimestamp
+	private LocalDateTime createdAt;
+
 }

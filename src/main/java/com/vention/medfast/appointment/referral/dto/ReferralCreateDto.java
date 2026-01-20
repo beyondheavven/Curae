@@ -10,23 +10,15 @@ import java.time.LocalDate;
 @Schema(description = "DTO for creating prescription (referral)")
 public record ReferralCreateDto(
 
-    @Schema(description = "Patient id")
-    @NotNull(message = "Patient id is required")
-    @Positive(message = "Patient id must be positive")
-    Long patientId,
+		@Schema(description = "Patient id") @NotNull(message = "Patient id is required") @Positive(
+				message = "Patient id must be positive") Long patientId,
 
-    @Schema(description = "Service id")
-    @NotNull(message = "Service id is required")
-    @Positive(message = "Service id must be positive")
-    Long serviceId,
+		@Schema(description = "Service id") @NotNull(message = "Service id is required") @Positive(
+				message = "Service id must be positive") Long serviceId,
 
-    @Schema(description = "Appointment type")
-    @NotNull
-    AppointmentType appointmentType,
+		@Schema(description = "Appointment type") @NotNull AppointmentType appointmentType,
 
-    @Schema(description = "Expiration date of prescription")
-    @NotNull(message = "Expiration date is required")
-    @Future(message = "Expiration date must be in the future")
-    LocalDate expiresAt
-) {
+		@Schema(description = "Expiration date of prescription") @NotNull(
+				message = "Expiration date is required") @Future(
+						message = "Expiration date must be in the future") LocalDate expiresAt) {
 }

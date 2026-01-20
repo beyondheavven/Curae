@@ -9,10 +9,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface AppointmentService {
-    Long createFirst(FirstAppointmentCreateDto dto);
-    Long createDraft(AppointmentCreateDto dto);
-    void confirm(Long appointmentId);
-    Appointment getConfirmed(Long appointmentId);
-    void createWithLabs(AppointmentCreateWithLabsDto dto);
-    Page<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable);
+
+	Long createFirst(FirstAppointmentCreateDto dto);
+
+	Long createDraft(AppointmentCreateDto dto);
+
+	void confirm(Long appointmentId);
+
+	Appointment getConfirmed(Long appointmentId);
+
+	void createWithLabs(AppointmentCreateWithLabsDto dto);
+
+	Page<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable);
+
 }

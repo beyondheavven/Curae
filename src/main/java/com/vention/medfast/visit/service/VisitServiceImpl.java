@@ -28,39 +28,43 @@ import java.time.LocalTime;
 @RequiredArgsConstructor
 public class VisitServiceImpl implements VisitService {
 
-    private final VisitRepository visitRepository;
-    private final VisitMapper visitMapper;
-    private final AppointmentService appointmentService;
-    private final PatientService patientService;
+	private final VisitRepository visitRepository;
 
-    @Override
-    @Transactional
-    public long create(VisitCreateDto dto) {
-        Appointment appointment = appointmentService.getConfirmed(dto.appointmentId());
-        if (appointment.getType() != AppointmentType.VISIT) {
-            throw new AppointmentException("Appointment is not a visit");
-        }
-        if (visitRepository.existsById(appointment.getId())) {
-            throw new AppointmentException("Visit already exists for this appointment");
-        }
-        Visit visit = visitMapper.toEntity(dto, appointment);
-        Visit saved = visitRepository.save(visit);
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-        return saved.getId();
-    }
+	private final VisitMapper visitMapper;
 
-    @Override
-    public Page<VisitResponseDto> findAllForPatient(VisitType type, Pageable pageable) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        Patient patient = patientService.getPatientByEmail(email);
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate today = now.toLocalDate();
-        LocalTime time = now.toLocalTime();
-        Page<Visit> visits = switch (type) {
-            case PAST -> visitRepository.findPastByPatient(patient.getId(), today, time, pageable);
-            case UPCOMING -> visitRepository.findUpcomingByPatient(patient.getId(), today, time, pageable);
-        };
-        return visits.map(visitMapper::toVisitResponseDto);
-    }
+	private final AppointmentService appointmentService;
+
+	private final PatientService patientService;
+
+	@Override
+	@Transactional
+	public long create(VisitCreateDto dto) {
+		Appointment appointment = appointmentService.getConfirmed(dto.appointmentId());
+		if (appointment.getType() != AppointmentType.VISIT) {
+			throw new AppointmentException("Appointment is not a visit");
+		}
+		if (visitRepository.existsById(appointment.getId())) {
+			throw new AppointmentException("Visit already exists for this appointment");
+		}
+		Visit visit = visitMapper.toEntity(dto, appointment);
+		Visit saved = visitRepository.save(visit);
+		appointment.setStatus(AppointmentStatus.COMPLETED);
+		return saved.getId();
+	}
+
+	@Override
+	public Page<VisitResponseDto> findAllForPatient(VisitType type, Pageable pageable) {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		String email = auth.getName();
+		Patient patient = patientService.getPatientByEmail(email);
+		LocalDateTime now = LocalDateTime.now();
+		LocalDate today = now.toLocalDate();
+		LocalTime time = now.toLocalTime();
+		Page<Visit> visits = switch (type) {
+			case PAST -> visitRepository.findPastByPatient(patient.getId(), today, time, pageable);
+			case UPCOMING -> visitRepository.findUpcomingByPatient(patient.getId(), today, time, pageable);
+		};
+		return visits.map(visitMapper::toVisitResponseDto);
+	}
+
 }

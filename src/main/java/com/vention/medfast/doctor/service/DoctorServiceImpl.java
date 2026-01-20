@@ -143,14 +143,13 @@ public class DoctorServiceImpl implements DoctorService {
 		return doctorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Doctor not found"));
 	}
 
-    @Override
-    public Doctor getCurrentDoctor() {
-        Authentication authentication =
-            SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails user =
-            (CustomUserDetails) authentication.getPrincipal();
-        Long userId = user.getId();
-        return doctorRepository.findByUserId(userId)
-            .orElseThrow(() -> new EntityNotFoundException("Doctor profile not found"));
-    }
+	@Override
+	public Doctor getCurrentDoctor() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+		Long userId = user.getId();
+		return doctorRepository.findByUserId(userId)
+			.orElseThrow(() -> new EntityNotFoundException("Doctor profile not found"));
+	}
+
 }

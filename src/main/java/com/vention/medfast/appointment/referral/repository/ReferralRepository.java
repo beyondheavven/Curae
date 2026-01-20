@@ -13,17 +13,15 @@ import java.util.List;
 @Repository
 public interface ReferralRepository extends JpaRepository<Referral, Long> {
 
-    @Query("""
-        select r
-        from Referral r
-        where r.patient.id = :patientId
-          and r.status = :status
-          and r.expiresAt >= :today
-        order by r.expiresAt asc
-    """)
-    List<Referral> findActiveByPatient(
-        @Param("patientId") Long patientId,
-        @Param("status") ReferralStatus status,
-        @Param("today") LocalDate today
-    );
+	@Query("""
+			    select r
+			    from Referral r
+			    where r.patient.id = :patientId
+			      and r.status = :status
+			      and r.expiresAt >= :today
+			    order by r.expiresAt asc
+			""")
+	List<Referral> findActiveByPatient(@Param("patientId") Long patientId, @Param("status") ReferralStatus status,
+			@Param("today") LocalDate today);
+
 }

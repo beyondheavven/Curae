@@ -31,6 +31,6 @@ public interface DoctorService {
 
 	Doctor findDoctorById(Long id);
 
-    Doctor getCurrentDoctor();
+	Doctor getCurrentDoctor();
 
 }

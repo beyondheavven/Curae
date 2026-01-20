@@ -1,4 +1,13 @@
 package com.vention.medfast.wrapper;
 
-public record ResponseError(ErrorCode errorCode, String message) {
+import java.time.OffsetDateTime;
+
+public sealed interface ResponseError permits ValidationError, CommonError {
+
+	ErrorCode errorCode();
+
+	String message();
+
+	OffsetDateTime timestamp();
+
 }

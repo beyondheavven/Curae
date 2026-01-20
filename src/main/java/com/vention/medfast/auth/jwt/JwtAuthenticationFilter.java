@@ -1,6 +1,5 @@
 package com.vention.medfast.auth.jwt;
 
-import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.auth.jwt.service.JwtServiceImpl;
 import com.vention.medfast.user.model.User;
@@ -9,22 +8,19 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
+import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import tools.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	public static final String BEARER_PREFIX = "Bearer ";
@@ -33,7 +29,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final UserRepository userRepository;
 
-	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -48,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String token = authHeader.substring(BEARER_PREFIX.length()).trim();
 		if (token.isEmpty()) {
-			writeUnauthorizedResponse(response, "Invalid JWT token");
+			unauthorized(request, response, "Invalid JWT token");
 			return;
 		}
 
@@ -62,12 +58,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			uid = jwtServiceImpl.extractUserId(token);
 		}
 		catch (Exception e) {
-			writeUnauthorizedResponse(response, "Invalid JWT token");
+			unauthorized(request, response, "Invalid JWT token");
 			return;
 		}
 
 		if (uid == null) {
-			writeUnauthorizedResponse(response, "Invalid JWT token");
+			unauthorized(request, response, "Invalid JWT token");
 			return;
 		}
 
@@ -78,7 +74,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					user.getRole());
 
 			if (jwtServiceImpl.isAccessToken(token) && jwtServiceImpl.isTokenValid(token, userDetails)) {
-
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,
 						null, userDetails.getAuthorities());
 
@@ -89,21 +84,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				return;
 			}
 
-			writeUnauthorizedResponse(response, "Invalid or expired JWT token");
+			unauthorized(request, response, "Invalid or expired JWT token");
 		}
 		catch (Exception e) {
-			writeUnauthorizedResponse(response, "Invalid or expired JWT token");
+			unauthorized(request, response, "Invalid or expired JWT token");
 		}
 	}
 
-	private void writeUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
-		int status = HttpServletResponse.SC_UNAUTHORIZED;
-		ErrorResponseDto error = ErrorResponseDto.builder().statusCode(status).message(message).build();
+	private void unauthorized(HttpServletRequest request, HttpServletResponse response, String message)
+			throws IOException {
 
-		response.setStatus(status);
-		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-		objectMapper.writeValue(response.getWriter(), error);
+		restAuthenticationEntryPoint.commence(request, response, new AuthenticationException(message) {
+		});
 	}
 
 }

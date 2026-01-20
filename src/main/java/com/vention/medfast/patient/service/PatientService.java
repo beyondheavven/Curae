@@ -20,7 +20,8 @@ public interface PatientService {
 
 	Patient getById(Long id);
 
-    Patient getCurrentPatient();
+	Patient getCurrentPatient();
 
-    Patient getPatientByEmail(String email);
+	Patient getPatientByEmail(String email);
+
 }

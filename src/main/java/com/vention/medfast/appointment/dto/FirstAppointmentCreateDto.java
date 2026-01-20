@@ -7,13 +7,11 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record FirstAppointmentCreateDto(
-    @NotNull AppointmentType type,
+public record FirstAppointmentCreateDto(@NotNull AppointmentType type,
 
-    @NotNull @Future LocalDate date,
+		@NotNull @Future LocalDate date,
 
-    @NotNull LocalTime time,
+		@NotNull LocalTime time,
 
-    @NotNull @Positive Long doctorId
-) {
+		@NotNull @Positive Long doctorId) {
 }

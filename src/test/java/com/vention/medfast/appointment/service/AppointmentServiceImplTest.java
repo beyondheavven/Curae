@@ -69,12 +69,14 @@ class AppointmentServiceImplTest {
 
 	@Test
 	void shouldCreateDraftWithReferral() {
-		AppointmentCreateDto dto = new AppointmentCreateDto(10L, null, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
+		AppointmentCreateDto dto = new AppointmentCreateDto(10L, null, LocalDate.now().plusDays(1),
+				LocalTime.of(10, 0));
 		Referral referral = new Referral();
 		referral.setAppointmentType(AppointmentType.VISIT);
 		Appointment appointment = new Appointment();
 		when(referralService.getActiveById(10L)).thenReturn(referral);
-		when(appointmentMapper.toAppointment(dto, referral.getIssuedBy(), referral.getPatient(), referral)).thenReturn(appointment);
+		when(appointmentMapper.toAppointment(dto, referral.getIssuedBy(), referral.getPatient(), referral))
+			.thenReturn(appointment);
 		when(appointmentRepository.save(appointment)).thenReturn(appointment);
 		appointmentService.createDraft(dto);
 		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
@@ -116,7 +118,8 @@ class AppointmentServiceImplTest {
 
 	@Test
 	void shouldCreateAppointmentWithLabs() {
-		AppointmentCreateWithLabsDto req = new AppointmentCreateWithLabsDto(2L, LocalDate.of(2031, 1, 1), LocalTime.of(12, 0), List.of(10L, 10L, 11L));
+		AppointmentCreateWithLabsDto req = new AppointmentCreateWithLabsDto(2L, LocalDate.of(2031, 1, 1),
+				LocalTime.of(12, 0), List.of(10L, 10L, 11L));
 		Patient patient = new Patient();
 		Doctor doctor = new Doctor();
 		LabTest t1 = new LabTest();
@@ -132,4 +135,5 @@ class AppointmentServiceImplTest {
 		verify(appointmentRepository).save(appointment);
 		verify(labResultService).createForAppointment(appointment, List.of(t1, t2));
 	}
+
 }
