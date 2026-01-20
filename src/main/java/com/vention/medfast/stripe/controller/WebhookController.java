@@ -8,12 +8,14 @@ import com.vention.medfast.stripe.dto.WebhookProcessingDto;
 import com.vention.medfast.stripe.service.webhook.WebhookService;
 import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseWrapper;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+@Hidden
 @RestController
 @RequestMapping(ApiPaths.WEBHOOK_ENDPOINT)
 @RequiredArgsConstructor
