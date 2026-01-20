@@ -2,7 +2,6 @@ package com.vention.medfast.visit.model;
 
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.clinic.model.Clinic;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,7 +24,7 @@ public class Visit {
 	@Column(name = "appointment_id")
 	private Long id;
 
-	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
+	@OneToOne(fetch = FetchType.LAZY, optional = false)
 	@MapsId
 	@JoinColumn(name = "appointment_id")
 	private Appointment appointment;

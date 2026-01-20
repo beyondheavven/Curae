@@ -1,15 +1,11 @@
 package com.vention.medfast.visit.service;
 
 import com.vention.medfast.appointment.model.Appointment;
-import com.vention.medfast.appointment.model.Status;
-import com.vention.medfast.clinic.model.Clinic;
-import com.vention.medfast.clinic.service.ClinicService;
-import com.vention.medfast.doctor.model.Doctor;
-import com.vention.medfast.doctor.service.DoctorService;
+import com.vention.medfast.appointment.model.AppointmentStatus;
+import com.vention.medfast.appointment.model.AppointmentType;
+import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.service.model.ProvidedService;
-import com.vention.medfast.service.service.ProvidedServiceService;
 import com.vention.medfast.visit.dto.VisitCreateDto;
 import com.vention.medfast.visit.dto.VisitResponseDto;
 import com.vention.medfast.visit.mapper.VisitMapper;
@@ -31,161 +27,110 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Set;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class VisitServiceImplTest {
+class VisitServiceImplTest {
+
+    @Mock
+    private VisitRepository visitRepository;
 
 	@Mock
 	private VisitMapper visitMapper;
 
-	@Mock
-	private DoctorService doctorService;
+    @Mock
+    private AppointmentService appointmentService;
 
-	@Mock
-	private ProvidedServiceService providedServiceService;
+    @Mock
+    private PatientService patientService;
 
-	@Mock
-	private VisitRepository visitRepository;
+    @Mock
+    private Authentication authentication;
 
-	@Mock
-	private PatientService patientService;
-
-	@Mock
-	private ClinicService clinicService;
-
-	@Mock
-	private Authentication authentication;
-
-	@Mock
-	private SecurityContext securityContext;
+    @Mock
+    private SecurityContext securityContext;
 
 	@InjectMocks
 	private VisitServiceImpl visitService;
 
 	@Test
 	public void shouldCreateVisitWhenInputIsValid() {
-		VisitCreateDto dto = new VisitCreateDto(LocalDate.of(2030, 10, 12), LocalTime.of(14, 30), 1L, 1L, 1L, 1L);
-
-		Patient patient = new Patient();
-		patient.setId(1L);
-
-		Clinic clinic = new Clinic();
-		clinic.setId(1L);
-
-		Doctor doctor = new Doctor();
-		doctor.setId(1L);
-		doctor.setClinics(Set.of(clinic));
-
-		ProvidedService providedService = new ProvidedService();
-		providedService.setId(1L);
-
-		Appointment appEntity = new Appointment();
-		appEntity.setId(1L);
-		appEntity.setDate(LocalDate.of(2030, 10, 12));
-		appEntity.setTime(LocalTime.of(14, 30));
-		appEntity.setStatus(Status.SCHEDULED);
-		appEntity.setPatient(patient);
-		appEntity.setDoctor(doctor);
-		appEntity.setService(providedService);
-
-		Visit entity = new Visit();
-		entity.setId(1L);
-		entity.setAppointment(appEntity);
-		entity.setClinic(clinic);
-
-		when(visitMapper.toEntity(dto, doctor, patient, providedService, clinic)).thenReturn(entity);
-		when(providedServiceService.getProvidedServiceById(anyLong())).thenReturn(providedService);
-		when(doctorService.findDoctorById(anyLong())).thenReturn(doctor);
-		when(patientService.getById(anyLong())).thenReturn(patient);
-		when(clinicService.findById(anyLong())).thenReturn(clinic);
-		when(visitRepository.save(entity)).thenReturn(entity);
-
-		long resultId = visitService.create(dto);
-
-		assertEquals(1L, resultId);
-
-		verify(visitMapper).toEntity(dto, doctor, patient, providedService, clinic);
-		verify(providedServiceService).getProvidedServiceById(anyLong());
-		verify(doctorService).findDoctorById(anyLong());
-		verify(patientService).getById(anyLong());
-		verify(visitRepository).save(entity);
+        VisitCreateDto dto = new VisitCreateDto(1L, "Diagnosis", "Symptoms", "Medical report");
+        Appointment appointment = new Appointment();
+        appointment.setId(1L);
+        appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+        appointment.setType(AppointmentType.VISIT);
+        Visit visit = new Visit();
+        visit.setAppointment(appointment);
+        when(appointmentService.getConfirmed(1L)).thenReturn(appointment);
+        when(visitRepository.existsById(1L)).thenReturn(false);
+        when(visitMapper.toEntity(dto, appointment)).thenReturn(visit);
+        when(visitRepository.save(any())).thenAnswer(inv -> {
+            Visit v = inv.getArgument(0);
+            v.setId(1L);
+            return v;
+        });
+        long result = visitService.create(dto);
+        assertEquals(1L, result);
+        assertEquals(AppointmentStatus.COMPLETED, appointment.getStatus());
+        verify(appointmentService).getConfirmed(1L);
+        verify(visitRepository).existsById(1L);
+        verify(visitMapper).toEntity(dto, appointment);
+        verify(visitRepository).save(visit);
 	}
 
-	@Test
-	void shouldReturnUpcomingVisitsForPatient_WhenInputIsValid() {
-		String email = "patient@example.com";
-		VisitType type = VisitType.UPCOMING;
+    @Test
+    void shouldReturnUpcomingVisitsForPatient() {
+        String email = "patient@mail.com";
+        Patient patient = new Patient();
+        patient.setId(1L);
+        Visit visit = new Visit();
+        VisitResponseDto responseDto = mock(VisitResponseDto.class);
+        Pageable pageable = mock(Pageable.class);
+        Page<Visit> page = new PageImpl<>(List.of(visit));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn(email);
+        when(patientService.getPatientByEmail(email)).thenReturn(patient);
+        when(visitRepository.findUpcomingByPatient(
+            eq(1L), any(LocalDate.class), any(LocalTime.class), eq(pageable))
+        ).thenReturn(page);
+        when(visitMapper.toVisitResponseDto(visit)).thenReturn(responseDto);
+        Page<VisitResponseDto> result =
+            visitService.findAllForPatient(VisitType.UPCOMING, pageable);
+        assertThat(result.getContent()).containsExactly(responseDto);
+        verify(patientService).getPatientByEmail(email);
+        verify(visitRepository).findUpcomingByPatient(
+            any(), any(), any(), any()
+        );
+    }
 
-		Patient patient = new Patient();
-		patient.setId(1L);
-
-		Visit visit = new Visit();
-		VisitResponseDto dto = mock(VisitResponseDto.class);
-		Pageable pageable = mock(Pageable.class);
-		Page<Visit> page = new PageImpl<>(List.of(visit), pageable, 1);
-
-		when(securityContext.getAuthentication()).thenReturn(authentication);
-		SecurityContextHolder.setContext(securityContext);
-		when(authentication.getName()).thenReturn(email);
-		when(patientService.getPatientByEmail(email)).thenReturn(patient);
-
-		when(visitRepository.findUpcomingByPatient(any(Long.class), any(LocalDate.class), any(LocalTime.class),
-				any(Pageable.class)))
-			.thenReturn(page);
-		when(visitMapper.toVisitResponseDto(visit)).thenReturn(dto);
-
-		Page<VisitResponseDto> result = visitService.findAllForPatient(type, pageable);
-
-		assertThat(result.getTotalElements()).isEqualTo(1);
-		assertThat(result.getContent().getFirst()).isSameAs(dto);
-
-		verify(patientService).getPatientByEmail(email);
-		verify(visitRepository).findUpcomingByPatient(any(Long.class), any(LocalDate.class), any(LocalTime.class),
-				any(Pageable.class));
-		verify(visitMapper).toVisitResponseDto(visit);
-	}
-
-	@Test
-	void shouldReturnPastVisitsForPatient_whenInputIsValid() {
-		String email = "patient@example.com";
-		VisitType type = VisitType.PAST;
-
-		Patient patient = new Patient();
-		patient.setId(1L);
-
-		Visit visit = new Visit();
-		VisitResponseDto dto = mock(VisitResponseDto.class);
-		Pageable pageable = mock(Pageable.class);
-		Page<Visit> page = new PageImpl<>(List.of(visit), pageable, 1);
-
-		when(securityContext.getAuthentication()).thenReturn(authentication);
-		SecurityContextHolder.setContext(securityContext);
-		when(authentication.getName()).thenReturn(email);
-		when(patientService.getPatientByEmail(email)).thenReturn(patient);
-
-		when(visitRepository.findPastByPatient(any(Long.class), any(LocalDate.class), any(LocalTime.class),
-				any(Pageable.class)))
-			.thenReturn(page);
-		when(visitMapper.toVisitResponseDto(visit)).thenReturn(dto);
-
-		Page<VisitResponseDto> result = visitService.findAllForPatient(type, pageable);
-
-		assertThat(result.getTotalElements()).isEqualTo(1);
-		assertThat(result.getContent().getFirst()).isSameAs(dto);
-
-		verify(patientService).getPatientByEmail(email);
-		verify(visitRepository).findPastByPatient(any(Long.class), any(LocalDate.class), any(LocalTime.class),
-				any(Pageable.class));
-		verify(visitMapper).toVisitResponseDto(visit);
-	}
-
+    @Test
+    void shouldReturnPastVisitsForPatient() {
+        String email = "patient@mail.com";
+        Patient patient = new Patient();
+        patient.setId(1L);
+        Visit visit = new Visit();
+        VisitResponseDto responseDto = mock(VisitResponseDto.class);
+        Pageable pageable = mock(Pageable.class);
+        Page<Visit> page = new PageImpl<>(List.of(visit));
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(authentication.getName()).thenReturn(email);
+        when(patientService.getPatientByEmail(email)).thenReturn(patient);
+        when(visitRepository.findPastByPatient(
+            eq(1L), any(LocalDate.class), any(LocalTime.class), eq(pageable))
+        ).thenReturn(page);
+        when(visitMapper.toVisitResponseDto(visit)).thenReturn(responseDto);
+        Page<VisitResponseDto> result = visitService.findAllForPatient(VisitType.PAST, pageable);
+        assertThat(result.getContent()).containsExactly(responseDto);
+        verify(patientService).getPatientByEmail(email);
+        verify(visitRepository).findPastByPatient(
+            any(), any(), any(), any()
+        );
+    }
 }
