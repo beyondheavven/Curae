@@ -2,6 +2,8 @@ package com.vention.medfast.user.mapper;
 
 import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.registration.dto.PersonDto;
+import com.vention.medfast.user.dto.UserResponseDto;
+import com.vention.medfast.user.dto.UserUpdateRequestDto;
 import com.vention.medfast.user.model.User;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Context;
@@ -12,6 +14,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "passwordHash", ignore = true)
+	@Mapping(target = "role", ignore = true)
+	@Mapping(target = "refreshTokens", ignore = true)
+	void updateUserFromDto(@MappingTarget User user, UserUpdateRequestDto dto,
+			@Context PasswordEncoder passwordEncoder);
+
+	@AfterMapping
+	default void updatePassword(@MappingTarget User user, UserUpdateRequestDto dto,
+			@Context PasswordEncoder passwordEncoder) {
+		if (dto.password() != null && !dto.password().isBlank()) {
+			user.setPasswordHash(passwordEncoder.encode(dto.password()));
+		}
+	}
+
+	UserResponseDto toResponseDto(User user);
 
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "passwordHash", ignore = true)
