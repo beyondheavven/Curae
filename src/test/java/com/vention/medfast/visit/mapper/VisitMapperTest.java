@@ -1,7 +1,7 @@
 package com.vention.medfast.visit.mapper;
 
 import com.vention.medfast.appointment.model.Appointment;
-import com.vention.medfast.appointment.model.Status;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.visit.dto.VisitCreateDto;
 import com.vention.medfast.visit.model.Visit;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,7 +35,7 @@ class VisitMapperTest {
         appointment.setId(1L);
         appointment.setDate(LocalDate.of(2030, 10, 12));
         appointment.setTime(LocalTime.of(14, 30));
-        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+        appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
 
         Visit visit = visitMapper.toEntity(dto, appointment);
 

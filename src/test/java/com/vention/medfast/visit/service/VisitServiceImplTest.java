@@ -1,8 +1,8 @@
 package com.vention.medfast.visit.service;
 
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.model.Status;
 import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
@@ -62,7 +62,7 @@ class VisitServiceImplTest {
         VisitCreateDto dto = new VisitCreateDto(1L, "Diagnosis", "Symptoms", "Medical report");
         Appointment appointment = new Appointment();
         appointment.setId(1L);
-        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+        appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
         appointment.setType(AppointmentType.VISIT);
         Visit visit = new Visit();
         visit.setAppointment(appointment);
@@ -76,7 +76,7 @@ class VisitServiceImplTest {
         });
         long result = visitService.create(dto);
         assertEquals(1L, result);
-        assertEquals(Status.COMPLETED, appointment.getStatus());
+        assertEquals(AppointmentStatus.COMPLETED, appointment.getStatus());
         verify(appointmentService).getConfirmed(1L);
         verify(visitRepository).existsById(1L);
         verify(visitMapper).toEntity(dto, appointment);

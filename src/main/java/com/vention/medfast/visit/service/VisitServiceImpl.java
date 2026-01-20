@@ -2,8 +2,8 @@ package com.vention.medfast.visit.service;
 
 import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.model.Status;
 import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
@@ -45,7 +45,7 @@ public class VisitServiceImpl implements VisitService {
         }
         Visit visit = visitMapper.toEntity(dto, appointment);
         Visit saved = visitRepository.save(visit);
-        appointment.setStatus(Status.COMPLETED);
+        appointment.setStatus(AppointmentStatus.COMPLETED);
         return saved.getId();
     }
 

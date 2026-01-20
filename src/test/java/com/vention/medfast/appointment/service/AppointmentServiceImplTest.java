@@ -6,8 +6,8 @@ import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.model.Status;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.model.ReferralStatus;
 import com.vention.medfast.appointment.referral.service.ReferralService;
@@ -77,7 +77,7 @@ class AppointmentServiceImplTest {
 		when(appointmentMapper.toAppointment(dto, referral.getIssuedBy(), referral.getPatient(), referral)).thenReturn(appointment);
 		when(appointmentRepository.save(appointment)).thenReturn(appointment);
 		appointmentService.createDraft(dto);
-		assertThat(appointment.getStatus()).isEqualTo(Status.SCHEDULED);
+		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
 		assertThat(appointment.getType()).isEqualTo(AppointmentType.VISIT);
 	}
 
@@ -86,18 +86,18 @@ class AppointmentServiceImplTest {
 		Referral referral = new Referral();
 		referral.setStatus(ReferralStatus.ACTIVE);
 		Appointment appointment = new Appointment();
-		appointment.setStatus(Status.SCHEDULED);
+		appointment.setStatus(AppointmentStatus.SCHEDULED);
 		appointment.setReferral(referral);
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
 		appointmentService.confirm(1L);
-		assertThat(appointment.getStatus()).isEqualTo(Status.SCHEDULED_CONFIRMED);
+		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED_CONFIRMED);
 		verify(referralService).markUsed(referral);
 	}
 
 	@Test
 	void shouldThrowException_whenConfirmingNotDraftAppointment() {
 		Appointment appointment = new Appointment();
-		appointment.setStatus(Status.COMPLETED);
+		appointment.setStatus(AppointmentStatus.COMPLETED);
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
 		assertThatThrownBy(() -> appointmentService.confirm(1L)).isInstanceOf(AppointmentException.class);
 	}

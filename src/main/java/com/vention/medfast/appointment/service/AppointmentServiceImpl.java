@@ -7,8 +7,8 @@ import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.model.Status;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
@@ -50,7 +50,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Doctor doctor = doctorService.findDoctorById(dto.doctorId());
         Appointment appointment =
             appointmentMapper.toFirstAppointment(dto, doctor, patient);
-        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+        appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
         return appointmentRepository.save(appointment).getId();
     }
 
@@ -62,12 +62,12 @@ public class AppointmentServiceImpl implements AppointmentService {
             Referral referral = referralService.getActiveById(dto.referralId());
             appointment = appointmentMapper.toAppointment(dto, referral.getIssuedBy(), referral.getPatient(), referral);
             appointment.setType(referral.getAppointmentType());
-            appointment.setStatus(Status.SCHEDULED);
+            appointment.setStatus(AppointmentStatus.SCHEDULED);
         } else {
             Patient patient = patientService.getCurrentPatient();
             Doctor doctor = doctorService.findDoctorById(dto.doctorId());
             appointment = appointmentMapper.toAppointment(dto, doctor, patient, null);
-            appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+            appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
         }
         return appointmentRepository.save(appointment).getId();
     }
@@ -76,10 +76,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public void confirm(Long appointmentId) {
         Appointment appointment = findAppointment(appointmentId);
-        if (appointment.getStatus() != Status.SCHEDULED) {
+        if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
             throw new AppointmentException("Only draft appointment can be confirmed");
         }
-        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+        appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
         if (appointment.getReferral() != null) {
             referralService.markUsed(appointment.getReferral());
         }
@@ -89,7 +89,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional(readOnly = true)
     public Appointment getConfirmed(Long appointmentId) {
         Appointment appointment = findAppointment(appointmentId);
-        if (appointment.getStatus() != Status.SCHEDULED_CONFIRMED) {
+        if (appointment.getStatus() != AppointmentStatus.SCHEDULED_CONFIRMED) {
             throw new AppointmentException("Appointment is not confirmed");
         }
         return appointment;
@@ -106,7 +106,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Appointment appointment = appointmentMapper.toLabAppointment(req, doctor, patient);
         appointment.setType(AppointmentType.TEST);
-        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+        appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
 
         appointmentRepository.save(appointment);
         labResultService.createForAppointment(appointment, tests);

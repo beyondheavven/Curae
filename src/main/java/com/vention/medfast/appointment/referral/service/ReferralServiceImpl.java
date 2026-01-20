@@ -33,10 +33,8 @@ public class ReferralServiceImpl implements ReferralService {
     @Override
     @Transactional(readOnly = true)
     public List<ReferralResponseDto> getActiveByPatient(Long patientId) {
-        return referralRepository
-            .findByPatientIdAndStatusOrderByExpiresAtAsc(patientId, ReferralStatus.ACTIVE)
+        return referralRepository.findActiveByPatient(patientId, ReferralStatus.ACTIVE, LocalDate.now())
             .stream()
-            .filter(referral -> !isExpired(referral))
             .map(referralMapper::toDto)
             .toList();
     }

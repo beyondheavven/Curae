@@ -3,8 +3,8 @@ package com.vention.medfast.visit.controller;
 import com.jayway.jsonpath.JsonPath;
 import com.vention.medfast.AbstractControllerIntegrationTest;
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.model.Status;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.visit.dto.VisitCreateDto;
@@ -27,7 +27,7 @@ class VisitControllerTest extends AbstractControllerIntegrationTest {
         Appointment appointment = new Appointment();
         appointment.setDate(LocalDate.now().plusDays(1));
         appointment.setTime(LocalTime.of(10, 30));
-        appointment.setStatus(Status.SCHEDULED_CONFIRMED);
+        appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
         appointment.setType(AppointmentType.VISIT);
         appointment.setDoctor(em.find(Doctor.class, 1L));
         appointment.setPatient(em.find(Patient.class, 1L));
@@ -47,7 +47,7 @@ class VisitControllerTest extends AbstractControllerIntegrationTest {
         assertThat(visit.getDiagnosis()).isEqualTo("Diagnosis");
         assertThat(visit.getSymptoms()).isEqualTo("Symptoms");
         assertThat(visit.getMedicalReport()).isEqualTo("Medical report");
-        assertThat(visit.getAppointment().getStatus()).isEqualTo(Status.COMPLETED);
+        assertThat(visit.getAppointment().getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
 	}
 
     @Test

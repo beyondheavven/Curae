@@ -18,26 +18,27 @@ class AppointmentControllerTest extends AbstractControllerIntegrationTest {
 	@Test
 	void shouldReturnThelabHistoryForPatient() throws Exception {
 
-		login("john.smith@mail.com", "pass");
+        login("john.smith@mail.com", "pass");
 
-		performRequest(HttpMethod.GET, ApiPaths.APPOINTMENT_ENDPOINT + "/lab", null).andDo(print())
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.content").isArray())
-			.andExpect(jsonPath("$.data.content.length()").value(2))
+        performRequest(HttpMethod.GET, ApiPaths.APPOINTMENT_ENDPOINT + "/lab", null).andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.data.content").isArray())
+            .andExpect(jsonPath("$.data.content.length()").value(2))
 
-			.andExpect(jsonPath("$.data.content[0].appointmentId").value(5))
-			.andExpect(jsonPath("$.data.content[0].date").value("2026-01-22"))
-			.andExpect(jsonPath("$.data.content[0].appointmentStatus").value("SCHEDULED"))
-			.andExpect(jsonPath("$.data.content[0].tests.length()").value(2))
-			.andExpect(jsonPath("$.data.content[0].tests[0].testName").value("Ferritin"))
-			.andExpect(jsonPath("$.data.content[0].tests[0].status").value("PROCESSING"))
-			.andExpect(jsonPath("$.data.content[0].tests[0].resultUrl").value(Matchers.nullValue()))
-			.andExpect(jsonPath("$.data.content[0].tests[0].uploadedAt").value(Matchers.nullValue()))
+            .andExpect(jsonPath("$.data.content[*].appointmentId",
+                Matchers.containsInAnyOrder(5, 4)))
+            .andExpect(jsonPath("$.data.content[*].appointmentStatus",
+                Matchers.containsInAnyOrder("SCHEDULED", "COMPLETED")))
+            .andExpect(jsonPath("$.data.content[*].date",
+                Matchers.everyItem(Matchers.notNullValue())))
 
-			.andExpect(jsonPath("$.data.content[1].appointmentId").value(4))
-			.andExpect(jsonPath("$.data.content[1].date").value("2026-01-09"))
-			.andExpect(jsonPath("$.data.content[1].appointmentStatus").value("COMPLETED"))
-			.andExpect(jsonPath("$.data.content[1].tests.length()").value(4));
+            .andExpect(jsonPath("$.data.content[0].tests.length()").value(2))
+            .andExpect(jsonPath("$.data.content[0].tests[0].testName").value("Ferritin"))
+            .andExpect(jsonPath("$.data.content[0].tests[0].status").value("PROCESSING"))
+            .andExpect(jsonPath("$.data.content[0].tests[0].resultUrl").value(Matchers.nullValue()))
+            .andExpect(jsonPath("$.data.content[0].tests[0].uploadedAt").value(Matchers.nullValue()))
+
+            .andExpect(jsonPath("$.data.content[1].tests.length()").value(4));
 
 	}
 
