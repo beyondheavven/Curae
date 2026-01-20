@@ -1,6 +1,7 @@
 package com.vention.medfast.stripe.service.webhook;
 
 import com.stripe.model.Event;
+import com.stripe.model.Charge;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
 import com.vention.medfast.stripe.dto.WebhookProcessingDto;
@@ -26,12 +27,13 @@ public class WebhookServiceImpl implements WebhookService {
 
 		StripeObject stripeObject = objectOptional.get();
 		String description;
-		String status = "SUCCESS";
+		String status = null;
 
 		switch (event.getType()) {
 			case "payment_intent.succeeded":
 				PaymentIntent successIntent = (PaymentIntent) stripeObject;
 				description = "Order paid successfully. Amount: " + successIntent.getAmount();
+				status = "SUCCESS";
 				break;
 
 			case "payment_intent.payment_failed":
@@ -42,6 +44,12 @@ public class WebhookServiceImpl implements WebhookService {
 				status = "FAILED";
 				break;
 
+			case "charge.refunded":
+				Charge charge = (Charge) stripeObject;
+				long amountRefunded = charge.getAmountRefunded();
+				description = String.format("Payment refunded. Amount: %d %s", amountRefunded, charge.getCurrency());
+				status = "REFUNDED";
+				break;
 			default:
 				description = "Event ignored";
 				status = "IGNORED";
