@@ -1,5 +1,4 @@
-package com.vention.medfast.payment.dto;
-
+package com.vention.medfast.stripe.dto;
 
 public record PaymentResponseDto(
 

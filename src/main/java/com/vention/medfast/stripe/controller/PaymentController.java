@@ -1,28 +1,28 @@
-package com.vention.medfast.payment.controller;
+package com.vention.medfast.stripe.controller;
 
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.payment.service.PaymentService;
+import com.vention.medfast.stripe.service.payment.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+//acumen-heaven-champ-hero
+
 @RestController
 @RequestMapping(ApiPaths.PAYMENT_ENDPOINT)
 @RequiredArgsConstructor
 public class PaymentController {
 
-    private final PaymentService paymentService;
+	private final PaymentService paymentService;
 
-    @Value("${STRIPE_PUBLIC_KEY}")
-    private String stripePublicKey;
+	@Value("${STRIPE_PUBLIC_KEY}")
+	private String stripePublicKey;
 
-
-    @PostMapping
-    public String checkout(){
-        return "";
-    }
-
+	@PostMapping
+	public String checkout() {
+		return "";
+	}
 
 }

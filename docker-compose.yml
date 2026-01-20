@@ -16,6 +16,9 @@ services:
       - EMAIL_VERIFICATION_TTL_MS=${EMAIL_VERIFICATION_TTL_MS}
       - EMAIL_VERIFICATION_VERIFY_URL=${EMAIL_VERIFICATION_VERIFY_URL}
       - JWT_SECRET=${JWT_SECRET}
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - WEBHOOK_SECRET_KEY=${WEBHOOK_SECRET_KEY}
     ports:
       - "8080:8080"
     depends_on:
@@ -97,6 +100,16 @@ services:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - app
+
+  stripe-cli:
+    image: stripe/stripe-cli
+    container_name: stripe-cli
+    command: listen --forward-to http://app:8080/api/webhook --api-key ${STRIPE_SECRET_KEY} --log-level info
+    environment:
+      - STRIPE_API_KEY=${STRIPE_SECRET_KEY}
+    depends_on:
+      - app
+    restart: on-failure
 
 volumes:
   pgdata:
