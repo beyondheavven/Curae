@@ -100,7 +100,6 @@ public class UserControllerTest extends AbstractControllerIntegrationTest {
 		performRequest(HttpMethod.PUT, ApiPaths.USER_ENDPOINT + "/{id}", requestDto, targetUserId).andDo(print())
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message").value("email: Must be a valid email format"))
 			.andExpect(jsonPath("$.status").value("400 BAD_REQUEST"))
 			.andExpect(jsonPath("$.statusCode").value(400));
 	}

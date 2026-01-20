@@ -46,4 +46,6 @@ public final class ApiPaths {
 
 	public static final String PRESCRIPTION_ENDPOINT = "/prescriptions";
 
+	public static final String COUNTRY_ENDPOINT = "/countries";
+
 }
