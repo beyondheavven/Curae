@@ -1,10 +1,13 @@
 package com.vention.medfast.api.exception;
 
 import com.vention.medfast.wrapper.ErrorCode;
+import com.vention.medfast.wrapper.FieldValidationError;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -20,8 +23,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import java.util.Objects;
 
 @Slf4j
 @RestControllerAdvice
@@ -71,26 +72,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, org.springframework.http.HttpStatusCode status,
 			org.springframework.web.context.request.WebRequest request) {
-		String message = ex.getBindingResult()
+
+		List<FieldValidationError> validationErrors = ex.getBindingResult()
 			.getFieldErrors()
 			.stream()
-			.findFirst()
-			.map(err -> err.getField() + ": " + err.getDefaultMessage())
-			.orElse("Validation error");
+			.map(err -> new FieldValidationError(err.getField(), err.getRejectedValue(), err.getDefaultMessage()))
+			.toList();
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-			.body(ResponseWrapper.withError(HttpStatus.BAD_REQUEST, message, ErrorCode.VALIDATION_ERROR));
+			.body(ResponseWrapper.withValidationError(HttpStatus.BAD_REQUEST, "Validation failed", validationErrors));
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)
 	public ResponseEntity<ResponseWrapper<?>> handleConstraintViolation(ConstraintViolationException ex) {
-		String message = ex.getConstraintViolations()
-			.stream()
-			.map(v -> v.getPropertyPath() + ": " + v.getMessage())
-			.findFirst()
-			.orElse("Validation failed");
 
-		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, message);
+		List<FieldValidationError> validationErrors = ex.getConstraintViolations()
+			.stream()
+			.map(v -> new FieldValidationError(v.getPropertyPath() != null ? v.getPropertyPath().toString() : null,
+					v.getInvalidValue(), v.getMessage()))
+			.toList();
+
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+			.body(ResponseWrapper.withValidationError(HttpStatus.BAD_REQUEST, "Validation failed", validationErrors));
 	}
 
 	@Override
@@ -145,6 +148,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(PasswordResetException.class)
 	public ResponseEntity<ResponseWrapper<?>> handlePasswordResetException(PasswordResetException ex) {
 		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(AppointmentException.class)
+	public ResponseEntity<ResponseWrapper<?>> handleAppointmentException(AppointmentException ex) {
+		return buildError(HttpStatus.CONFLICT, ErrorCode.BAD_REQUEST, ex.getMessage());
 	}
 
 	private ResponseEntity<ResponseWrapper<?>> buildError(HttpStatus status, ErrorCode code, String message) {

@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -62,9 +63,22 @@ public class PatientServiceImpl implements PatientService {
 	}
 
 	@Override
+	public Patient getCurrentPatient() {
+		User currentUser = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+			.orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
+		return getPatientByUserId(currentUser.getId());
+	}
+
+	@Override
 	public Patient getPatientByUserId(Long userId) {
 		return patientRepository.findByUserId((userId))
 			.orElseThrow(() -> new IllegalArgumentException("Patient profile not found for user with ID: " + userId));
+	}
+
+	@Override
+	public Patient getPatientByEmail(String email) {
+		return patientRepository.findByEmail(email)
+			.orElseThrow(() -> new IllegalArgumentException("Patient not found"));
 	}
 
 	@Override

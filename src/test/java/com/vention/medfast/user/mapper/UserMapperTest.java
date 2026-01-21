@@ -3,7 +3,10 @@ package com.vention.medfast.user.mapper;
 import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.registration.dto.PersonDto;
+import com.vention.medfast.user.dto.UserResponseDto;
+import com.vention.medfast.user.dto.UserUpdateRequestDto;
 import com.vention.medfast.user.model.RoleType;
+import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
 import java.time.LocalDate;
 import java.util.Set;
@@ -28,6 +31,35 @@ class UserMapperTest {
 			return encodedPassword != null && encodedPassword.equals(encode(rawPassword));
 		}
 	};
+
+	@Test
+	void shouldMapUserToUserResponseDtoWhenValidInput() {
+		User user = new User();
+		user.setId(10L);
+		user.setPasswordHash("hashedPassword");
+		user.setFirstName("Jane");
+		user.setLastName("Doe");
+		user.setBirthDate(LocalDate.of(2000, 1, 1));
+		user.setProfileUrl("www.example.com/profile_url");
+		user.setRole(RoleType.PATIENT);
+		user.setStatus(Status.ACTIVE);
+
+		UserResponseDto dto = mapper.toResponseDto(user);
+
+		assertThat(dto).isNotNull();
+		assertThat(dto.id()).isEqualTo(10L);
+		assertThat(dto.firstName()).isEqualTo("Jane");
+		assertThat(dto.lastName()).isEqualTo("Doe");
+		assertThat(dto.birthDate()).isEqualTo(LocalDate.of(2000, 1, 1));
+		assertThat(dto.role()).isEqualTo(RoleType.PATIENT);
+		assertThat(dto.status()).isEqualTo(Status.ACTIVE);
+		assertThat(dto.profileUrl()).isEqualTo("www.example.com/profile_url");
+	}
+
+	@Test
+	void shouldReturnNullWhenUserIsNull() {
+		assertThat(mapper.toResponseDto(null)).isNull();
+	}
 
 	@Test
 	void shouldMapPersonDtoToPatientUserWhenValidDataProvided() {
@@ -79,6 +111,42 @@ class UserMapperTest {
 	@Test
 	void shouldReturnNullWhenUserCreateDtoIsNull() {
 		assertThat(mapper.toDoctorUser(null, null, passwordEncoder)).isNull();
+	}
+
+	@Test
+	void shouldUpdateUserFromDtoWhenValidInput() {
+		User user = new User();
+		user.setId(1L);
+		user.setRole(RoleType.PATIENT);
+		user.setPasswordHash("passHash");
+		user.setFirstName("John");
+
+		UserUpdateRequestDto dto = new UserUpdateRequestDto("new@mail.com", "newPass123", "NewFirstName", "NewLastName",
+				LocalDate.of(2000, 1, 1), Status.BLOCKED, null);
+
+		mapper.updateUserFromDto(user, dto, passwordEncoder);
+
+		assertThat(user.getEmail()).isEqualTo("new@mail.com");
+		assertThat(user.getFirstName()).isEqualTo("NewFirstName");
+		assertThat(user.getLastName()).isEqualTo("NewLastName");
+		assertThat(user.getStatus()).isEqualTo(Status.BLOCKED);
+		assertThat(user.getBirthDate()).isEqualTo(LocalDate.of(2000, 1, 1));
+		assertThat(user.getProfileUrl()).isNull();
+		assertThat(user.getId()).isEqualTo(1L);
+		assertThat(user.getRole()).isEqualTo(RoleType.PATIENT);
+	}
+
+	@Test
+	void shouldNotUpdatePasswordWhenDtoPasswordIsNull() {
+		User user = new User();
+		user.setPasswordHash("passHash");
+
+		UserUpdateRequestDto dto = new UserUpdateRequestDto("mail@mail.com", null, "Name", "LastName",
+				LocalDate.of(2000, 1, 1), Status.ACTIVE, null);
+
+		mapper.updateUserFromDto(user, dto, passwordEncoder);
+
+		assertThat(user.getPasswordHash()).isEqualTo("passHash");
 	}
 
 }

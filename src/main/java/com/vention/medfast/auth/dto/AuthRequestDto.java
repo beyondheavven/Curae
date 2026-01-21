@@ -13,7 +13,7 @@ public class AuthRequestDto {
 	@Schema(example = "Test@test.com")
 	private String email;
 
-	@Schema(example = "test123")
+	@Schema(example = "pass")
 	private String password;
 
 }

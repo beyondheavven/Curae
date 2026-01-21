@@ -1,27 +1,32 @@
 package com.vention.medfast.appointment.model;
 
+import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.doctor.model.Doctor;
+import com.vention.medfast.labresult.model.LabResult;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.service.model.ProvidedService;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -31,7 +36,6 @@ public class Appointment {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id", nullable = false)
 	private Long id;
 
 	@Column(name = "scheduled_date", nullable = false)
@@ -41,20 +45,28 @@ public class Appointment {
 	private LocalTime time;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "status", nullable = false, length = 20)
-	private Status status;
+	@Column(name = "status", nullable = false)
+	private AppointmentStatus status;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "doctor_id", nullable = false)
 	private Doctor doctor;
 
-	@ManyToOne(optional = false)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "patient_id", nullable = false)
 	private Patient patient;
 
-	@OneToOne(optional = false)
-	@JoinColumn(name = "service_id", nullable = false)
-	private ProvidedService service;
+	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+	@Column(name = "type", nullable = false)
+	private AppointmentType type;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "referral_id")
+	private Referral referral;
+
+	@OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
+	private List<LabResult> labResults = new ArrayList<>();
 
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false, nullable = false)

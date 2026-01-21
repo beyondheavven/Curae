@@ -7,16 +7,14 @@ import com.vention.medfast.patient.dto.PatientCreateDto;
 import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.user.dto.UserCreateDto;
+import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
-import com.vention.medfast.user.model.RoleType;
+import java.time.LocalDate;
+import java.util.UUID;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
-
-import java.time.LocalDate;
-import java.util.UUID;
-
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -63,8 +61,10 @@ class PatientControllerTest extends AbstractControllerIntegrationTest {
 			.build();
 
 		performRequest(HttpMethod.POST, "/patients", invalidDto).andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message", Matchers.notNullValue()));
+			.andExpect(jsonPath("$.error.message").value("Validation failed"))
+			.andExpect(jsonPath("$.error.validationErrors").isArray())
+			.andExpect(jsonPath("$.error.validationErrors", Matchers.not(Matchers.empty())))
+			.andExpect(jsonPath("$.error.validationErrors[*].message", Matchers.hasItem(Matchers.notNullValue())));
 	}
 
 	@Test

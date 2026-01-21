@@ -4,22 +4,19 @@ import com.jayway.jsonpath.JsonPath;
 import com.vention.medfast.AbstractControllerIntegrationTest;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.specialization.dto.SpecializationCreateDto;
-
+import com.vention.medfast.specialization.model.Specialization;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.vention.medfast.specialization.model.Specialization;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,12 +87,13 @@ class SpecializationControllerTest extends AbstractControllerIntegrationTest {
 	}
 
 	@Test
-	void shouldReturn400WhenValidationErrorsPresentWithCreate() throws Exception {
-		SpecializationCreateDto dto = new SpecializationCreateDto("A", "", List.of());
+	void shouldReturn400WhenValidationErrorsPresentWithUpdate() throws Exception {
+		SpecializationCreateDto invalidDto = new SpecializationCreateDto("A", "", List.of());
 
-		performRequest(HttpMethod.POST, "/specializations", dto).andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message", Matchers.notNullValue()));
+		performRequest(HttpMethod.PUT, "/specializations/{id}", invalidDto, 1).andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.error.message").value("Validation failed"))
+			.andExpect(jsonPath("$.error.validationErrors").isArray())
+			.andExpect(jsonPath("$.error.validationErrors", Matchers.not(Matchers.empty())));
 	}
 
 	@Test
@@ -153,14 +151,6 @@ class SpecializationControllerTest extends AbstractControllerIntegrationTest {
 
 		performRequest(HttpMethod.PUT, "/specializations/{id}", dto, 999).andExpect(status().isNotFound())
 			.andExpect(jsonPath("$.error.message").value("Specialization not found"));
-	}
-
-	@Test
-	void shouldReturn400WhenValidationErrorsPresentWithUpdate() throws Exception {
-		SpecializationCreateDto invalidDto = new SpecializationCreateDto("A", "", List.of());
-
-		performRequest(HttpMethod.PUT, "/specializations/{id}", invalidDto, 1).andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"));
 	}
 
 	private long createValidSpecialization() {

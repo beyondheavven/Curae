@@ -1,24 +1,19 @@
 package com.vention.medfast.visit.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Schema(description = "DTO for creating a visit")
 public record VisitCreateDto(
-		@NotNull(message = "Scheduled date is required") @Future(
-				message = "Scheduled date must be in the future") LocalDate scheduledDate,
 
-		@NotNull(message = "Scheduled time is required") LocalTime scheduledTime,
+		@NotNull(message = "Appointment id is required") Long appointmentId,
 
-		@NotNull(message = "Doctor id is required") @Positive(message = "Doctor id must be positive") Long doctorId,
+		@NotBlank(message = "Diagnosis is required") String diagnosis,
 
-		@NotNull(message = "Patient id is required") @Positive(message = "Patient id must be positive") Long patientId,
+		@NotBlank(message = "Symptoms are required") String symptoms,
 
-		@NotNull(message = "Patient id is required") @Positive(
-				message = "Patient id must be positive") Long serviceId) {
+		@NotBlank(message = "Medical report is required") String medicalReport
+
+) {
 }

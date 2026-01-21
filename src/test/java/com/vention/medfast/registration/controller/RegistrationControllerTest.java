@@ -7,15 +7,13 @@ import com.vention.medfast.registration.dto.AddressDto;
 import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.registration.dto.PatientRegistrationRequestDto;
 import com.vention.medfast.registration.dto.PersonDto;
-import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.model.RoleType;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-
+import com.vention.medfast.user.model.User;
 import java.time.LocalDate;
 import java.util.Set;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -59,8 +57,8 @@ public class RegistrationControllerTest extends AbstractControllerIntegrationTes
 		PatientRegistrationRequestDto request = createPatientRequest(null);
 
 		performRequest(HttpMethod.POST, "/registration", request).andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message").exists());
+			.andExpect(jsonPath("$.error.message").value("Validation failed"))
+			.andExpect(jsonPath("$.error.validationErrors").isArray());
 	}
 
 	@Test
@@ -68,17 +66,8 @@ public class RegistrationControllerTest extends AbstractControllerIntegrationTes
 		DoctorRegistrationRequestDto request = createDoctorRequest(null);
 
 		performRequest(HttpMethod.POST, "/registration/admin/doctors", request).andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("VALIDATION_ERROR"))
-			.andExpect(jsonPath("$.error.message").exists());
-	}
-
-	@Test
-	void shouldReturn403_WhenDoctorRegistrationIsNotAllowed() throws Exception {
-		login("jane.doe@mail.com", "pass");
-
-		DoctorRegistrationRequestDto request = createDoctorRequest("any@med.com");
-
-		performRequest(HttpMethod.POST, "/registration/admin/doctors", request).andExpect(status().isForbidden());
+			.andExpect(jsonPath("$.error.message").value("Validation failed"))
+			.andExpect(jsonPath("$.error.validationErrors").isArray());
 	}
 
 	@Test

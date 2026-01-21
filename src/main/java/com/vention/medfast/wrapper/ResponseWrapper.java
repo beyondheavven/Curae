@@ -1,11 +1,17 @@
 package com.vention.medfast.wrapper;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
-@Setter
+@JsonInclude(NON_NULL)
 @Getter
+@Setter
 public class ResponseWrapper<T> {
 
 	private T data;
@@ -15,6 +21,10 @@ public class ResponseWrapper<T> {
 	private HttpStatus status;
 
 	private int statusCode;
+
+	private static OffsetDateTime now() {
+		return OffsetDateTime.now(ZoneOffset.UTC);
+	}
 
 	public static <T> ResponseWrapper<T> ok(T data) {
 		ResponseWrapper<T> wrapper = new ResponseWrapper<>();
@@ -26,7 +36,16 @@ public class ResponseWrapper<T> {
 
 	public static <T> ResponseWrapper<T> withError(HttpStatus status, String message, ErrorCode code) {
 		ResponseWrapper<T> wrapper = new ResponseWrapper<>();
-		wrapper.setError(new ResponseError(code, message));
+		wrapper.setError(new CommonError(code, message, now()));
+		wrapper.setStatus(status);
+		wrapper.setStatusCode(status.value());
+		return wrapper;
+	}
+
+	public static <T> ResponseWrapper<T> withValidationError(HttpStatus status, String message,
+			List<FieldValidationError> validationErrors) {
+		ResponseWrapper<T> wrapper = new ResponseWrapper<>();
+		wrapper.setError(new ValidationError(message, validationErrors, now()));
 		wrapper.setStatus(status);
 		wrapper.setStatusCode(status.value());
 		return wrapper;
