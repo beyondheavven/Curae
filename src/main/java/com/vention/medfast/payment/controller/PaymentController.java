@@ -1,9 +1,9 @@
-package com.vention.medfast.stripe.controller;
+package com.vention.medfast.payment.controller;
 
 import com.stripe.exception.StripeException;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.stripe.dto.PaymentRequestDto;
-import com.vention.medfast.stripe.service.payment.PaymentService;
+import com.vention.medfast.payment.dto.PaymentRequestDto;
+import com.vention.medfast.payment.service.PaymentService;
 import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,11 +23,9 @@ public class PaymentController {
 
 	private final PaymentService paymentService;
 
-    @Operation(
-        summary = "Create checkout session",
-        description = "Creates a Stripe Checkout Session based on the provided service and patient ID. Returns a URL to redirect the user to Stripe's hosted payment page."
-    )
-    @PostMapping("/checkout")
+	@Operation(summary = "Create checkout session",
+			description = "Creates a Stripe Checkout Session based on the provided service and patient ID. Returns a URL to redirect the user to Stripe's hosted payment page.")
+	@PostMapping("/checkout")
 	public ResponseWrapper<String> createCheckoutSession(@RequestBody PaymentRequestDto requestDto) {
 		try {
 			String paymentUrl = paymentService.createCheckoutSession(requestDto);

@@ -1,11 +1,11 @@
-package com.vention.medfast.stripe.controller;
+package com.vention.medfast.webhook.controller;
 
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.stripe.dto.WebhookProcessingDto;
-import com.vention.medfast.stripe.service.webhook.WebhookService;
+import com.vention.medfast.webhook.dto.WebhookProcessingDto;
+import com.vention.medfast.webhook.service.WebhookService;
 import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -33,7 +33,7 @@ public class WebhookController {
 	@PostMapping()
 	@Operation(summary = "Stripe webhook endpoint", description = "Endpoint for Stripe webhook")
 	public ResponseWrapper<WebhookProcessingDto> getStripeWebhook(@RequestBody String payload,
-			@RequestHeader("Stripe-Signature") String stripeSignature) {
+			@RequestHeader(value = "Stripe-Signature", required = false) String stripeSignature) {
 
 		if (endpointSecret == null || endpointSecret.isEmpty()) {
 			return ResponseWrapper.withError(HttpStatus.INTERNAL_SERVER_ERROR, "Endpoint secret is not set",

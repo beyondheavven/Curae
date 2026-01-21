@@ -1,4 +1,4 @@
-package com.vention.medfast.stripe.service.webhook;
+package com.vention.medfast.webhook.service;
 
 import com.stripe.exception.EventDataObjectDeserializationException;
 import com.stripe.model.StripeObject;
@@ -13,7 +13,7 @@ import com.vention.medfast.purchase.model.Purchase;
 import com.vention.medfast.purchase.repository.PurchaseRepository;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.repository.ProvidedServiceRepository;
-import com.vention.medfast.stripe.dto.WebhookProcessingDto;
+import com.vention.medfast.webhook.dto.WebhookProcessingDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
-package com.vention.medfast.stripe.service.webhook;
+package com.vention.medfast.webhook.service;
 
-import com.vention.medfast.stripe.dto.WebhookProcessingDto;
+import com.vention.medfast.webhook.dto.WebhookProcessingDto;
 
 import com.stripe.model.Event;
 

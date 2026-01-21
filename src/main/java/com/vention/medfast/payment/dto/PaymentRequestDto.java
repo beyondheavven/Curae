@@ -1,4 +1,4 @@
-package com.vention.medfast.stripe.dto;
+package com.vention.medfast.payment.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

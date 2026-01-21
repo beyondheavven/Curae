@@ -1,7 +1,7 @@
-package com.vention.medfast.stripe.service.payment;
+package com.vention.medfast.payment.service;
 
 import com.stripe.exception.StripeException;
-import com.vention.medfast.stripe.dto.PaymentRequestDto;
+import com.vention.medfast.payment.dto.PaymentRequestDto;
 
 public interface PaymentService {
 

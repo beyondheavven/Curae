@@ -1,4 +1,4 @@
-package com.vention.medfast.stripe.service.payment;
+package com.vention.medfast.payment.service;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
@@ -7,7 +7,7 @@ import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.repository.ProvidedServiceRepository;
-import com.vention.medfast.stripe.dto.PaymentRequestDto;
+import com.vention.medfast.payment.dto.PaymentRequestDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
