@@ -6,6 +6,8 @@ import com.vention.medfast.stripe.dto.PaymentRequestDto;
 import com.vention.medfast.stripe.service.payment.PaymentService;
 import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseWrapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,11 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ApiPaths.PAYMENT_ENDPOINT)
 @RequiredArgsConstructor
+@Tag(name = "Payment", description = "Endpoints for processing payments via Stripe")
 public class PaymentController {
 
 	private final PaymentService paymentService;
 
-	@PostMapping("/checkout")
+    @Operation(
+        summary = "Create checkout session",
+        description = "Creates a Stripe Checkout Session based on the provided service and patient ID. Returns a URL to redirect the user to Stripe's hosted payment page."
+    )
+    @PostMapping("/checkout")
 	public ResponseWrapper<String> createCheckoutSession(@RequestBody PaymentRequestDto requestDto) {
 		try {
 			String paymentUrl = paymentService.createCheckoutSession(requestDto);

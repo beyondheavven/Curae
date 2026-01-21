@@ -16,14 +16,12 @@ import com.vention.medfast.service.repository.ProvidedServiceRepository;
 import com.vention.medfast.stripe.dto.WebhookProcessingDto;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WebhookServiceImpl implements WebhookService {
