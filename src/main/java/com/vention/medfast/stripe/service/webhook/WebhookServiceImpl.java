@@ -1,7 +1,11 @@
 package com.vention.medfast.stripe.service.webhook;
 
 import com.stripe.exception.EventDataObjectDeserializationException;
-import com.stripe.model.*;
+import com.stripe.model.StripeObject;
+import com.stripe.model.Event;
+import com.stripe.model.EventDataObjectDeserializer;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.Charge;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.purchase.model.PaymentStatus;
