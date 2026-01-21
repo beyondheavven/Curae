@@ -1,9 +1,7 @@
 package com.vention.medfast.stripe.service.webhook;
 
-import com.stripe.model.Event;
-import com.stripe.model.Charge;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.StripeObject;
+import com.stripe.exception.EventDataObjectDeserializationException;
+import com.stripe.model.*;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.repository.PatientRepository;
 import com.vention.medfast.purchase.model.PaymentStatus;
@@ -34,25 +32,31 @@ public class WebhookServiceImpl implements WebhookService {
 
 	@Override
 	public WebhookProcessingDto processEvent(Event event) {
-		Optional<StripeObject> objectOptional = event.getDataObjectDeserializer().getObject();
+		EventDataObjectDeserializer objectDeserializer = event.getDataObjectDeserializer();
+        StripeObject stripeObject = null;
 
-		if (objectOptional.isEmpty()) {
-			log.error("❌ Failed to deserialize Stripe Object for event: {}", event.getId());
-			return WebhookProcessingDto.builder()
-				.eventId(event.getId())
-				.eventType(event.getType())
-				.status("ERROR")
-				.message("Failed to deserialize Stripe Object")
-				.build();
-		}
+        if (objectDeserializer.getObject().isPresent()) {
+            stripeObject = objectDeserializer.getObject().get();
+        } else {
+            try {
+                stripeObject = objectDeserializer.deserializeUnsafe();
+            } catch (EventDataObjectDeserializationException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
-		StripeObject stripeObject = objectOptional.get();
+        if (stripeObject == null) {
+            return WebhookProcessingDto.builder()
+                .status("ERROR")
+                .message("Failed to deserialize")
+                .build();
+        }
+
 		String description;
 		String status = null;
 
 		switch (event.getType()) {
 			case "payment_intent.succeeded":
-				log.info("💰 Processing payment_intent.succeeded...");
 				PaymentIntent successIntent = (PaymentIntent) stripeObject;
 				saveNewPurchase(successIntent, PaymentStatus.SUCCESS);
 				description = "Order paid successfully. Amount: " + successIntent.getAmount();
@@ -60,7 +64,6 @@ public class WebhookServiceImpl implements WebhookService {
 				break;
 
 			case "payment_intent.payment_failed":
-				log.info("❌ Processing payment_intent.payment_failed...");
 				PaymentIntent failedIntent = (PaymentIntent) stripeObject;
 				saveNewPurchase(failedIntent, PaymentStatus.FAILED);
 				String errorMsg = failedIntent.getLastPaymentError() != null
@@ -70,7 +73,6 @@ public class WebhookServiceImpl implements WebhookService {
 				break;
 
 			case "charge.refunded":
-				log.info("💸 Processing charge.refunded...");
 				Charge charge = (Charge) stripeObject;
 				handleRefund(charge);
 				long amountRefunded = charge.getAmountRefunded();
@@ -78,7 +80,6 @@ public class WebhookServiceImpl implements WebhookService {
 				status = "REFUNDED";
 				break;
 			default:
-				log.debug("ℹ️ Ignoring event type: {}", event.getType());
 				description = "Event ignored";
 				status = "IGNORED";
 		}
@@ -88,13 +89,11 @@ public class WebhookServiceImpl implements WebhookService {
 
 	private void saveNewPurchase(PaymentIntent intent, PaymentStatus status) {
 		if (purchaseRepository.findByStripePaymentIntentId(intent.getId()).isPresent()) {
-			log.warn("⚠️ Purchase with Intent ID {} already exists in DB. Skipping duplicate.", intent.getId());
 			return;
 		}
 
 		Map<String, String> metadata = intent.getMetadata();
 		if (metadata == null || !metadata.containsKey("patientId") || !metadata.containsKey("serviceId")) {
-			log.warn("⚠️ Metadata is NULL for Intent ID: {}. Cannot link purchase to patient.", intent.getId());
 			return;
 		}
 
@@ -116,14 +115,12 @@ public class WebhookServiceImpl implements WebhookService {
 		purchase.setStatus(status);
 
 		purchaseRepository.save(purchase);
-		log.info("✅ Successfully saved purchase! ID: {}, Patient: {}, Status: {}", intent.getId(), patientId, status);
 	}
 
 	private void handleRefund(Charge charge) {
 		String paymentIntentId = charge.getPaymentIntent();
 
 		if (paymentIntentId == null) {
-			log.warn("⚠️ Refund received but PaymentIntent ID is null. Charge ID: {}", charge.getId());
 			return;
 		}
 
@@ -133,7 +130,6 @@ public class WebhookServiceImpl implements WebhookService {
 			Purchase purchase = purchaseOpt.get();
 			purchase.setStatus(PaymentStatus.REFUNDED);
 			purchaseRepository.save(purchase);
-			log.info("✅ Updated status to REFUNDED for PaymentIntent: {}", paymentIntentId);
 		}
 	}
 

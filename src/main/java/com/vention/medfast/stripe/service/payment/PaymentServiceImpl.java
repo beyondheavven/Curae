@@ -56,9 +56,12 @@ public class PaymentServiceImpl implements PaymentService {
 						.build())
 					.build())
 				.build())
-			.putMetadata("serviceId", providedService.getId().toString())
-			.putMetadata("patientId", patient.getId().toString())
-			.putMetadata("serviceName", providedService.getName())
+            .setPaymentIntentData(
+                SessionCreateParams.PaymentIntentData.builder()
+                    .putMetadata("patientId", patient.getId().toString())
+                    .putMetadata("serviceId", providedService.getId().toString())
+                    .build()
+            )
 			.build();
 
 		Session session = Session.create(params);
