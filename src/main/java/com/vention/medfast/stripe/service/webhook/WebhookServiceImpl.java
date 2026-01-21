@@ -33,24 +33,23 @@ public class WebhookServiceImpl implements WebhookService {
 	@Override
 	public WebhookProcessingDto processEvent(Event event) {
 		EventDataObjectDeserializer objectDeserializer = event.getDataObjectDeserializer();
-        StripeObject stripeObject = null;
+		StripeObject stripeObject = null;
 
-        if (objectDeserializer.getObject().isPresent()) {
-            stripeObject = objectDeserializer.getObject().get();
-        } else {
-            try {
-                stripeObject = objectDeserializer.deserializeUnsafe();
-            } catch (EventDataObjectDeserializationException e) {
-                throw new RuntimeException(e);
-            }
-        }
+		if (objectDeserializer.getObject().isPresent()) {
+			stripeObject = objectDeserializer.getObject().get();
+		}
+		else {
+			try {
+				stripeObject = objectDeserializer.deserializeUnsafe();
+			}
+			catch (EventDataObjectDeserializationException e) {
+				throw new RuntimeException(e);
+			}
+		}
 
-        if (stripeObject == null) {
-            return WebhookProcessingDto.builder()
-                .status("ERROR")
-                .message("Failed to deserialize")
-                .build();
-        }
+		if (stripeObject == null) {
+			return WebhookProcessingDto.builder().status("ERROR").message("Failed to deserialize").build();
+		}
 
 		String description;
 		String status = null;
