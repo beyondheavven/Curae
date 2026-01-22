@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,9 +48,10 @@ class PaymentControllerTest extends AbstractControllerIntegrationTest {
 
 		StripeException stripeException = new InvalidRequestException(errorMessage, null, null, null, 400, null);
 
-		doThrow(stripeException).when(paymentService).createCheckoutSession(any(PaymentRequestDto.class));
+		when(paymentService.createCheckoutSession(any(PaymentRequestDto.class))).thenThrow(stripeException);
 
-		performRequest(HttpMethod.POST, "/payment/checkout", requestDto).andExpect(status().isOk())
+		performRequest(HttpMethod.POST, "/payment/checkout", requestDto).andExpect(status().isBadRequest())
+
 			.andExpect(jsonPath("$.statusCode").value(400))
 			.andExpect(jsonPath("$.error.errorCode").value("BAD_REQUEST"))
 			.andExpect(jsonPath("$.error.message").value(errorMessage));

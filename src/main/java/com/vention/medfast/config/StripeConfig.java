@@ -2,18 +2,18 @@ package com.vention.medfast.config;
 
 import com.stripe.Stripe;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class StripeConfig {
 
-	@Value("${STRIPE_SECRET_KEY}")
-	private String secretKey;
+	private final StripeProperties stripeProperties;
 
 	@PostConstruct
 	public void init() {
-		Stripe.apiKey = secretKey;
+		Stripe.apiKey = stripeProperties.getSecretKey();
 	}
 
 }
