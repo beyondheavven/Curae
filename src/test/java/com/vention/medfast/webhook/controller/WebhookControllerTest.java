@@ -9,7 +9,6 @@ import com.vention.medfast.webhook.service.WebhookService;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static org.mockito.ArgumentMatchers.any;

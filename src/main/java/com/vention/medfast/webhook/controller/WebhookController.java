@@ -3,6 +3,7 @@ package com.vention.medfast.webhook.controller;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
+import com.vention.medfast.config.StripeProperties;
 import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.webhook.dto.WebhookProcessingDto;
 import com.vention.medfast.webhook.service.WebhookService;
@@ -11,7 +12,6 @@ import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,38 +25,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class WebhookController {
 
-	@Value("${WEBHOOK_SECRET_KEY}")
-	private String endpointSecret;
+	private final StripeProperties stripeProperties;
 
 	private final WebhookService webhookService;
 
 	@PostMapping()
 	@Operation(summary = "Stripe webhook endpoint", description = "Endpoint for Stripe webhook")
 	public ResponseWrapper<WebhookProcessingDto> getStripeWebhook(@RequestBody String payload,
-			@RequestHeader(value = "Stripe-Signature", required = false) String stripeSignature) {
+			@RequestHeader(value = "Stripe-Signature", required = true) String stripeSignature)
+			throws SignatureVerificationException, Exception {
 
-		if (endpointSecret == null || endpointSecret.isEmpty()) {
-			return ResponseWrapper.withError(HttpStatus.INTERNAL_SERVER_ERROR, "Endpoint secret is not set",
-					ErrorCode.SERVER_ERROR);
+		String endpointSecret = stripeProperties.getWebhookSecret();
 
-		}
-
-		if (stripeSignature == null) {
-			return ResponseWrapper.withError(HttpStatus.BAD_REQUEST, "Missing Stripe-Signature header",
-					ErrorCode.BAD_REQUEST);
-		}
-
-		Event event = null;
-
-		try {
-			event = Webhook.constructEvent(payload, stripeSignature, endpointSecret);
-		}
-		catch (SignatureVerificationException e) {
-			return ResponseWrapper.withError(HttpStatus.BAD_REQUEST, "Invalid signature", ErrorCode.BAD_REQUEST);
-		}
-		catch (Exception e) {
-			return ResponseWrapper.withError(HttpStatus.BAD_REQUEST, "Invalid Payload", ErrorCode.BAD_REQUEST);
-		}
+		Event event = Webhook.constructEvent(payload, stripeSignature, endpointSecret);
 
 		WebhookProcessingDto result = webhookService.processEvent(event);
 		return ResponseWrapper.withStatus(HttpStatus.OK, result);

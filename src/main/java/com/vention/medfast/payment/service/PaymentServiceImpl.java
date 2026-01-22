@@ -3,14 +3,13 @@ package com.vention.medfast.payment.service;
 import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
+import com.vention.medfast.config.StripeProperties;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.repository.PatientRepository;
+import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.service.model.ProvidedService;
-import com.vention.medfast.service.repository.ProvidedServiceRepository;
 import com.vention.medfast.payment.dto.PaymentRequestDto;
-import jakarta.persistence.EntityNotFoundException;
+import com.vention.medfast.service.service.ProvidedServiceService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,31 +19,25 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
-	private final ProvidedServiceRepository providedServiceRepository;
+	private final ProvidedServiceService providedServiceService;
 
-	private final PatientRepository patientRepository;
+	private final PatientService patientService;
 
-	@Value("${PAYMENT_SUCCESS_URL}")
-	private String PAYMENT_SUCCESS_URL;
-
-	@Value("${PAYMENT_CANCEL_URL}")
-	private String PAYMENT_CANCEL_URL;
+	private final StripeProperties stripeProperties;
 
 	@Transactional(readOnly = true)
 	@Override
 	public String createCheckoutSession(PaymentRequestDto requestDto) throws StripeException {
-		ProvidedService providedService = providedServiceRepository.findById(requestDto.serviceId())
-			.orElseThrow(() -> new EntityNotFoundException("Service not found"));
+		ProvidedService providedService = providedServiceService.getProvidedServiceById(requestDto.serviceId());
 
-		Patient patient = patientRepository.findById(requestDto.patientId())
-			.orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+		Patient patient = patientService.getById(requestDto.patientId());
 
 		Long amountInCents = providedService.getPrice().multiply(BigDecimal.valueOf(100)).longValue();
 
 		SessionCreateParams params = SessionCreateParams.builder()
 			.setMode(SessionCreateParams.Mode.PAYMENT)
-			.setSuccessUrl(PAYMENT_SUCCESS_URL)
-			.setCancelUrl(PAYMENT_CANCEL_URL)
+			.setSuccessUrl(stripeProperties.getPaymentSuccessUrl())
+			.setCancelUrl(stripeProperties.getPaymentCancelUrl())
 			.addLineItem(SessionCreateParams.LineItem.builder()
 				.setQuantity(1L)
 				.setPriceData(SessionCreateParams.LineItem.PriceData.builder()

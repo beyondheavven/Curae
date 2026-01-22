@@ -1,5 +1,7 @@
 package com.vention.medfast.api.exception;
 
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
 import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.FieldValidationError;
 import com.vention.medfast.wrapper.ResponseWrapper;
@@ -153,6 +155,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(AppointmentException.class)
 	public ResponseEntity<ResponseWrapper<?>> handleAppointmentException(AppointmentException ex) {
 		return buildError(HttpStatus.CONFLICT, ErrorCode.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(StripeException.class)
+	public ResponseEntity<ResponseWrapper<?>> handleStripeException(StripeException ex) {
+		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(SignatureVerificationException.class)
+	public ResponseEntity<ResponseWrapper<?>> handleSignatureVerificationException(SignatureVerificationException ex) {
+		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, "Invalid Stripe signature");
 	}
 
 	private ResponseEntity<ResponseWrapper<?>> buildError(HttpStatus status, ErrorCode code, String message) {

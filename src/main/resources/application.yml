@@ -2,6 +2,13 @@ openapi:
   server-url: http://localhost:8080/api
   server-description: Production server
 
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  public-key: ${STRIPE_PUBLIC_KEY}`
+  webhook-secret: ${WEBHOOK_SECRET_KEY}
+  payment-success-url: ${PAYMENT_SUCCESS_URL}
+  payment-cancel-url: ${PAYMENT_CANCEL_URL}
+
 springdoc:
   show-actuator: true
   group-configs:
