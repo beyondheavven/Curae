@@ -4,6 +4,7 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.net.Webhook;
 import com.vention.medfast.AbstractControllerIntegrationTest;
+import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.webhook.dto.WebhookProcessingDto;
 import com.vention.medfast.webhook.service.WebhookService;
 import org.junit.jupiter.api.Test;
@@ -25,21 +26,16 @@ class WebhookControllerTest extends AbstractControllerIntegrationTest {
 	@MockitoBean
 	private WebhookService webhookService;
 
-	private static final String WEBHOOK_URL = "/webhook";
-
 	@Test
 	void shouldProcessEventSuccessfullyWhenSignatureIsValid() throws Exception {
-		login("john.smith@mail.com", "pass");
 
 		String payload = "{\"id\":\"evt_test123\", \"object\":\"event\"}";
 		String sigHeader = "t=123,v1=valid_signature";
 
 		Event mockEvent = mock(Event.class);
 
-		WebhookProcessingDto processingDto = WebhookProcessingDto.builder()
-			.status("SUCCESS")
-			.message("Processed successfully")
-			.build();
+		WebhookProcessingDto processingDto = new WebhookProcessingDto("evt_test123", "payment_intent.succeeded",
+				"SUCCESS", "Processed successfully");
 
 		try (MockedStatic<Webhook> webhookMock = mockStatic(Webhook.class)) {
 			webhookMock.when(() -> Webhook.constructEvent(anyString(), anyString(), anyString())).thenReturn(mockEvent);
@@ -47,7 +43,7 @@ class WebhookControllerTest extends AbstractControllerIntegrationTest {
 			when(webhookService.processEvent(any(Event.class))).thenReturn(processingDto);
 
 			mockMvc
-				.perform(post(WEBHOOK_URL).content(payload)
+				.perform(post(ApiPaths.WEBHOOK_ENDPOINT).content(payload)
 					.header("Stripe-Signature", sigHeader)
 					.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -58,33 +54,27 @@ class WebhookControllerTest extends AbstractControllerIntegrationTest {
 
 	@Test
 	void shouldReturnBadRequestWhenSignatureIsInvalid() throws Exception {
-		login("john.smith@mail.com", "pass");
-
 		String payload = "{}";
 		String sigHeader = "invalid_sig";
 
 		try (MockedStatic<Webhook> webhookMock = mockStatic(Webhook.class)) {
 			webhookMock.when(() -> Webhook.constructEvent(anyString(), anyString(), anyString()))
-				.thenThrow(new SignatureVerificationException("Invalid signature", "sig_header"));
+				.thenThrow(new SignatureVerificationException("Some internal stripe error", "sig_header"));
 
 			mockMvc
-				.perform(post(WEBHOOK_URL).content(payload)
+				.perform(post(ApiPaths.WEBHOOK_ENDPOINT).content(payload)
 					.header("Stripe-Signature", sigHeader)
 					.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
+				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.statusCode").value(400))
-				.andExpect(jsonPath("$.error.message").value("Invalid signature"));
+				.andExpect(jsonPath("$.error.message").value("Invalid Stripe signature"));
 		}
 	}
 
 	@Test
 	void shouldReturnBadRequestWhenSignatureHeaderIsMissing() throws Exception {
-		login("john.smith@mail.com", "pass");
-
-		mockMvc.perform(post(WEBHOOK_URL).content("{}").contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.statusCode").value(400))
-			.andExpect(jsonPath("$.error.message").value("Missing Stripe-Signature header"));
+		mockMvc.perform(post(ApiPaths.WEBHOOK_ENDPOINT).content("{}").contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest());
 	}
 
 }

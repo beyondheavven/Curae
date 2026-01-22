@@ -7,7 +7,6 @@ import com.vention.medfast.config.StripeProperties;
 import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.webhook.dto.WebhookProcessingDto;
 import com.vention.medfast.webhook.service.WebhookService;
-import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;

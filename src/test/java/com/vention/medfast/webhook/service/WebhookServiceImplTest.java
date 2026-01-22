@@ -7,12 +7,12 @@ import com.stripe.model.EventDataObjectDeserializer;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.StripeObject;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.repository.PatientRepository;
+import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.purchase.model.PaymentStatus;
 import com.vention.medfast.purchase.model.Purchase;
-import com.vention.medfast.purchase.repository.PurchaseRepository;
+import com.vention.medfast.purchase.service.PurchaseService;
 import com.vention.medfast.service.model.ProvidedService;
-import com.vention.medfast.service.repository.ProvidedServiceRepository;
+import com.vention.medfast.service.service.ProvidedServiceService;
 import com.vention.medfast.webhook.dto.WebhookProcessingDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -38,13 +38,13 @@ import static org.mockito.Mockito.when;
 class WebhookServiceImplTest {
 
 	@Mock
-	private PurchaseRepository purchaseRepository;
+	private PurchaseService purchaseService;
 
 	@Mock
-	private PatientRepository patientRepository;
+	private PatientService patientService;
 
 	@Mock
-	private ProvidedServiceRepository providedServiceRepository;
+	private ProvidedServiceService providedServiceService;
 
 	@InjectMocks
 	private WebhookServiceImpl webhookService;
@@ -77,14 +77,14 @@ class WebhookServiceImplTest {
 
 		Event event = mockStripeEvent("payment_intent.succeeded", paymentIntent);
 
-		when(purchaseRepository.findByStripePaymentIntentId(intentId)).thenReturn(Optional.empty());
-		when(patientRepository.findById(patientId)).thenReturn(Optional.of(new Patient()));
-		when(providedServiceRepository.findById(serviceId)).thenReturn(Optional.of(new ProvidedService()));
+		when(purchaseService.findByStripePaymentIntentId(intentId)).thenReturn(Optional.empty());
+		when(patientService.getById(patientId)).thenReturn(new Patient());
+		when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(new ProvidedService());
 
 		WebhookProcessingDto result = webhookService.processEvent(event);
 
 		assertEquals("SUCCESS", result.status());
-		verify(purchaseRepository).save(any(Purchase.class));
+		verify(purchaseService).save(any(Purchase.class));
 	}
 
 	@Test
@@ -103,15 +103,15 @@ class WebhookServiceImplTest {
 		when(deserializer.getObject()).thenReturn(Optional.empty());
 		when(deserializer.deserializeUnsafe()).thenReturn(paymentIntent);
 
-		when(purchaseRepository.findByStripePaymentIntentId("pi_unsafe")).thenReturn(Optional.empty());
-		when(patientRepository.findById(1L)).thenReturn(Optional.of(new Patient()));
-		when(providedServiceRepository.findById(2L)).thenReturn(Optional.of(new ProvidedService()));
+		when(purchaseService.findByStripePaymentIntentId("pi_unsafe")).thenReturn(Optional.empty());
+		when(patientService.getById(1L)).thenReturn(new Patient());
+		when(providedServiceService.getProvidedServiceById(2L)).thenReturn(new ProvidedService());
 
 		WebhookProcessingDto result = webhookService.processEvent(event);
 
 		assertEquals("SUCCESS", result.status());
 		verify(deserializer).deserializeUnsafe();
-		verify(purchaseRepository).save(any(Purchase.class));
+		verify(purchaseService).save(any(Purchase.class));
 	}
 
 	@Test
@@ -152,11 +152,11 @@ class WebhookServiceImplTest {
 
 		Event event = mockStripeEvent("payment_intent.succeeded", paymentIntent);
 
-		when(purchaseRepository.findByStripePaymentIntentId(intentId)).thenReturn(Optional.of(new Purchase()));
+		when(purchaseService.findByStripePaymentIntentId(intentId)).thenReturn(Optional.of(new Purchase()));
 
 		webhookService.processEvent(event);
 
-		verify(purchaseRepository, never()).save(any(Purchase.class));
+		verify(purchaseService, never()).save(any(Purchase.class));
 	}
 
 	@Test
@@ -167,11 +167,11 @@ class WebhookServiceImplTest {
 
 		Event event = mockStripeEvent("payment_intent.succeeded", paymentIntent);
 
-		when(purchaseRepository.findByStripePaymentIntentId(anyString())).thenReturn(Optional.empty());
+		when(purchaseService.findByStripePaymentIntentId(anyString())).thenReturn(Optional.empty());
 
 		webhookService.processEvent(event);
 
-		verify(purchaseRepository, never()).save(any(Purchase.class));
+		verify(purchaseService, never()).save(any(Purchase.class));
 	}
 
 	@Test
@@ -182,8 +182,9 @@ class WebhookServiceImplTest {
 
 		Event event = mockStripeEvent("payment_intent.succeeded", paymentIntent);
 
-		when(purchaseRepository.findByStripePaymentIntentId(anyString())).thenReturn(Optional.empty());
-		when(patientRepository.findById(999L)).thenReturn(Optional.empty());
+		when(purchaseService.findByStripePaymentIntentId(anyString())).thenReturn(Optional.empty());
+
+		when(patientService.getById(999L)).thenThrow(new EntityNotFoundException("Patient not found"));
 
 		assertThrows(EntityNotFoundException.class, () -> webhookService.processEvent(event));
 	}
@@ -199,14 +200,14 @@ class WebhookServiceImplTest {
 
 		Event event = mockStripeEvent("payment_intent.payment_failed", paymentIntent);
 
-		when(purchaseRepository.findByStripePaymentIntentId(intentId)).thenReturn(Optional.empty());
-		when(patientRepository.findById(1L)).thenReturn(Optional.of(new Patient()));
-		when(providedServiceRepository.findById(2L)).thenReturn(Optional.of(new ProvidedService()));
+		when(purchaseService.findByStripePaymentIntentId(intentId)).thenReturn(Optional.empty());
+		when(patientService.getById(1L)).thenReturn(new Patient());
+		when(providedServiceService.getProvidedServiceById(2L)).thenReturn(new ProvidedService());
 
 		WebhookProcessingDto result = webhookService.processEvent(event);
 
 		assertEquals("FAILED", result.status());
-		verify(purchaseRepository).save(any(Purchase.class));
+		verify(purchaseService).save(any(Purchase.class));
 	}
 
 	@Test
@@ -222,13 +223,13 @@ class WebhookServiceImplTest {
 		Purchase existingPurchase = new Purchase();
 		existingPurchase.setStatus(PaymentStatus.SUCCESS);
 
-		when(purchaseRepository.findByStripePaymentIntentId(intentId)).thenReturn(Optional.of(existingPurchase));
+		when(purchaseService.findByStripePaymentIntentId(intentId)).thenReturn(Optional.of(existingPurchase));
 
 		WebhookProcessingDto result = webhookService.processEvent(event);
 
 		assertEquals("REFUNDED", result.status());
 		assertEquals(PaymentStatus.REFUNDED, existingPurchase.getStatus());
-		verify(purchaseRepository).save(existingPurchase);
+		verify(purchaseService).save(existingPurchase);
 	}
 
 	@Test
@@ -238,7 +239,7 @@ class WebhookServiceImplTest {
 		WebhookProcessingDto result = webhookService.processEvent(event);
 
 		assertEquals("IGNORED", result.status());
-		verify(purchaseRepository, never()).save(any());
+		verify(purchaseService, never()).save(any());
 	}
 
 }

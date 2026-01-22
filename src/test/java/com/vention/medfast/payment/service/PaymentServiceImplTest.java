@@ -18,7 +18,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,102 +31,105 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceImplTest {
 
-    @Mock
-    private ProvidedServiceService providedServiceService;
+	@Mock
+	private ProvidedServiceService providedServiceService;
 
-    @Mock
-    private PatientService patientService;
+	@Mock
+	private PatientService patientService;
 
-    @Mock
-    private StripeProperties stripeProperties;
+	@Mock
+	private StripeProperties stripeProperties;
 
-    @InjectMocks
-    private PaymentServiceImpl paymentService;
+	@InjectMocks
+	private PaymentServiceImpl paymentService;
 
-    @Test
-    void shouldCreateCheckoutSessionWhenInputIsValid() throws StripeException {
-        Long serviceId = 1L;
-        Long patientId = 100L;
-        String currency = "usd";
-        String expectedUrl = "https://checkout.stripe.com/pay/cs_test_abc123";
-        String successUrl = "http://localhost:8080/success";
-        String cancelUrl = "http://localhost:8080/cancel";
+	@Test
+	void shouldCreateCheckoutSessionWhenInputIsValid() throws StripeException {
+		Long serviceId = 1L;
+		Long patientId = 100L;
+		String currency = "usd";
+		String expectedUrl = "https://checkout.stripe.com/pay/cs_test_abc123";
+		String successUrl = "http://localhost:8080/success";
+		String cancelUrl = "http://localhost:8080/cancel";
 
-        PaymentRequestDto requestDto = new PaymentRequestDto(serviceId, patientId, currency);
+		PaymentRequestDto requestDto = new PaymentRequestDto(serviceId, patientId, currency);
 
-        ProvidedService service = new ProvidedService();
-        service.setId(serviceId);
-        service.setName("Doctor Consultation");
-        service.setDescription("General checkup");
-        service.setPrice(BigDecimal.valueOf(50.00));
+		ProvidedService service = new ProvidedService();
+		service.setId(serviceId);
+		service.setName("Doctor Consultation");
+		service.setDescription("General checkup");
+		service.setPrice(BigDecimal.valueOf(50.00));
 
-        Patient patient = new Patient();
-        patient.setId(patientId);
+		Patient patient = new Patient();
+		patient.setId(patientId);
 
-        when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(Optional.of(service));
-        when(pa.findById(patientId)).thenReturn(Optional.of(patient));
+		when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(service);
+		when(patientService.getById(patientId)).thenReturn(patient);
 
-        when(stripeProperties.getPaymentSuccessUrl()).thenReturn(successUrl);
-        when(stripeProperties.getPaymentCancelUrl()).thenReturn(cancelUrl);
+		when(stripeProperties.getPaymentSuccessUrl()).thenReturn(successUrl);
+		when(stripeProperties.getPaymentCancelUrl()).thenReturn(cancelUrl);
 
-        try (MockedStatic<Session> sessionMockedStatic = mockStatic(Session.class)) {
-            Session mockSession = mock(Session.class);
-            when(mockSession.getUrl()).thenReturn(expectedUrl);
+		try (MockedStatic<Session> sessionMockedStatic = mockStatic(Session.class)) {
+			Session mockSession = mock(Session.class);
+			when(mockSession.getUrl()).thenReturn(expectedUrl);
 
-            sessionMockedStatic.when(() -> Session.create(any(SessionCreateParams.class)))
-                .thenReturn(mockSession);
+			sessionMockedStatic.when(() -> Session.create(any(SessionCreateParams.class))).thenReturn(mockSession);
 
-            String resultUrl = paymentService.createCheckoutSession(requestDto);
+			String resultUrl = paymentService.createCheckoutSession(requestDto);
 
-            assertEquals(expectedUrl, resultUrl);
+			assertEquals(expectedUrl, resultUrl);
 
-            verify(providedServiceRepository).findById(serviceId);
-            verify(patientRepository).findById(patientId);
+			verify(providedServiceService).getProvidedServiceById(serviceId);
+			verify(patientService).getById(patientId);
 
-            verify(stripeProperties).getPaymentSuccessUrl();
-            verify(stripeProperties).getPaymentCancelUrl();
+			verify(stripeProperties).getPaymentSuccessUrl();
+			verify(stripeProperties).getPaymentCancelUrl();
 
-            sessionMockedStatic.verify(() -> Session.create(any(SessionCreateParams.class)));
-        }
-    }
+			sessionMockedStatic.verify(() -> Session.create(any(SessionCreateParams.class)));
+		}
+	}
 
-    @Test
-    void shouldThrowExceptionWhenServiceNotFound() {
-        Long serviceId = 1L;
-        Long patientId = 100L;
-        PaymentRequestDto requestDto = new PaymentRequestDto(serviceId, patientId, "usd");
+	@Test
+	void shouldThrowExceptionWhenServiceNotFound() {
+		Long serviceId = 1L;
+		Long patientId = 100L;
+		PaymentRequestDto requestDto = new PaymentRequestDto(serviceId, patientId, "usd");
 
-        when(providedServiceRepository.findById(serviceId)).thenReturn(Optional.empty());
+		when(providedServiceService.getProvidedServiceById(serviceId))
+			.thenThrow(new EntityNotFoundException("Service not found"));
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> paymentService.createCheckoutSession(requestDto));
+		EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+				() -> paymentService.createCheckoutSession(requestDto));
 
-        assertEquals("Service not found", exception.getMessage());
+		assertEquals("Service not found", exception.getMessage());
 
-        verify(providedServiceRepository).findById(serviceId);
-        verifyNoInteractions(patientRepository);
-        verifyNoInteractions(stripeProperties);
-    }
+		verify(providedServiceService).getProvidedServiceById(serviceId);
+		verifyNoInteractions(patientService);
+		verifyNoInteractions(stripeProperties);
+	}
 
-    @Test
-    void shouldThrowExceptionWhenPatientNotFound() {
-        Long serviceId = 1L;
-        Long patientId = 100L;
-        PaymentRequestDto requestDto = new PaymentRequestDto(serviceId, patientId, "usd");
+	@Test
+	void shouldThrowExceptionWhenPatientNotFound() {
+		Long serviceId = 1L;
+		Long patientId = 100L;
+		PaymentRequestDto requestDto = new PaymentRequestDto(serviceId, patientId, "usd");
 
-        ProvidedService service = new ProvidedService();
-        service.setId(serviceId);
+		ProvidedService service = new ProvidedService();
+		service.setId(serviceId);
+		service.setPrice(BigDecimal.TEN);
 
-        when(providedServiceRepository.findById(serviceId)).thenReturn(Optional.of(service));
-        when(patientRepository.findById(patientId)).thenReturn(Optional.empty());
+		when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(service);
 
-        EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
-            () -> paymentService.createCheckoutSession(requestDto));
+		when(patientService.getById(patientId)).thenThrow(new EntityNotFoundException("Patient not found"));
 
-        assertEquals("Patient not found", exception.getMessage());
+		EntityNotFoundException exception = assertThrows(EntityNotFoundException.class,
+				() -> paymentService.createCheckoutSession(requestDto));
 
-        verify(providedServiceRepository).findById(serviceId);
-        verify(patientRepository).findById(patientId);
-        verifyNoInteractions(stripeProperties);
-    }
+		assertEquals("Patient not found", exception.getMessage());
+
+		verify(providedServiceService).getProvidedServiceById(serviceId);
+		verify(patientService).getById(patientId);
+		verifyNoInteractions(stripeProperties);
+	}
+
 }
