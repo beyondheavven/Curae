@@ -1,4 +1,4 @@
-package com.vention.medfast.appointment.referral.model;
+package com.vention.medfast.referral.model;
 
 public enum ReferralStatus {
 

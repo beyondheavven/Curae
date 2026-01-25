@@ -1,4 +1,4 @@
-package com.vention.medfast.appointment.referral.dto;
+package com.vention.medfast.referral.dto;
 
 import com.vention.medfast.appointment.model.AppointmentType;
 import io.swagger.v3.oas.annotations.media.Schema;

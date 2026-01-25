@@ -4,7 +4,7 @@ import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.model.Appointment;
-import com.vention.medfast.appointment.referral.model.Referral;
+import com.vention.medfast.referral.model.Referral;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
 import org.mapstruct.Mapper;
