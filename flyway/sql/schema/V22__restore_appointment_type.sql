@@ -11,5 +11,9 @@ UPDATE appointments
 SET type = 'VISIT'
 WHERE type IS NULL;
 
+update appointments
+set type = 'TEST'
+where id in (4,5);
+
 ALTER TABLE appointments
 ALTER COLUMN type SET NOT NULL;

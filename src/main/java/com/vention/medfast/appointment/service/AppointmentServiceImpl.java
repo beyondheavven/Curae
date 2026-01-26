@@ -18,6 +18,8 @@ import com.vention.medfast.labresult.mapper.LabResultMapper;
 import com.vention.medfast.labresult.service.LabResultService;
 import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
+import com.vention.medfast.notification.eventListener.eventModel.StatusChangedEvent;
+import com.vention.medfast.notification.model.NotificationType;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
@@ -28,6 +30,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -52,6 +55,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private final LabResultService labResultService;
 
 	private final LabResultMapper labResultMapper;
+
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
 	@Transactional
@@ -141,9 +146,25 @@ public class AppointmentServiceImpl implements AppointmentService {
 		return appointmentRepository.getStatusStatisticsByType(startDate, endDate, type);
 	}
 
-	private Appointment findAppointment(Long appointmentId) {
+	@Override
+	public Appointment findAppointment(Long appointmentId) {
 		return appointmentRepository.findById(appointmentId)
 			.orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+	}
+
+	@Transactional
+	@Override
+	public void cancelAppointment(Long appointmentId) {
+		Appointment appointment = findAppointment(appointmentId);
+		AppointmentStatus oldStatus = appointment.getStatus();
+		appointment.setStatus(AppointmentStatus.CANCELLED);
+
+		appointmentRepository.save(appointment);
+
+		eventPublisher
+			.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_STATUS_CHANGED, appointment.getId(),
+					appointment.getPatient().getId(), oldStatus.name(), AppointmentStatus.CANCELLED.name()));
+
 	}
 
 }

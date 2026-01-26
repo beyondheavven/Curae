@@ -56,4 +56,6 @@ public final class ApiPaths {
 
 	public static final String STATISTICS_ENDPOINT = "/statistics";
 
+	public static final String NOTIFICATION_ENDPOINT = "/notifications";
+
 }

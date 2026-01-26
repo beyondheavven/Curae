@@ -1,8 +1,10 @@
 package com.vention.medfast.appointment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.labresult.model.LabResult;
+import com.vention.medfast.notification.model.Notification;
 import com.vention.medfast.patient.model.Patient;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,7 +51,7 @@ public class Appointment {
 	private AppointmentStatus status;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "doctor_id", nullable = false)
+	@JoinColumn(name = "doctor_id", nullable = true)
 	private Doctor doctor;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -75,5 +77,9 @@ public class Appointment {
 	@UpdateTimestamp
 	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
+	private List<Notification> notifications = new ArrayList<>();
 
 }

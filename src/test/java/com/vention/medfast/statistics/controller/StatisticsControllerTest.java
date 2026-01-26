@@ -2,13 +2,11 @@ package com.vention.medfast.statistics.controller;
 
 import com.vention.medfast.AbstractControllerIntegrationTest;
 import com.vention.medfast.constants.ApiPaths;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-
 import java.time.LocalDate;
-
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,14 +26,14 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 			.andExpect(jsonPath("$.data.period.startDate").value(startDate.toString()))
 			.andExpect(jsonPath("$.data.period.endDate").value(endDate.toString()))
 
-			.andExpect(jsonPath("$.data.appointments.stats.total").value(2))
+			.andExpect(jsonPath("$.data.appointments.stats.total").value(3))
 			.andExpect(jsonPath("$.data.appointments.stats.scheduled").value(0))
-			.andExpect(jsonPath("$.data.appointments.stats.completed").value(2))
+			.andExpect(jsonPath("$.data.appointments.stats.completed").value(3))
 
 			.andExpect(jsonPath("$.data.visits.stats.total").value(1))
 			.andExpect(jsonPath("$.data.visits.stats.completed").value(1))
 
-			.andExpect(jsonPath("$.data.labResults.stats.total").value(1))
+			.andExpect(jsonPath("$.data.labResults.stats.total").value(2))
 			.andExpect(jsonPath("$.data.labResults.results.processing").value(1))
 			.andExpect(jsonPath("$.data.labResults.results.ready").value(3))
 			.andExpect(jsonPath("$.data.labResults.results.failed").value(0));

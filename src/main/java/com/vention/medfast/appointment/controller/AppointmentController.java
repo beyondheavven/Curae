@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -110,6 +111,12 @@ public class AppointmentController {
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	public void createWithLabs(@Valid @RequestBody AppointmentCreateWithLabsDto request) {
 		appointmentService.createWithLabs(request);
+	}
+
+	@PatchMapping("/{id}/cancel")
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public void cancelAppointment(@PathVariable Long id) {
+		appointmentService.cancelAppointment(id);
 	}
 
 }

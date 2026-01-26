@@ -78,6 +78,9 @@ public class SecurityConfig {
 				.requestMatchers(ApiPaths.APPOINTMENT_ENDPOINT, ApiPaths.APPOINTMENT_ENDPOINT + "/**")
 				.authenticated()
 
+				.requestMatchers(ApiPaths.NOTIFICATION_ENDPOINT, ApiPaths.NOTIFICATION_ENDPOINT + "/**")
+				.authenticated()
+
 				.requestMatchers("/account/password-reset/request", "/account/password-reset/verify",
 						"/account/password-reset/confirm", "/account/set-password")
 				.permitAll()

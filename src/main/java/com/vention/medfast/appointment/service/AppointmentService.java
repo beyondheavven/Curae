@@ -30,4 +30,8 @@ public interface AppointmentService {
 
 	AppointmentStatusCounts getStatusStatisticsByType(LocalDate start, LocalDate end, AppointmentType type);
 
+	Appointment findAppointment(Long appointmentId);
+
+	void cancelAppointment(Long appointmentId);
+
 }
