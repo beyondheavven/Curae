@@ -8,6 +8,7 @@ import com.vention.medfast.wrapper.ResponseWrapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -75,11 +77,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 			HttpHeaders headers, org.springframework.http.HttpStatusCode status,
 			org.springframework.web.context.request.WebRequest request) {
 
-		List<FieldValidationError> validationErrors = ex.getBindingResult()
-			.getFieldErrors()
-			.stream()
-			.map(err -> new FieldValidationError(err.getField(), err.getRejectedValue(), err.getDefaultMessage()))
-			.toList();
+		List<FieldValidationError> validationErrors = ex.getBindingResult().getAllErrors().stream().map(error -> {
+			if (error instanceof FieldError fe) {
+				return new FieldValidationError(fe.getField(), fe.getRejectedValue(), fe.getDefaultMessage());
+			}
+			return new FieldValidationError(error.getObjectName(), null, error.getDefaultMessage());
+		}).toList();
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.body(ResponseWrapper.withValidationError(HttpStatus.BAD_REQUEST, "Validation failed", validationErrors));

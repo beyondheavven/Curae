@@ -28,7 +28,7 @@ public final class ApiPaths {
 
 	public static final String REGISTRATION_ENDPOINT = "/registration";
 
-	public static final String ADMIN_DOCTOR_ENDPOINT = "/admin/doctors";
+	public static final String ADMIN_ENDPOINT = "/admin";
 
 	public static final String SET_PASSWORD_ENDPOINT = "/set-password";
 
@@ -53,5 +53,7 @@ public final class ApiPaths {
 	public static final String COUNTRY_ENDPOINT = "/countries";
 
 	public static final String CHAT_ENDPOINT = "/chats";
+
+	public static final String STATISTICS_ENDPOINT = "/statistics";
 
 }
