@@ -105,7 +105,7 @@ public class ChatController {
 	public ResponseWrapper<MessageResponseDto> sendMessage(@AuthenticationPrincipal CustomUserDetails user,
 			@PathVariable Long chatId, @Valid @RequestBody MessageSendRequestDto dto) {
 		return ResponseWrapper.withStatus(HttpStatus.CREATED,
-				chatMapper.toMessageResponse(chatService.sendMessage(chatId, user.getId(), dto.content())));
+				chatMapper.toMessageResponse(chatService.createMessage(chatId, user.getId(), dto.content())));
 	}
 
 }

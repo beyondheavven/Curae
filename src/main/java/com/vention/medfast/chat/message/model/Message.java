@@ -36,9 +36,6 @@ public class Message {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 
-	protected Message() {
-	}
-
 	public static Message create(Long chatId, Long senderId, String content) {
 		Message message = new Message();
 		message.chatId = chatId;

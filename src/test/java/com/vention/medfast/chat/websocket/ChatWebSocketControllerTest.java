@@ -13,12 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.access.AccessDeniedException;
 
-import java.security.Principal;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,31 +41,27 @@ public class ChatWebSocketControllerTest {
 
 		ChatMessageSendWsDto dto = new ChatMessageSendWsDto("hello");
 
-		CustomUserDetails userDetails = new CustomUserDetails(userId, "test@mail.com", "pass", null);
-
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null);
+		CustomUserDetails user = new CustomUserDetails(userId, "test@mail.com", "pass", null);
 
 		Message message = Message.create(chatId, userId, "hello");
 		MessageResponseDto responseDto = new MessageResponseDto(1L, chatId, userId, "hello", null);
 
-		when(chatService.sendMessage(chatId, userId, "hello")).thenReturn(message);
+		when(chatService.createMessage(chatId, userId, "hello")).thenReturn(message);
 		when(chatMapper.toMessageResponse(message)).thenReturn(responseDto);
 
-		controller.sendMessage(chatId, authentication, dto);
+		controller.sendMessage(chatId, user, dto);
 
-		verify(chatService).sendMessage(chatId, userId, "hello");
+		verify(chatService).createMessage(chatId, userId, "hello");
 		verify(chatMapper).toMessageResponse(message);
 		verify(messagingTemplate).convertAndSend("/topic/chats/" + chatId, responseDto);
 	}
 
 	@Test
 	void sendMessage_shouldThrowAccessDenied_whenPrincipalIsInvalid() {
-		Principal invalidPrincipal = () -> "anonymous";
 
 		ChatMessageSendWsDto dto = new ChatMessageSendWsDto("hello");
 
-		assertThatThrownBy(() -> controller.sendMessage(1L, invalidPrincipal, dto))
-			.isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+		assertThatThrownBy(() -> controller.sendMessage(1L, null, dto)).isInstanceOf(AccessDeniedException.class);
 	}
 
 }

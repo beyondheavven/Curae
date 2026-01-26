@@ -12,10 +12,8 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-
-import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,13 +26,13 @@ public class ChatWebSocketController {
 	private final SimpMessagingTemplate messagingTemplate;
 
 	@MessageMapping("/chats/{chatId}/send")
-	public void sendMessage(@DestinationVariable Long chatId, Principal principal, @Valid ChatMessageSendWsDto dto) {
-		if (!(principal instanceof Authentication authentication)
-				|| !(authentication.getPrincipal() instanceof CustomUserDetails user)) {
+	public void sendMessage(@DestinationVariable Long chatId, @AuthenticationPrincipal CustomUserDetails user,
+			@Valid ChatMessageSendWsDto dto) {
+		if (user == null) {
 			throw new AccessDeniedException("Unauthenticated WebSocket message");
 		}
 
-		Message message = chatService.sendMessage(chatId, user.getId(), dto.content());
+		Message message = chatService.createMessage(chatId, user.getId(), dto.content());
 
 		MessageResponseDto response = chatMapper.toMessageResponse(message);
 

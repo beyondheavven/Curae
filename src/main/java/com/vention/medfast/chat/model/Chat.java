@@ -34,9 +34,6 @@ public class Chat {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
 
-	protected Chat() {
-	}
-
 	public static Chat create(Long patientId, Long doctorId) {
 		Chat chat = new Chat();
 		chat.patientId = patientId;

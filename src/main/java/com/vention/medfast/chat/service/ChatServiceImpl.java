@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -30,6 +31,7 @@ public class ChatServiceImpl implements ChatService {
 	private final UserService userService;
 
 	@Override
+	@Transactional
 	public Chat createChat(Long patientId, Long doctorId) {
 		if (patientId.equals(doctorId)) {
 			throw new ChatOperationException("Cannot create chat with yourself");
@@ -60,7 +62,7 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	@Override
-	public Message sendMessage(Long chatId, Long senderId, String content) {
+	public Message createMessage(Long chatId, Long senderId, String content) {
 		String normalizedContent = normalizeMessageContent(content);
 
 		Chat chat = getChatOrThrow(chatId);
@@ -90,16 +92,11 @@ public class ChatServiceImpl implements ChatService {
 	}
 
 	private String normalizeMessageContent(String content) {
-		if (content == null) {
+		if (StringUtils.isBlank(content)) {
 			throw new ChatOperationException("Message content cannot be empty");
 		}
 
-		String trimmed = content.trim();
-		if (trimmed.isEmpty()) {
-			throw new ChatOperationException("Message content cannot be empty");
-		}
-
-		return trimmed;
+		return content.trim();
 	}
 
 }

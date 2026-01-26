@@ -15,6 +15,6 @@ public interface ChatService {
 
 	Page<Message> getChatMessages(Long chatId, Long userId, Pageable pageable);
 
-	Message sendMessage(Long chatId, Long senderId, String content);
+	Message createMessage(Long chatId, Long senderId, String content);
 
 }

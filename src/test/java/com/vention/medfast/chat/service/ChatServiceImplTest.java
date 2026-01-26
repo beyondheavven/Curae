@@ -140,25 +140,25 @@ public class ChatServiceImplTest {
 	}
 
 	@Test
-	void sendMessageFailsOnBlankContent() {
-		assertThatThrownBy(() -> service.sendMessage(1L, 1L, "   ")).isInstanceOf(ChatOperationException.class);
+	void createMessageFailsOnBlankContent() {
+		assertThatThrownBy(() -> service.createMessage(1L, 1L, "   ")).isInstanceOf(ChatOperationException.class);
 	}
 
 	@Test
-	void sendMessageFailsWhenUserNotParticipant() {
+	void createMessageFailsWhenUserNotParticipant() {
 		Chat chat = Chat.create(1L, 2L);
 		when(chatRepository.findById(10L)).thenReturn(Optional.of(chat));
 
-		assertThatThrownBy(() -> service.sendMessage(10L, 99L, "hello")).isInstanceOf(AccessDeniedException.class);
+		assertThatThrownBy(() -> service.createMessage(10L, 99L, "hello")).isInstanceOf(AccessDeniedException.class);
 	}
 
 	@Test
-	void sendMessageSavesNormalizedMessage() {
+	void createMessageSavesNormalizedMessage() {
 		Chat chat = Chat.create(1L, 2L);
 		when(chatRepository.findById(10L)).thenReturn(Optional.of(chat));
 		when(messageRepository.save(any(Message.class))).thenAnswer(inv -> inv.getArgument(0));
 
-		Message message = service.sendMessage(10L, 1L, "  hello  ");
+		Message message = service.createMessage(10L, 1L, "  hello  ");
 
 		assertThat(message.getContent()).isEqualTo("hello");
 		assertThat(message.getChatId()).isEqualTo(10L);

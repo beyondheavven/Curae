@@ -131,7 +131,7 @@ public class ChatControllerTest {
 
 		MessageResponseDto dto = new MessageResponseDto(55L, 99L, 9L, "hello", message.getCreatedAt());
 
-		when(chatService.sendMessage(99L, 9L, "hello")).thenReturn(message);
+		when(chatService.createMessage(99L, 9L, "hello")).thenReturn(message);
 		when(chatMapper.toMessageResponse(message)).thenReturn(dto);
 
 		ResponseWrapper<MessageResponseDto> response = controller.sendMessage(user, 99L, request);
@@ -140,7 +140,7 @@ public class ChatControllerTest {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED.value());
 		assertThat(response.getData()).isEqualTo(dto);
 
-		verify(chatService).sendMessage(99L, 9L, "hello");
+		verify(chatService).createMessage(99L, 9L, "hello");
 		verify(chatMapper).toMessageResponse(message);
 	}
 
