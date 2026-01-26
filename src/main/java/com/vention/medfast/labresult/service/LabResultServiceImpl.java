@@ -5,9 +5,14 @@ import com.vention.medfast.labresult.model.LabResult;
 import com.vention.medfast.labresult.model.LabResultStatus;
 import com.vention.medfast.labresult.repository.LabResultRepository;
 import com.vention.medfast.labtest.model.LabTest;
+
+import java.time.LocalDate;
 import java.util.List;
+
+import com.vention.medfast.statistics.dto.response.LabResultStatusCounts;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -26,6 +31,12 @@ public class LabResultServiceImpl implements LabResultService {
 		}).toList();
 
 		labResultRepository.saveAll(results);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public LabResultStatusCounts getStatusStatistics(LocalDate startDate, LocalDate endDate) {
+		return labResultRepository.getStatusCounts(startDate, endDate);
 	}
 
 }

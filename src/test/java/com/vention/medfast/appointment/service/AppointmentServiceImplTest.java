@@ -20,6 +20,7 @@ import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,7 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentServiceImplTest {
@@ -134,6 +136,57 @@ class AppointmentServiceImplTest {
 		appointmentService.createWithLabs(req);
 		verify(appointmentRepository).save(appointment);
 		verify(labResultService).createForAppointment(appointment, List.of(t1, t2));
+	}
+
+	@Test
+	void shouldReturnAllStatusStatistics() {
+		LocalDate startDate = LocalDate.of(2026, 1, 1);
+		LocalDate endDate = LocalDate.of(2026, 1, 31);
+
+		AppointmentStatusCounts expectedCounts = new AppointmentStatusCounts(10L, 5L, 2L, 3L, 0L);
+
+		when(appointmentRepository.getAllStatusStatistics(startDate, endDate)).thenReturn(expectedCounts);
+
+		AppointmentStatusCounts result = appointmentService.getAllStatusStatistics(startDate, endDate);
+
+		assertThat(result).isNotNull();
+		assertThat(result.total()).isEqualTo(10L);
+		assertThat(result.scheduled()).isEqualTo(5L);
+
+		verify(appointmentRepository).getAllStatusStatistics(startDate, endDate);
+	}
+
+	@Test
+	void shouldReturnStatusStatisticsByType() {
+		LocalDate startDate = LocalDate.of(2026, 1, 1);
+		LocalDate endDate = LocalDate.of(2026, 1, 31);
+		AppointmentType type = AppointmentType.VISIT;
+
+		AppointmentStatusCounts expectedCounts = new AppointmentStatusCounts(5L, 2L, 1L, 2L, 0L);
+
+		when(appointmentRepository.getStatusStatisticsByType(startDate, endDate, type)).thenReturn(expectedCounts);
+
+		AppointmentStatusCounts result = appointmentService.getStatusStatisticsByType(startDate, endDate, type);
+
+		assertThat(result).isNotNull();
+		assertThat(result.total()).isEqualTo(5L);
+
+		verify(appointmentRepository).getStatusStatisticsByType(startDate, endDate, type);
+	}
+
+	@Test
+	void shouldReturnZeroCountsWhenNoAppointmentsExist() {
+		LocalDate startDate = LocalDate.of(2099, 1, 1);
+		LocalDate endDate = LocalDate.of(2099, 1, 31);
+
+		AppointmentStatusCounts emptyCounts = new AppointmentStatusCounts(0L, 0L, 0L, 0L, 0L);
+
+		when(appointmentRepository.getAllStatusStatistics(startDate, endDate)).thenReturn(emptyCounts);
+
+		AppointmentStatusCounts result = appointmentService.getAllStatusStatistics(startDate, endDate);
+
+		assertThat(result).isNotNull();
+		assertThat(result.total()).isZero();
 	}
 
 }

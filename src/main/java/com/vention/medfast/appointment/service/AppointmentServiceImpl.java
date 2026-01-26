@@ -20,7 +20,10 @@ import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
+
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -123,6 +126,19 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Transactional(readOnly = true)
 	public Page<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable) {
 		return appointmentRepository.findLabHistoryPage(userId, pageable).map(labResultMapper::toHistoryDto);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public AppointmentStatusCounts getAllStatusStatistics(LocalDate startDate, LocalDate endDate) {
+		return appointmentRepository.getAllStatusStatistics(startDate, endDate);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public AppointmentStatusCounts getStatusStatisticsByType(LocalDate startDate, LocalDate endDate,
+			AppointmentType type) {
+		return appointmentRepository.getStatusStatisticsByType(startDate, endDate, type);
 	}
 
 	private Appointment findAppointment(Long appointmentId) {
