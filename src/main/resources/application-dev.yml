@@ -88,6 +88,10 @@ server:
 app:
   base-url: ${openapi.server-url}
 
+  websocket:
+    allowed-origins:
+      - http://localhost:8000
+
   email-verification:
     ttl-ms: 3600000
 

@@ -52,6 +52,8 @@ public final class ApiPaths {
 
 	public static final String COUNTRY_ENDPOINT = "/countries";
 
+	public static final String CHAT_ENDPOINT = "/chats";
+
 	public static final String STATISTICS_ENDPOINT = "/statistics";
 
 }

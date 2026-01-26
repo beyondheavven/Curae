@@ -170,6 +170,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, "Invalid Stripe signature");
 	}
 
+	@ExceptionHandler(ChatOperationException.class)
+	public ResponseEntity<ResponseWrapper<?>> handleChatOperationException(ChatOperationException ex) {
+		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
+	}
+
 	private ResponseEntity<ResponseWrapper<?>> buildError(HttpStatus status, ErrorCode code, String message) {
 		return ResponseEntity.status(status).body(ResponseWrapper.withError(status, message, code));
 	}
