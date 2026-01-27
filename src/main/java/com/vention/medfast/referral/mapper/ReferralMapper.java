@@ -21,6 +21,7 @@ public interface ReferralMapper {
 	@Mapping(target = "status", constant = "ACTIVE")
 	Referral toEntity(ReferralCreateDto dto, Patient patient, Doctor doctor, ProvidedService service);
 
+
 	@Mapping(target = "serviceId", source = "service.id")
 	ReferralResponseDto toDto(Referral referral);
 

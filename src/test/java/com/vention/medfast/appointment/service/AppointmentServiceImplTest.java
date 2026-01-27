@@ -4,7 +4,6 @@ import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
-import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;

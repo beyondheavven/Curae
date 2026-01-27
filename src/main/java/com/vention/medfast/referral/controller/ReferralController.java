@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
-@RestController
+ @RestController
 @RequestMapping(ApiPaths.PRESCRIPTION_ENDPOINT)
 @RequiredArgsConstructor
 @Tag(name = "Prescriptions", description = "Endpoints for managing prescriptions (referrals)")
@@ -35,9 +35,9 @@ public class ReferralController {
 
 	private final ReferralService referralService;
 
-	@Operation(summary = "Create prescription", description = "Doctor issues a prescription for patient")
+	@Operation(summary = "Create referral", description = "Doctor issues a referrals for patient")
 	@ApiResponses({
-			@ApiResponse(responseCode = "201", description = "Prescription created",
+			@ApiResponse(responseCode = "201", description = "Referral created",
 					content = @Content(schema = @Schema(implementation = Long.class))),
 			@ApiResponse(responseCode = "400", description = "Validation error",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
@@ -49,9 +49,9 @@ public class ReferralController {
 		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
 	}
 
-	@Operation(summary = "Get active prescriptions by patient",
-			description = "Returns all active prescriptions for a patient")
-	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Prescriptions retrieved"),
+	@Operation(summary = "Get active referrals by patient",
+			description = "Returns all active referrals for a patient")
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Referrals retrieved"),
 			@ApiResponse(responseCode = "400", description = "Invalid request",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
@@ -61,12 +61,12 @@ public class ReferralController {
 		return ResponseWrapper.ok(result);
 	}
 
-	@Operation(summary = "Mark prescription as used",
-			description = "Marks prescription as used after appointment confirmation")
-	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Prescription marked as used"),
-			@ApiResponse(responseCode = "400", description = "Invalid prescription state",
+	@Operation(summary = "Mark referral as used",
+			description = "Marks referral as used after appointment confirmation")
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Referral marked as used"),
+			@ApiResponse(responseCode = "400", description = "Invalid referral state",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
-			@ApiResponse(responseCode = "404", description = "Prescription not found",
+			@ApiResponse(responseCode = "404", description = "Referral not found",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PreAuthorize("hasRole('DOCTOR')")
 	@PatchMapping("/{id}/use")

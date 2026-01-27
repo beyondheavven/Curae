@@ -8,7 +8,6 @@ import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.visit.dto.VisitCreateDto;
 import com.vention.medfast.visit.dto.VisitResponseDto;
-import com.vention.medfast.visit.mapper.VisitMapper;
 import com.vention.medfast.visit.model.Visit;
 import com.vention.medfast.visit.model.VisitType;
 import com.vention.medfast.visit.repository.VisitRepository;
