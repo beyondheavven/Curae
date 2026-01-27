@@ -2,6 +2,7 @@ package com.vention.medfast.appointment.mapper;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.referral.model.Referral;
@@ -9,6 +10,7 @@ import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface AppointmentMapper {
@@ -49,5 +51,9 @@ public interface AppointmentMapper {
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
 	Appointment toLabAppointment(AppointmentCreateWithLabsDto dto, Doctor doctor, Patient patient);
+
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "doctor", source = "doctor")
+	void updateFromDto(AppointmentUpdateDto dto, @MappingTarget Appointment appointment, Doctor doctor);
 
 }

@@ -2,6 +2,7 @@ package com.vention.medfast.appointment.service;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.model.Appointment;
@@ -33,5 +34,7 @@ public interface AppointmentService {
 	Appointment findAppointment(Long appointmentId);
 
 	void cancelAppointment(Long appointmentId);
+
+	Long update(AppointmentUpdateDto dto, Long id);
 
 }

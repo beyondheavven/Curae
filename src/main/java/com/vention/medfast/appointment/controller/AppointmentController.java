@@ -3,6 +3,7 @@ package com.vention.medfast.appointment.controller;
 import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.service.AppointmentService;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -117,6 +119,18 @@ public class AppointmentController {
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancelAppointment(@PathVariable Long id) {
 		appointmentService.cancelAppointment(id);
+	}
+
+	@Operation(summary = "Update appointment", description = "Updates appointment details")
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Appointment updated"),
+			@ApiResponse(responseCode = "400", description = "Invalid appointment state",
+					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+			@ApiResponse(responseCode = "404", description = "Appointment not found",
+					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('PATIENT')")
+	public ResponseWrapper<Long> update(@PathVariable Long id, @Valid @RequestBody AppointmentUpdateDto dto) {
+		return ResponseWrapper.ok(appointmentService.update(dto, id));
 	}
 
 }

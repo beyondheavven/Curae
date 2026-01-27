@@ -2,8 +2,10 @@ package com.vention.medfast.appointment.mapper;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.model.Appointment;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.doctor.model.Doctor;
@@ -87,6 +89,23 @@ class AppointmentMapperTest {
 		assertThat(appointment.getDate()).isEqualTo(dto.date());
 		assertThat(appointment.getTime()).isEqualTo(dto.time());
 		assertThat(appointment.getLabResults()).isNotNull();
+	}
+
+	@Test
+	void shouldUpdateAppointmentFromDto_whenInputIsValid() {
+		Appointment appointment = new Appointment();
+		appointment.setStatus(AppointmentStatus.SCHEDULED);
+		appointment.setDate(LocalDate.of(2026, 10, 1));
+		appointment.setTime(LocalTime.of(13, 45));
+
+		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.of(2026, 1, 18), LocalTime.of(10, 45),
+				AppointmentStatus.COMPLETED, 1L);
+
+		mapper.updateFromDto(dto, appointment, new Doctor());
+
+		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
+		assertThat(appointment.getDate()).isEqualTo(LocalDate.of(2026, 1, 18));
+		assertThat(appointment.getTime()).isEqualTo(LocalTime.of(10, 45));
 	}
 
 }

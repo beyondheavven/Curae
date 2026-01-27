@@ -3,6 +3,7 @@ package com.vention.medfast.appointment.service;
 import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
@@ -29,6 +30,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -156,15 +158,30 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Override
 	public void cancelAppointment(Long appointmentId) {
 		Appointment appointment = findAppointment(appointmentId);
-		AppointmentStatus oldStatus = appointment.getStatus();
 		appointment.setStatus(AppointmentStatus.CANCELLED);
-
 		appointmentRepository.save(appointment);
 
-		eventPublisher
-			.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_STATUS_CHANGED, appointment.getId(),
-					appointment.getPatient().getId(), oldStatus.name(), AppointmentStatus.CANCELLED.name()));
+		eventPublisher.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_CANCELLED, appointment.getId(),
+				appointment.getPatient().getId()));
 
+	}
+
+	@Transactional
+	@Override
+	public Long update(AppointmentUpdateDto dto, Long id) {
+		Appointment appointment = findAppointment(id);
+
+		if (appointment.getStatus() != AppointmentStatus.SCHEDULED
+				&& appointment.getStatus() != AppointmentStatus.SCHEDULED_CONFIRMED) {
+			throw new IllegalStateException(
+					"Appointment with status " + appointment.getStatus() + " cannot be updated");
+		}
+		Doctor doctor = doctorService.findDoctorById(dto.doctorId());
+		appointmentMapper.updateFromDto(dto, appointment, doctor);
+
+		eventPublisher.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_DETAILS_CHANGED,
+				appointment.getId(), appointment.getPatient().getId()));
+		return id;
 	}
 
 }
