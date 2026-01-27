@@ -3,6 +3,7 @@ package com.vention.medfast.appointment.service;
 import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
@@ -18,13 +19,20 @@ import com.vention.medfast.labresult.mapper.LabResultMapper;
 import com.vention.medfast.labresult.service.LabResultService;
 import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
+import com.vention.medfast.notification.eventListener.eventModel.StatusChangedEvent;
+import com.vention.medfast.notification.model.NotificationType;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
+
+import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -49,6 +57,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private final LabResultService labResultService;
 
 	private final LabResultMapper labResultMapper;
+
+	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
 	@Transactional
@@ -125,9 +135,53 @@ public class AppointmentServiceImpl implements AppointmentService {
 		return appointmentRepository.findLabHistoryPage(userId, pageable).map(labResultMapper::toHistoryDto);
 	}
 
-	private Appointment findAppointment(Long appointmentId) {
+	@Override
+	@Transactional(readOnly = true)
+	public AppointmentStatusCounts getAllStatusStatistics(LocalDate startDate, LocalDate endDate) {
+		return appointmentRepository.getAllStatusStatistics(startDate, endDate);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public AppointmentStatusCounts getStatusStatisticsByType(LocalDate startDate, LocalDate endDate,
+			AppointmentType type) {
+		return appointmentRepository.getStatusStatisticsByType(startDate, endDate, type);
+	}
+
+	@Override
+	public Appointment findAppointment(Long appointmentId) {
 		return appointmentRepository.findById(appointmentId)
 			.orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+	}
+
+	@Transactional
+	@Override
+	public void cancelAppointment(Long appointmentId) {
+		Appointment appointment = findAppointment(appointmentId);
+		appointment.setStatus(AppointmentStatus.CANCELLED);
+		appointmentRepository.save(appointment);
+
+		eventPublisher.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_CANCELLED, appointment.getId(),
+				appointment.getPatient().getId()));
+
+	}
+
+	@Transactional
+	@Override
+	public Long update(AppointmentUpdateDto dto, Long id) {
+		Appointment appointment = findAppointment(id);
+
+		if (appointment.getStatus() != AppointmentStatus.SCHEDULED
+				&& appointment.getStatus() != AppointmentStatus.SCHEDULED_CONFIRMED) {
+			throw new IllegalStateException(
+					"Appointment with status " + appointment.getStatus() + " cannot be updated");
+		}
+		Doctor doctor = doctorService.findDoctorById(dto.doctorId());
+		appointmentMapper.updateFromDto(dto, appointment, doctor);
+
+		eventPublisher.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_DETAILS_CHANGED,
+				appointment.getId(), appointment.getPatient().getId()));
+		return id;
 	}
 
 }

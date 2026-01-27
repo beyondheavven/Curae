@@ -69,7 +69,7 @@ public class RegistrationController {
 	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Doctor successfully registered"),
 			@ApiResponse(responseCode = "400", description = "Validation error"),
 			@ApiResponse(responseCode = "409", description = "Email already exists") })
-	@PostMapping(ApiPaths.ADMIN_DOCTOR_ENDPOINT)
+	@PostMapping(ApiPaths.DOCTOR_ENDPOINT + ApiPaths.ADMIN_ENDPOINT)
 	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public void registerDoctor(@RequestBody @Valid DoctorRegistrationRequestDto request) {

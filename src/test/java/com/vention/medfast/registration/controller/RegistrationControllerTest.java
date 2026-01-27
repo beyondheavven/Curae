@@ -1,6 +1,7 @@
 package com.vention.medfast.registration.controller;
 
 import com.vention.medfast.AbstractControllerIntegrationTest;
+import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Gender;
 import com.vention.medfast.registration.dto.AddressDto;
@@ -24,7 +25,7 @@ public class RegistrationControllerTest extends AbstractControllerIntegrationTes
 		String email = "newpatient@example.com";
 		PatientRegistrationRequestDto request = createPatientRequest(email);
 
-		performRequest(HttpMethod.POST, "/registration", request).andExpect(status().isCreated());
+		performRequest(HttpMethod.POST, ApiPaths.REGISTRATION_ENDPOINT, request).andExpect(status().isCreated());
 
 		User user = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class)
 			.setParameter("email", email)
@@ -39,7 +40,9 @@ public class RegistrationControllerTest extends AbstractControllerIntegrationTes
 		String doctorEmail = "new.doctor@med.com";
 		DoctorRegistrationRequestDto request = createDoctorRequest(doctorEmail);
 
-		performRequest(HttpMethod.POST, "/registration/admin/doctors", request).andExpect(status().isCreated());
+		performRequest(HttpMethod.POST,
+				ApiPaths.REGISTRATION_ENDPOINT + ApiPaths.DOCTOR_ENDPOINT + ApiPaths.ADMIN_ENDPOINT, request)
+			.andExpect(status().isCreated());
 
 		Doctor doctor = em.createQuery("SELECT d FROM Doctor d WHERE d.user.email =:email", Doctor.class)
 			.setParameter("email", doctorEmail)
@@ -56,7 +59,7 @@ public class RegistrationControllerTest extends AbstractControllerIntegrationTes
 	void shouldReturn400_WhenRegistrationFieldsAreEmptyForPatient() throws Exception {
 		PatientRegistrationRequestDto request = createPatientRequest(null);
 
-		performRequest(HttpMethod.POST, "/registration", request).andExpect(status().isBadRequest())
+		performRequest(HttpMethod.POST, ApiPaths.REGISTRATION_ENDPOINT, request).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.error.message").value("Validation failed"))
 			.andExpect(jsonPath("$.error.validationErrors").isArray());
 	}
@@ -65,7 +68,9 @@ public class RegistrationControllerTest extends AbstractControllerIntegrationTes
 	void shouldReturn400_WhenRegistrationFieldsAreEmptyForDoctor() throws Exception {
 		DoctorRegistrationRequestDto request = createDoctorRequest(null);
 
-		performRequest(HttpMethod.POST, "/registration/admin/doctors", request).andExpect(status().isBadRequest())
+		performRequest(HttpMethod.POST,
+				ApiPaths.REGISTRATION_ENDPOINT + ApiPaths.DOCTOR_ENDPOINT + ApiPaths.ADMIN_ENDPOINT, request)
+			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.error.message").value("Validation failed"))
 			.andExpect(jsonPath("$.error.validationErrors").isArray());
 	}
@@ -75,7 +80,7 @@ public class RegistrationControllerTest extends AbstractControllerIntegrationTes
 		String existingEmail = "jane.doe@mail.com";
 		PatientRegistrationRequestDto request = createPatientRequest(existingEmail);
 
-		performRequest(HttpMethod.POST, "/registration", request).andExpect(status().isConflict());
+		performRequest(HttpMethod.POST, ApiPaths.REGISTRATION_ENDPOINT, request).andExpect(status().isConflict());
 	}
 
 	private PatientRegistrationRequestDto createPatientRequest(String email) {

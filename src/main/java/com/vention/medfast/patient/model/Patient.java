@@ -1,6 +1,7 @@
 package com.vention.medfast.patient.model;
 
 import com.vention.medfast.address.model.Address;
+import com.vention.medfast.notification.model.Notification;
 import com.vention.medfast.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,8 +13,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
@@ -46,5 +50,8 @@ public class Patient {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "gender")
 	private Gender gender;
+
+	@OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
+	private List<Notification> notifications = new ArrayList<>();
 
 }

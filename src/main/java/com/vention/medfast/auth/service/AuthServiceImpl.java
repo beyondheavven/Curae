@@ -12,6 +12,7 @@ import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.service.UserService;
 import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -96,6 +97,26 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		refreshTokenService.revokeRefreshToken(refreshToken);
+	}
+
+	@Override
+	public Authentication authenticateByAccessToken(String token) {
+		if (!jwtService.isAccessToken(token)) {
+			throw new AccessDeniedException("Invalid access token");
+		}
+
+		String username = jwtService.extractUsername(token);
+		if (username == null) {
+			throw new AccessDeniedException("Invalid JWT token");
+		}
+
+		CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+
+		if (!jwtService.isTokenValid(token, userDetails)) {
+			throw new AccessDeniedException("Invalid or expired JWT token");
+		}
+
+		return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 	}
 
 }

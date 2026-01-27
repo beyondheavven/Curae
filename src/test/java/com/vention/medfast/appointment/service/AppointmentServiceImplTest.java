@@ -3,6 +3,7 @@ package com.vention.medfast.appointment.service;
 import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
@@ -19,22 +20,32 @@ import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentServiceImplTest {
@@ -62,6 +73,9 @@ class AppointmentServiceImplTest {
 
 	@Mock
 	private LabResultMapper labResultMapper;
+
+	@Mock
+	private ApplicationEventPublisher eventPublisher;
 
 	@InjectMocks
 	private AppointmentServiceImpl appointmentService;
@@ -133,6 +147,100 @@ class AppointmentServiceImplTest {
 		appointmentService.createWithLabs(req);
 		verify(appointmentRepository).save(appointment);
 		verify(labResultService).createForAppointment(appointment, List.of(t1, t2));
+	}
+
+	@Test
+	void shouldReturnAllStatusStatistics() {
+		LocalDate startDate = LocalDate.of(2026, 1, 1);
+		LocalDate endDate = LocalDate.of(2026, 1, 31);
+
+		AppointmentStatusCounts expectedCounts = new AppointmentStatusCounts(10L, 5L, 2L, 3L, 0L);
+
+		when(appointmentRepository.getAllStatusStatistics(startDate, endDate)).thenReturn(expectedCounts);
+
+		AppointmentStatusCounts result = appointmentService.getAllStatusStatistics(startDate, endDate);
+
+		assertThat(result).isNotNull();
+		assertThat(result.total()).isEqualTo(10L);
+		assertThat(result.scheduled()).isEqualTo(5L);
+
+		verify(appointmentRepository).getAllStatusStatistics(startDate, endDate);
+	}
+
+	@Test
+	void shouldReturnStatusStatisticsByType() {
+		LocalDate startDate = LocalDate.of(2026, 1, 1);
+		LocalDate endDate = LocalDate.of(2026, 1, 31);
+		AppointmentType type = AppointmentType.VISIT;
+
+		AppointmentStatusCounts expectedCounts = new AppointmentStatusCounts(5L, 2L, 1L, 2L, 0L);
+
+		when(appointmentRepository.getStatusStatisticsByType(startDate, endDate, type)).thenReturn(expectedCounts);
+
+		AppointmentStatusCounts result = appointmentService.getStatusStatisticsByType(startDate, endDate, type);
+
+		assertThat(result).isNotNull();
+		assertThat(result.total()).isEqualTo(5L);
+
+		verify(appointmentRepository).getStatusStatisticsByType(startDate, endDate, type);
+	}
+
+	@Test
+	void shouldReturnZeroCountsWhenNoAppointmentsExist() {
+		LocalDate startDate = LocalDate.of(2099, 1, 1);
+		LocalDate endDate = LocalDate.of(2099, 1, 31);
+
+		AppointmentStatusCounts emptyCounts = new AppointmentStatusCounts(0L, 0L, 0L, 0L, 0L);
+
+		when(appointmentRepository.getAllStatusStatistics(startDate, endDate)).thenReturn(emptyCounts);
+
+		AppointmentStatusCounts result = appointmentService.getAllStatusStatistics(startDate, endDate);
+
+		assertThat(result).isNotNull();
+		assertThat(result.total()).isZero();
+	}
+
+	@Test
+	void shouldUpdateAppointment_whenStatusIsScheduled() {
+		Appointment appointment = new Appointment();
+		appointment.setId(1L);
+		appointment.setStatus(AppointmentStatus.SCHEDULED);
+
+		Patient patient = new Patient();
+		patient.setId(10L);
+		appointment.setPatient(patient);
+
+		Doctor doctor = new Doctor();
+		doctor.setId(1L);
+
+		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now(), LocalTime.now(),
+				AppointmentStatus.SCHEDULED, 1L);
+
+		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+		when(doctorService.findDoctorById(1L)).thenReturn(doctor);
+
+		Long result = appointmentService.update(dto, 1L);
+
+		assertEquals(1L, result);
+		verify(appointmentMapper).updateFromDto(dto, appointment, doctor);
+	}
+
+	@Test
+	void shouldThrowIllegalStateException_whenStatusIsCANCELLED() {
+		Appointment appointment = new Appointment();
+		appointment.setId(1L);
+		appointment.setStatus(AppointmentStatus.CANCELLED);
+
+		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+
+		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now(), LocalTime.now(),
+				AppointmentStatus.CANCELLED, 2L);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> appointmentService.update(dto, 1L));
+
+		assertEquals("Appointment with status CANCELLED cannot be updated", e.getMessage());
+
+		verifyNoInteractions(doctorService, appointmentMapper, eventPublisher);
 	}
 
 }

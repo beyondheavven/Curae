@@ -1,5 +1,7 @@
 package com.vention.medfast.appointment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.vention.medfast.notification.model.Notification;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.referral.model.Referral;
 import jakarta.persistence.Column;
@@ -12,12 +14,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -68,5 +73,9 @@ public class Appointment {
 	@UpdateTimestamp
 	@Column(name = "updated_at", nullable = false)
 	private LocalDateTime updatedAt;
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
+	private List<Notification> notifications = new ArrayList<>();
 
 }
