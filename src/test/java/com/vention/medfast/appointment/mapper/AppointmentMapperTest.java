@@ -42,7 +42,7 @@ class AppointmentMapperTest {
 		assertThat(appointment.getPatient()).isSameAs(patient);
 		assertThat(appointment.getType()).isNull();
 		assertThat(appointment.getStatus()).isNull();
-        assertThat(appointment.getId()).isNull();
+		assertThat(appointment.getId()).isNull();
 		assertThat(appointment.getDate()).isEqualTo(dto.date());
 		assertThat(appointment.getTime()).isEqualTo(dto.time());
 	}

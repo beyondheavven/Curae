@@ -40,23 +40,19 @@ class AppointmentControllerTest {
 		controller = new AppointmentController(appointmentService);
 	}
 
-    @Test
-    void createAppointment_ShouldReturnCreatedId() {
-        AppointmentCreateDto dto = new AppointmentCreateDto(
-            null,
-            LocalDate.now().plusDays(1),
-            LocalTime.of(10, 0)
-        );
+	@Test
+	void createAppointment_ShouldReturnCreatedId() {
+		AppointmentCreateDto dto = new AppointmentCreateDto(null, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
 
-        Long expectedId = 123L;
-        when(appointmentService.create(dto)).thenReturn(expectedId);
+		Long expectedId = 123L;
+		when(appointmentService.create(dto)).thenReturn(expectedId);
 
-        ResponseWrapper<Long> response = controller.createAppointment(dto);
+		ResponseWrapper<Long> response = controller.createAppointment(dto);
 
-        assertThat(response.getData()).isEqualTo(expectedId);
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED);
-        verify(appointmentService).create(dto);
-    }
+		assertThat(response.getData()).isEqualTo(expectedId);
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED);
+		verify(appointmentService).create(dto);
+	}
 
 	@Test
 	void createDraftDelegatesToServiceAndReturnsWrapper() {

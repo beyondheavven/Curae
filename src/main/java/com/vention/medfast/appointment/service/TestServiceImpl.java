@@ -1,4 +1,4 @@
-package com.vention.medfast.test.service;
+package com.vention.medfast.appointment.service;
 
 import org.springframework.stereotype.Service;
 

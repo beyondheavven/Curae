@@ -1,7 +1,7 @@
 package com.vention.medfast.labresult.model;
 
 import com.vention.medfast.labtest.model.LabTest;
-import com.vention.medfast.test.model.Test;
+import com.vention.medfast.appointment.model.Test;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

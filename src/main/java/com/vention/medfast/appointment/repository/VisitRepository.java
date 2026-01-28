@@ -1,6 +1,6 @@
-package com.vention.medfast.visit.repository;
+package com.vention.medfast.appointment.repository;
 
-import com.vention.medfast.visit.model.Visit;
+import com.vention.medfast.appointment.model.Visit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

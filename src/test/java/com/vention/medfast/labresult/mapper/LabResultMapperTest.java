@@ -1,7 +1,6 @@
 package com.vention.medfast.labresult.mapper;
 
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
-import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.labresult.model.LabResult;
 import com.vention.medfast.labresult.model.LabResultStatus;
@@ -26,11 +25,11 @@ class LabResultMapperTest {
 
 	@Test
 	void shouldMapAppointmentToHistoryDto() {
-		com.vention.medfast.test.model.Test testAppointment = new com.vention.medfast.test.model.Test();
-        testAppointment.setId(10L);
-        testAppointment.setDate(LocalDate.of(2030, 2, 15));
-        testAppointment.setTime(LocalTime.of(8, 45));
-        testAppointment.setStatus(AppointmentStatus.COMPLETED);
+		com.vention.medfast.appointment.model.Test testAppointment = new com.vention.medfast.appointment.model.Test();
+		testAppointment.setId(10L);
+		testAppointment.setDate(LocalDate.of(2030, 2, 15));
+		testAppointment.setTime(LocalTime.of(8, 45));
+		testAppointment.setStatus(AppointmentStatus.COMPLETED);
 
 		LabTest labTest = new LabTest();
 		labTest.setId(3L);
@@ -44,7 +43,7 @@ class LabResultMapperTest {
 		labResult.setResultUrl("http://result.url");
 		labResult.setUploadedAt(LocalDateTime.of(2030, 2, 16, 9, 0));
 
-        testAppointment.setLabResults(List.of(labResult));
+		testAppointment.setLabResults(List.of(labResult));
 
 		PatientLabHistoryDTO dto = labResultMapper.toHistoryDto(testAppointment);
 

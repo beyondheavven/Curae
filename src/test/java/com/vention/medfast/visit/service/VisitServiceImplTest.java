@@ -1,9 +1,8 @@
 package com.vention.medfast.visit.service;
 
-import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.service.AppointmentService;
+import com.vention.medfast.appointment.service.VisitServiceImpl;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.clinic.service.ClinicService;
 import com.vention.medfast.doctor.model.Doctor;
@@ -12,12 +11,12 @@ import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.service.ProvidedServiceService;
-import com.vention.medfast.visit.dto.VisitCreateDto;
-import com.vention.medfast.visit.dto.VisitResponseDto;
-import com.vention.medfast.visit.mapper.VisitMapper;
-import com.vention.medfast.visit.model.Visit;
-import com.vention.medfast.visit.model.VisitType;
-import com.vention.medfast.visit.repository.VisitRepository;
+import com.vention.medfast.appointment.dto.VisitCreateDto;
+import com.vention.medfast.appointment.dto.VisitResponseDto;
+import com.vention.medfast.appointment.mapper.VisitMapper;
+import com.vention.medfast.appointment.model.Visit;
+import com.vention.medfast.appointment.model.VisitType;
+import com.vention.medfast.appointment.repository.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -54,14 +53,14 @@ class VisitServiceImplTest {
 	@Mock
 	private PatientService patientService;
 
-    @Mock
-    private DoctorService doctorService;
+	@Mock
+	private DoctorService doctorService;
 
-    @Mock
-    private ProvidedServiceService providedServiceService;
+	@Mock
+	private ProvidedServiceService providedServiceService;
 
-    @Mock
-    private ClinicService clinicService;
+	@Mock
+	private ClinicService clinicService;
 
 	@Mock
 	private Authentication authentication;
@@ -73,58 +72,55 @@ class VisitServiceImplTest {
 	private VisitServiceImpl visitService;
 
 	@Test
-    public void shouldCreateVisitWhenInputIsValid() {
-        Long patientId = 1L;
-        Long doctorId = 2L;
-        Long serviceId = 1L;
-        Long clinicId = 2L;
+	public void shouldCreateVisitWhenInputIsValid() {
+		Long patientId = 1L;
+		Long doctorId = 2L;
+		Long serviceId = 1L;
+		Long clinicId = 2L;
 
-        VisitCreateDto dto = new VisitCreateDto(
-            "Diagnosis", "Symptoms", "Report",
-            doctorId, serviceId, clinicId
-        );
+		VisitCreateDto dto = new VisitCreateDto("Diagnosis", "Symptoms", "Report", doctorId, serviceId, clinicId);
 
-        Patient patient = new Patient();
-        patient.setId(patientId);
+		Patient patient = new Patient();
+		patient.setId(patientId);
 
-        Doctor doctor = new Doctor();
-        doctor.setId(doctorId);
+		Doctor doctor = new Doctor();
+		doctor.setId(doctorId);
 
-        ProvidedService service = new ProvidedService();
-        service.setId(serviceId);
+		ProvidedService service = new ProvidedService();
+		service.setId(serviceId);
 
-        Clinic clinic = new Clinic();
-        clinic.setId(clinicId);
+		Clinic clinic = new Clinic();
+		clinic.setId(clinicId);
 
-        when(patientService.getById(patientId)).thenReturn(patient);
-        when(doctorService.findDoctorById(doctorId)).thenReturn(doctor);
-        when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(service);
-        when(clinicService.findById(clinicId)).thenReturn(clinic);
+		when(patientService.getById(patientId)).thenReturn(patient);
+		when(doctorService.findDoctorById(doctorId)).thenReturn(doctor);
+		when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(service);
+		when(clinicService.findById(clinicId)).thenReturn(clinic);
 
-        when(visitRepository.save(any(Visit.class))).thenAnswer(inv -> {
-            Visit v = inv.getArgument(0);
-            v.setId(100L);
-            return v;
-        });
+		when(visitRepository.save(any(Visit.class))).thenAnswer(inv -> {
+			Visit v = inv.getArgument(0);
+			v.setId(100L);
+			return v;
+		});
 
-        long result = visitService.create(patientId, dto);
+		long result = visitService.create(patientId, dto);
 
-        assertThat(result).isEqualTo(100L);
-        ArgumentCaptor<Visit> visitCaptor = ArgumentCaptor.forClass(Visit.class);
-        verify(visitRepository).save(visitCaptor.capture());
-        Visit capturedVisit = visitCaptor.getValue();
+		assertThat(result).isEqualTo(100L);
+		ArgumentCaptor<Visit> visitCaptor = ArgumentCaptor.forClass(Visit.class);
+		verify(visitRepository).save(visitCaptor.capture());
+		Visit capturedVisit = visitCaptor.getValue();
 
-        assertThat(capturedVisit.getDiagnosis()).isEqualTo("Diagnosis");
-        assertThat(capturedVisit.getSymptoms()).isEqualTo("Symptoms");
-        assertThat(capturedVisit.getDoctor()).isEqualTo(doctor);
-        assertThat(capturedVisit.getProvidedService()).isEqualTo(service);
-        assertThat(capturedVisit.getClinic()).isEqualTo(clinic);
-        assertThat(capturedVisit.getPatient()).isEqualTo(patient);
+		assertThat(capturedVisit.getDiagnosis()).isEqualTo("Diagnosis");
+		assertThat(capturedVisit.getSymptoms()).isEqualTo("Symptoms");
+		assertThat(capturedVisit.getDoctor()).isEqualTo(doctor);
+		assertThat(capturedVisit.getProvidedService()).isEqualTo(service);
+		assertThat(capturedVisit.getClinic()).isEqualTo(clinic);
+		assertThat(capturedVisit.getPatient()).isEqualTo(patient);
 
-        assertThat(capturedVisit.getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
-        assertThat(capturedVisit.getType()).isEqualTo(AppointmentType.VISIT);
-        assertThat(capturedVisit.getDate()).isEqualTo(LocalDate.now());
-    }
+		assertThat(capturedVisit.getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
+		assertThat(capturedVisit.getType()).isEqualTo(AppointmentType.VISIT);
+		assertThat(capturedVisit.getDate()).isEqualTo(LocalDate.now());
+	}
 
 	@Test
 	void shouldReturnUpcomingVisitsForPatient() {

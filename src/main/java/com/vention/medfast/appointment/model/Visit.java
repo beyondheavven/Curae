@@ -1,6 +1,5 @@
-package com.vention.medfast.visit.model;
+package com.vention.medfast.appointment.model;
 
-import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.service.model.ProvidedService;

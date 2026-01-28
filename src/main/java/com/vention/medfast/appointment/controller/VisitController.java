@@ -1,11 +1,11 @@
-package com.vention.medfast.visit.controller;
+package com.vention.medfast.appointment.controller;
 
 import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.visit.dto.VisitCreateDto;
-import com.vention.medfast.visit.dto.VisitResponseDto;
-import com.vention.medfast.visit.model.VisitType;
-import com.vention.medfast.visit.service.VisitService;
+import com.vention.medfast.appointment.dto.VisitCreateDto;
+import com.vention.medfast.appointment.dto.VisitResponseDto;
+import com.vention.medfast.appointment.model.VisitType;
+import com.vention.medfast.appointment.service.VisitService;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -39,7 +39,8 @@ public class VisitController {
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<Long> create(@Valid @RequestBody VisitCreateDto dto, @RequestParam(name = "patientId") Long patientId) {
+	public ResponseWrapper<Long> create(@Valid @RequestBody VisitCreateDto dto,
+			@RequestParam(name = "patientId") Long patientId) {
 		long id = visitService.create(patientId, dto);
 		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
 	}

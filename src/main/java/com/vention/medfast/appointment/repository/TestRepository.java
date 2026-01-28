@@ -1,6 +1,6 @@
-package com.vention.medfast.test.repository;
+package com.vention.medfast.appointment.repository;
 
-import com.vention.medfast.test.model.Test;
+import com.vention.medfast.appointment.model.Test;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

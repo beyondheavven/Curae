@@ -50,8 +50,8 @@ public class Appointment {
 	private LocalTime time;
 
 	@Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "status", nullable = false)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+	@Column(name = "status", nullable = false)
 	private AppointmentStatus status;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -17,5 +17,5 @@ public record AppointmentUpdateDto(
 
 		@NotNull(message = "Status is required") AppointmentStatus status
 
-        ){
+) {
 }

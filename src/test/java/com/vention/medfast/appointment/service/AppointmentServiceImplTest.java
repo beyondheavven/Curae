@@ -13,7 +13,6 @@ import com.vention.medfast.referral.model.Referral;
 import com.vention.medfast.referral.model.ReferralStatus;
 import com.vention.medfast.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
-import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.labresult.mapper.LabResultMapper;
 import com.vention.medfast.labresult.service.LabResultService;
 import com.vention.medfast.labtest.model.LabTest;
@@ -42,7 +41,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -79,14 +77,12 @@ class AppointmentServiceImplTest {
 
 	@Test
 	void shouldCreateDraftWithReferral() {
-		AppointmentCreateDto dto = new AppointmentCreateDto(10L, LocalDate.now().plusDays(1),
-				LocalTime.of(10, 0));
+		AppointmentCreateDto dto = new AppointmentCreateDto(10L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
 		Referral referral = new Referral();
 		referral.setAppointmentType(AppointmentType.VISIT);
 		Appointment appointment = new Appointment();
 		when(referralService.getActiveById(10L)).thenReturn(referral);
-		when(appointmentMapper.toAppointment(dto, referral.getPatient(), referral))
-			.thenReturn(appointment);
+		when(appointmentMapper.toAppointment(dto, referral.getPatient(), referral)).thenReturn(appointment);
 		when(appointmentRepository.save(appointment)).thenReturn(appointment);
 		appointmentService.create(dto);
 		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
@@ -117,8 +113,8 @@ class AppointmentServiceImplTest {
 	@Test
 	void shouldReturnLabHistoryForUser() {
 		Pageable pageable = Pageable.unpaged();
-        com.vention.medfast.test.model.Test testEntity = new com.vention.medfast.test.model.Test();
-        testEntity.setId(5L);
+		com.vention.medfast.appointment.model.Test testEntity = new com.vention.medfast.appointment.model.Test();
+		testEntity.setId(5L);
 		PatientLabHistoryDTO dto = new PatientLabHistoryDTO(5L, LocalDate.now(), "COMPLETED", List.of());
 		when(appointmentRepository.findLabHistoryPage(7L, pageable)).thenReturn(new PageImpl<>(List.of(testEntity)));
 		when(labResultMapper.toHistoryDto(testEntity)).thenReturn(dto);
@@ -135,7 +131,7 @@ class AppointmentServiceImplTest {
 		t1.setId(10L);
 		LabTest t2 = new LabTest();
 		t2.setId(11L);
-		com.vention.medfast.test.model.Test testAppointment = new com.vention.medfast.test.model.Test();
+		com.vention.medfast.appointment.model.Test testAppointment = new com.vention.medfast.appointment.model.Test();
 		when(patientService.getById(2L)).thenReturn(patient);
 		when(labTestService.findAllById(Set.of(10L, 11L))).thenReturn(List.of(t1, t2));
 		when(appointmentMapper.toLabAppointment(req, patient)).thenReturn(testAppointment);

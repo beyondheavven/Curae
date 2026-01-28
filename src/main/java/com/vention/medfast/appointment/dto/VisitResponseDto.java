@@ -1,4 +1,4 @@
-package com.vention.medfast.visit.dto;
+package com.vention.medfast.appointment.dto;
 
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;

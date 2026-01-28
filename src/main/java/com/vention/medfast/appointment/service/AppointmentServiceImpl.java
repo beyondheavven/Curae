@@ -21,7 +21,7 @@ import com.vention.medfast.notification.model.NotificationType;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
-import com.vention.medfast.test.model.Test;
+import com.vention.medfast.appointment.model.Test;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.time.LocalDate;
@@ -55,7 +55,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 	private final LabResultMapper labResultMapper;
 
 	private final ApplicationEventPublisher eventPublisher;
-
 
 	@Override
 	@Transactional
@@ -107,22 +106,21 @@ public class AppointmentServiceImpl implements AppointmentService {
 		List<LabTest> labTests = labTestService.findAllById(uniqueIds);
 
 		Appointment appointment = appointmentMapper.toLabAppointment(req, patient);
-        Test testAppointment = (Test) appointment;
-        testAppointment.setType(AppointmentType.TEST);
-        testAppointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+		Test testAppointment = (Test) appointment;
+		testAppointment.setType(AppointmentType.TEST);
+		testAppointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
 
-        appointmentRepository.save(testAppointment);
-        labResultService.createForAppointment(testAppointment, labTests);
+		appointmentRepository.save(testAppointment);
+		labResultService.createForAppointment(testAppointment, labTests);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public Page<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable) {
 		return appointmentRepository.findLabHistoryPage(userId, pageable).map(appointment -> {
-            Test test = (Test) appointment;
-            return labResultMapper.toHistoryDto(test);
-            }
-        );
+			Test test = (Test) appointment;
+			return labResultMapper.toHistoryDto(test);
+		});
 	}
 
 	@Override

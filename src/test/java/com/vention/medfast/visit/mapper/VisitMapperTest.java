@@ -1,11 +1,11 @@
 package com.vention.medfast.visit.mapper;
 
-import com.vention.medfast.visit.dto.VisitCreateDto;
-import com.vention.medfast.visit.model.Visit;
+import com.vention.medfast.appointment.dto.VisitCreateDto;
+import com.vention.medfast.appointment.mapper.VisitMapper;
+import com.vention.medfast.appointment.model.Visit;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +20,7 @@ class VisitMapperTest {
 
 	@Test
 	void shouldMapDtoToEntityWhenInputIsValid() {
-		VisitCreateDto dto = new VisitCreateDto( "Diagnosis", "Symptoms", "Medical report", 1L, 2L, 1L);
+		VisitCreateDto dto = new VisitCreateDto("Diagnosis", "Symptoms", "Medical report", 1L, 2L, 1L);
 
 		Visit visit = visitMapper.toEntity(dto);
 

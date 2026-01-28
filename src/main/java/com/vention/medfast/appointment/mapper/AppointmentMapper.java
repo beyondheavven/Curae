@@ -22,7 +22,7 @@ public interface AppointmentMapper {
 	@Mapping(target = "type", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "notifications", ignore = true)
+	@Mapping(target = "notifications", ignore = true)
 	Appointment toAppointment(AppointmentCreateDto dto, Patient patient, Referral referral);
 
 	@Mapping(target = "id", ignore = true)
@@ -34,7 +34,7 @@ public interface AppointmentMapper {
 	@Mapping(target = "type", ignore = true)
 	@Mapping(target = "createdAt", ignore = true)
 	@Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "notifications", ignore = true)
+	@Mapping(target = "notifications", ignore = true)
 	Appointment toLabAppointment(AppointmentCreateWithLabsDto dto, Patient patient);
 
 	@Mapping(target = "id", ignore = true)

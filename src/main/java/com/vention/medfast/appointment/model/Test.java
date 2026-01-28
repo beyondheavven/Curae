@@ -1,6 +1,5 @@
-package com.vention.medfast.test.model;
+package com.vention.medfast.appointment.model;
 
-import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.labresult.model.LabResult;
 import jakarta.persistence.Table;
