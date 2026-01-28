@@ -45,7 +45,7 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 		OnlineConsultation oc = onlineConsultationMapper.toEntity(createOnlineConsultationRequest);
 
 		oc.setPatient(patient);
-        oc.setDoctor(doctor);
+		oc.setDoctor(doctor);
 
 		onlineConsultationRepository.save(oc);
 	}
@@ -62,11 +62,11 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 	public void update(UpdateOnlineConsultationRequest req) {
 		OnlineConsultation oc = findById(req.onlineConsultationId());
 		onlineConsultationMapper.updateOnlineConsultation(req, oc);
-        if (req.doctorId() != null && !req.doctorId().equals(oc.getDoctor().getId())) {
-            Doctor newDoctor = doctorService.findDoctorById(req.doctorId());
-            oc.setDoctor(newDoctor);
-        }
-        onlineConsultationRepository.save(oc);
+		if (req.doctorId() != null && !req.doctorId().equals(oc.getDoctor().getId())) {
+			Doctor newDoctor = doctorService.findDoctorById(req.doctorId());
+			oc.setDoctor(newDoctor);
+		}
+		onlineConsultationRepository.save(oc);
 	}
 
 	private OnlineConsultation findById(Long consultationId) {

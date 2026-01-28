@@ -1,4 +1,4 @@
-package com.vention.medfast.visit.mapper;
+package com.vention.medfast.appointment.visit.mapper;
 
 import com.vention.medfast.appointment.dto.VisitCreateDto;
 import com.vention.medfast.appointment.mapper.VisitMapper;

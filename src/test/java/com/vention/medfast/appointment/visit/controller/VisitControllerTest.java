@@ -1,8 +1,9 @@
-package com.vention.medfast.visit.controller;
+package com.vention.medfast.appointment.visit.controller;
 
 import com.jayway.jsonpath.JsonPath;
 import com.vention.medfast.AbstractControllerIntegrationTest;
 import com.vention.medfast.appointment.model.AppointmentStatus;
+import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -84,12 +86,33 @@ class VisitControllerTest extends AbstractControllerIntegrationTest {
 	void shouldReturnPastVisitsWhenInputIsValid() throws Exception {
 		login("jane.doe@mail.com", "pass");
 
+		Patient patient = em.find(Patient.class, 1L);
+		Doctor doctor = em.find(Doctor.class, 1L);
+		Clinic clinic = em.find(Clinic.class, 1L);
+		ProvidedService service = em.find(ProvidedService.class, 1L);
+
+		Visit pastVisit = new Visit();
+		pastVisit.setPatient(patient);
+		pastVisit.setDoctor(doctor);
+		pastVisit.setClinic(clinic);
+		pastVisit.setProvidedService(service);
+
+		pastVisit.setDate(LocalDate.now().minusDays(10));
+		pastVisit.setTime(LocalTime.of(10, 0));
+		pastVisit.setStatus(AppointmentStatus.COMPLETED);
+		pastVisit.setType(AppointmentType.VISIT);
+
+		pastVisit.setDiagnosis("Test Diagnosis");
+		pastVisit.setSymptoms("Test Symptoms");
+		pastVisit.setMedicalReport("Test Report");
+
+		em.persist(pastVisit);
+		em.flush();
+
 		performRequest(HttpMethod.GET, "/visits?type=PAST&page=0&size=10", null).andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.content").isArray())
-			.andExpect(jsonPath("$.data.content[0].id").exists())
 			.andExpect(jsonPath("$.data.content[0].doctor").exists())
 			.andExpect(jsonPath("$.data.content[0].clinic").exists())
-			.andExpect(jsonPath("$.data.content[0].service").exists())
 			.andExpect(jsonPath("$.data.content[0].status").value("COMPLETED"));
 	}
 

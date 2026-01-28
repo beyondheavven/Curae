@@ -18,15 +18,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 	@EntityGraph(attributePaths = { "labResults", "labResults.labTest" })
 	@Query(value = """
-			    SELECT DISTINCT a
-			    FROM Appointment a
-			    JOIN a.labResults lr
-			    WHERE a.patient.user.id = :userId
+			    SELECT DISTINCT t
+			    FROM Test t
+			    JOIN t.labResults lr
+			    WHERE t.patient.user.id = :userId
 			""", countQuery = """
-			    SELECT COUNT(DISTINCT a.id)
-			    FROM Appointment a
-			    JOIN a.labResults lr
-			    WHERE a.patient.user.id = :userId
+			    SELECT COUNT(DISTINCT t.id)
+			    FROM Test t
+			    JOIN t.labResults lr
+			    WHERE t.patient.user.id = :userId
 			""")
 	Page<Appointment> findLabHistoryPage(@Param("userId") Long userId, Pageable pageable);
 

@@ -48,21 +48,21 @@ class OnlineConsultationServiceImplTest {
 	@InjectMocks
 	private OnlineConsultationServiceImpl service;
 
-    @Test
-    void getOnlineConsultationReturnsMappedDto() {
-        OnlineConsultation oc = new OnlineConsultation();
-        OnlineConsultationDetails details = new OnlineConsultationDetails(1L, 2L, 3L, LocalDate.now(), LocalTime.NOON,
-            AppointmentStatus.SCHEDULED, AppointmentType.ONLINE, null, "link");
+	@Test
+	void getOnlineConsultationReturnsMappedDto() {
+		OnlineConsultation oc = new OnlineConsultation();
+		OnlineConsultationDetails details = new OnlineConsultationDetails(1L, 2L, 3L, LocalDate.now(), LocalTime.NOON,
+				AppointmentStatus.SCHEDULED, AppointmentType.ONLINE, null, "link");
 
-        when(onlineConsultationRepository.findById(1L)).thenReturn(Optional.of(oc));
-        when(onlineConsultationMapper.toDto(oc)).thenReturn(details);
+		when(onlineConsultationRepository.findById(1L)).thenReturn(Optional.of(oc));
+		when(onlineConsultationMapper.toDto(oc)).thenReturn(details);
 
-        OnlineConsultationDetails result = service.getDetails(1L);
+		OnlineConsultationDetails result = service.getDetails(1L);
 
-        assertThat(result).isEqualTo(details);
-        verify(onlineConsultationRepository).findById(1L);
-        verify(onlineConsultationMapper).toDto(oc);
-    }
+		assertThat(result).isEqualTo(details);
+		verify(onlineConsultationRepository).findById(1L);
+		verify(onlineConsultationMapper).toDto(oc);
+	}
 
 	@Test
 	void getOnlineConsultationThrowsWhenNotFound() {
@@ -109,26 +109,26 @@ class OnlineConsultationServiceImplTest {
 
 	@Test
 	void updateDelegatesToMapperAndSetsDoctor() {
-        UpdateOnlineConsultationRequest req = new UpdateOnlineConsultationRequest(9L, 5L, 6L,
-            LocalDate.now().plusDays(2), LocalTime.of(15, 0), AppointmentStatus.IN_CONSULTATION, "new");
+		UpdateOnlineConsultationRequest req = new UpdateOnlineConsultationRequest(9L, 5L, 6L,
+				LocalDate.now().plusDays(2), LocalTime.of(15, 0), AppointmentStatus.IN_CONSULTATION, "new");
 
-        OnlineConsultation oc = new OnlineConsultation();
+		OnlineConsultation oc = new OnlineConsultation();
 
-        Doctor oldDoctor = new Doctor();
-        oldDoctor.setId(7L);
-        oc.setDoctor(oldDoctor);
+		Doctor oldDoctor = new Doctor();
+		oldDoctor.setId(7L);
+		oc.setDoctor(oldDoctor);
 
-        Doctor newDoctor = new Doctor();
-        newDoctor.setId(6L);
+		Doctor newDoctor = new Doctor();
+		newDoctor.setId(6L);
 
-        when(onlineConsultationRepository.findById(9L)).thenReturn(Optional.of(oc));
-        when(doctorService.findDoctorById(6L)).thenReturn(newDoctor);
+		when(onlineConsultationRepository.findById(9L)).thenReturn(Optional.of(oc));
+		when(doctorService.findDoctorById(6L)).thenReturn(newDoctor);
 
-        service.update(req);
-        verify(onlineConsultationMapper).updateOnlineConsultation(req, oc);
-        assertThat(oc.getDoctor()).isSameAs(newDoctor);
-        verify(doctorService).findDoctorById(6L);
-        verify(onlineConsultationRepository).save(oc);
+		service.update(req);
+		verify(onlineConsultationMapper).updateOnlineConsultation(req, oc);
+		assertThat(oc.getDoctor()).isSameAs(newDoctor);
+		verify(doctorService).findDoctorById(6L);
+		verify(onlineConsultationRepository).save(oc);
 	}
 
 	@Test

@@ -1,4 +1,4 @@
-package com.vention.medfast.visit.service;
+package com.vention.medfast.appointment.visit.service;
 
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;

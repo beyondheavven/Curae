@@ -25,22 +25,17 @@ public interface OnlineConsultationMapper {
 	@Mapping(target = "meetingLink", source = "meetingLink")
 	OnlineConsultationDetails toDto(OnlineConsultation oc);
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "patient", ignore = true)
-    @Mapping(target = "doctor", ignore = true)
-    @Mapping(target = "referral", ignore = true)
-    @Mapping(target = "notifications", ignore = true)
-    @Mapping(target = "type", constant = "ONLINE")
-    @Mapping(target = "status", constant = "SCHEDULED")
-	OnlineConsultation toEntity(CreateOnlineConsultationRequest dto);
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "patient.id", source = "patientId")
+	@Mapping(target = "doctor.id", source = "doctorId")
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "referral", ignore = true)
+	@Mapping(target = "notifications", ignore = true)
 
-	@Mapping(target = "date", source = "date")
-	@Mapping(target = "time", source = "time")
-	@Mapping(target = "status", source = "status")
 	@Mapping(target = "type", constant = "ONLINE")
-	@Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-	@Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-	Appointment toAppointment(CreateOnlineConsultationRequest dto);
+	@Mapping(target = "status", source = "dto.status")
+	OnlineConsultation toEntity(CreateOnlineConsultationRequest dto);
 
 	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	void updateOnlineConsultation(UpdateOnlineConsultationRequest req, @MappingTarget OnlineConsultation oc);
