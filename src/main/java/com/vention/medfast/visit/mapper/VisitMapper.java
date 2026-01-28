@@ -1,6 +1,5 @@
 package com.vention.medfast.visit.mapper;
 
-import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.visit.dto.DoctorForVisitResponseDto;
 import com.vention.medfast.visit.dto.VisitCreateDto;
@@ -12,19 +11,25 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface VisitMapper {
 
-	@Mapping(target = "id", ignore = true)
-	@Mapping(target = "appointment", source = "appointment")
-	@Mapping(target = "diagnosis", source = "dto.diagnosis")
-	@Mapping(target = "symptoms", source = "dto.symptoms")
-	@Mapping(target = "medicalReport", source = "dto.medicalReport")
-	Visit toEntity(VisitCreateDto dto, Appointment appointment);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "diagnosis", source = "dto.diagnosis")
+    @Mapping(target = "symptoms", source = "dto.symptoms")
+    @Mapping(target = "medicalReport", source = "dto.medicalReport")
 
-	@Mapping(source = "appointment.doctor", target = "doctor")
-	@Mapping(source = "clinic.address", target = "address")
-	@Mapping(source = "clinic.name", target = "clinic")
-	@Mapping(source = "appointment.date", target = "date")
-	@Mapping(source = "appointment.time", target = "time")
-	@Mapping(source = "appointment.status", target = "status")
+    @Mapping(target = "doctor", ignore = true)
+    @Mapping(target = "clinic", ignore = true)
+    @Mapping(target = "providedService", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "notifications", ignore = true)
+    Visit toEntity(VisitCreateDto dto);
+
+    @Mapping(source = "doctor", target = "doctor")
+    @Mapping(source = "clinic.address", target = "address")
+    @Mapping(source = "clinic.name", target = "clinic")
+    @Mapping(source = "date", target = "date")
+    @Mapping(source = "time", target = "time")
+    @Mapping(source = "status", target = "status")
 	VisitResponseDto toVisitResponseDto(Visit visit);
 
 	@Mapping(source = "user.firstName", target = "firstName")

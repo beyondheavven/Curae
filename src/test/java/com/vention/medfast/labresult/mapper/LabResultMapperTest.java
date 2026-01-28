@@ -26,11 +26,11 @@ class LabResultMapperTest {
 
 	@Test
 	void shouldMapAppointmentToHistoryDto() {
-		Appointment appointment = new Appointment();
-		appointment.setId(10L);
-		appointment.setDate(LocalDate.of(2030, 2, 15));
-		appointment.setTime(LocalTime.of(8, 45));
-		appointment.setStatus(AppointmentStatus.COMPLETED);
+		com.vention.medfast.test.model.Test testAppointment = new com.vention.medfast.test.model.Test();
+        testAppointment.setId(10L);
+        testAppointment.setDate(LocalDate.of(2030, 2, 15));
+        testAppointment.setTime(LocalTime.of(8, 45));
+        testAppointment.setStatus(AppointmentStatus.COMPLETED);
 
 		LabTest labTest = new LabTest();
 		labTest.setId(3L);
@@ -38,18 +38,18 @@ class LabResultMapperTest {
 
 		LabResult labResult = new LabResult();
 		labResult.setId(7L);
-		labResult.setAppointment(appointment);
+		labResult.setTest(testAppointment);
 		labResult.setLabTest(labTest);
 		labResult.setStatus(LabResultStatus.PROCESSING);
 		labResult.setResultUrl("http://result.url");
 		labResult.setUploadedAt(LocalDateTime.of(2030, 2, 16, 9, 0));
 
-		appointment.setLabResults(List.of(labResult));
+        testAppointment.setLabResults(List.of(labResult));
 
-		PatientLabHistoryDTO dto = labResultMapper.toHistoryDto(appointment);
+		PatientLabHistoryDTO dto = labResultMapper.toHistoryDto(testAppointment);
 
 		assertThat(dto.appointmentId()).isEqualTo(10L);
-		assertThat(dto.date()).isEqualTo(appointment.getDate());
+		assertThat(dto.date()).isEqualTo(testAppointment.getDate());
 		assertThat(dto.appointmentStatus()).isEqualTo(AppointmentStatus.COMPLETED.name());
 		assertThat(dto.tests()).hasSize(1);
 		assertThat(dto.tests().get(0).id()).isEqualTo(7L);

@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface VisitService {
 
-	long create(VisitCreateDto dto);
+	Long create(Long patientId, VisitCreateDto dto);
 
 	Page<VisitResponseDto> findAllForPatient(VisitType type, Pageable pageable);
 

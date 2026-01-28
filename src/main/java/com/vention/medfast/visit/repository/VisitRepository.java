@@ -15,26 +15,24 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 
 	@Query("""
 			    select v from Visit v
-			    join v.appointment a
-			    where a.patient.id = :patientId
+			    where v.patient.id = :patientId
 			      and (
-			          a.date > :today
-			          or (a.date = :today and a.time > :now)
+			          v.date > :today
+			          or (v.date = :today and v.time > :now)
 			      )
-			    order by a.date, a.time
+			    order by v.date, v.time
 			""")
 	Page<Visit> findUpcomingByPatient(@Param("patientId") Long patientId, @Param("today") LocalDate today,
 			@Param("now") LocalTime now, Pageable pageable);
 
 	@Query("""
 			    select v from Visit v
-			    join v.appointment a
-			    where a.patient.id = :patientId
+			    where v.patient.id = :patientId
 			      and (
-			          a.date < :today
-			          or (a.date = :today and a.time <= :now)
+			          v.date < :today
+			          or (v.date = :today and v.time <= :now)
 			      )
-			    order by a.date desc, a.time desc
+			    order by v.date desc, v.time desc
 			""")
 	Page<Visit> findPastByPatient(@Param("patientId") Long patientId, @Param("today") LocalDate today,
 			@Param("now") LocalTime now, Pageable pageable);

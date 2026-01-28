@@ -21,7 +21,7 @@ import lombok.Setter;
 @Table(name = "visits")
 @PrimaryKeyJoinColumn(name = "appointment_id")
 @NoArgsConstructor
-public class Visit  extends Appointment{
+public class Visit extends Appointment {
 
 	@Column(name = "diagnosis")
 	private String diagnosis;
@@ -32,13 +32,13 @@ public class Visit  extends Appointment{
 	@Column(name = "medical_report")
 	private String medicalReport;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "doctor_id", nullable = false)
-    private Doctor doctor;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "doctor_id", nullable = false)
+	private Doctor doctor;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "service_id", nullable = false)
-    private ProvidedService providedService;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "service_id", nullable = false)
+	private ProvidedService providedService;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "clinic_id", nullable = false)

@@ -8,25 +8,27 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "lab_tests")
+@NoArgsConstructor
 public class LabTest {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false)
+	@Column(name = "name", nullable = false)
 	private String name;
 
-	@Column(nullable = false)
+	@Column(name = "description", nullable = false)
 	private String description;
 
-	@Column(nullable = false)
+	@Column(name = "price", nullable = false)
 	private BigDecimal price;
 
 }

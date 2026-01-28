@@ -18,7 +18,6 @@ public record ReferralCreateDto(
 
 		@Schema(description = "Appointment type") @NotNull AppointmentType appointmentType,
 
-		@Schema(description = "Expiration date of referral") @NotNull(
-				message = "Expiration date is required") @Future(
-						message = "Expiration date must be in the future") LocalDate expiresAt) {
+		@Schema(description = "Expiration date of referral") @NotNull(message = "Expiration date is required") @Future(
+				message = "Expiration date must be in the future") LocalDate expiresAt) {
 }

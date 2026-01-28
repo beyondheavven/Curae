@@ -1,19 +1,28 @@
 package com.vention.medfast.visit.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Schema(description = "DTO for creating a visit")
 public record VisitCreateDto(
 
-		@NotNull(message = "Appointment id is required") Long appointmentId,
+        @Schema(description = "Diagnosis (optional)")
+        String diagnosis,
 
-		@NotBlank(message = "Diagnosis is required") String diagnosis,
+        @Schema(description = "Symptoms (optional)")
+        String symptoms,
 
-		@NotBlank(message = "Symptoms are required") String symptoms,
+        @Schema(description = "Medical report (optional)")
+        String medicalReport,
 
-		@NotBlank(message = "Medical report is required") String medicalReport
+        @NotNull(message = "Doctor id is required")
+        Long doctorId,
+
+        @NotNull(message = "Service id is required")
+        Long serviceId,
+
+        @NotNull(message = "Clinic id is required")
+        Long clinicId
 
 ) {
 }

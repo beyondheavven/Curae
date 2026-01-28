@@ -5,6 +5,7 @@ import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
+import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
@@ -13,7 +14,6 @@ import com.vention.medfast.referral.model.ReferralStatus;
 import com.vention.medfast.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.doctor.model.Doctor;
-import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.labresult.mapper.LabResultMapper;
 import com.vention.medfast.labresult.service.LabResultService;
 import com.vention.medfast.labtest.model.LabTest;
@@ -57,9 +57,6 @@ class AppointmentServiceImplTest {
 	private ReferralService referralService;
 
 	@Mock
-	private DoctorService doctorService;
-
-	@Mock
 	private PatientService patientService;
 
 	@Mock
@@ -82,16 +79,16 @@ class AppointmentServiceImplTest {
 
 	@Test
 	void shouldCreateDraftWithReferral() {
-		AppointmentCreateDto dto = new AppointmentCreateDto(10L, null, LocalDate.now().plusDays(1),
+		AppointmentCreateDto dto = new AppointmentCreateDto(10L, LocalDate.now().plusDays(1),
 				LocalTime.of(10, 0));
 		Referral referral = new Referral();
 		referral.setAppointmentType(AppointmentType.VISIT);
 		Appointment appointment = new Appointment();
 		when(referralService.getActiveById(10L)).thenReturn(referral);
-		when(appointmentMapper.toAppointment(dto, referral.getIssuedBy(), referral.getPatient(), referral))
+		when(appointmentMapper.toAppointment(dto, referral.getPatient(), referral))
 			.thenReturn(appointment);
 		when(appointmentRepository.save(appointment)).thenReturn(appointment);
-		appointmentService.createDraft(dto);
+		appointmentService.create(dto);
 		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
 		assertThat(appointment.getType()).isEqualTo(AppointmentType.VISIT);
 	}
@@ -120,11 +117,11 @@ class AppointmentServiceImplTest {
 	@Test
 	void shouldReturnLabHistoryForUser() {
 		Pageable pageable = Pageable.unpaged();
-		Appointment appointment = new Appointment();
-		appointment.setId(5L);
+        com.vention.medfast.test.model.Test testEntity = new com.vention.medfast.test.model.Test();
+        testEntity.setId(5L);
 		PatientLabHistoryDTO dto = new PatientLabHistoryDTO(5L, LocalDate.now(), "COMPLETED", List.of());
-		when(appointmentRepository.findLabHistoryPage(7L, pageable)).thenReturn(new PageImpl<>(List.of(appointment)));
-		when(labResultMapper.toHistoryDto(appointment)).thenReturn(dto);
+		when(appointmentRepository.findLabHistoryPage(7L, pageable)).thenReturn(new PageImpl<>(List.of(testEntity)));
+		when(labResultMapper.toHistoryDto(testEntity)).thenReturn(dto);
 		Page<PatientLabHistoryDTO> result = appointmentService.getPatientLabHistory(7L, pageable);
 		assertThat(result.getContent()).containsExactly(dto);
 	}
@@ -134,19 +131,17 @@ class AppointmentServiceImplTest {
 		AppointmentCreateWithLabsDto req = new AppointmentCreateWithLabsDto(2L, LocalDate.of(2031, 1, 1),
 				LocalTime.of(12, 0), List.of(10L, 10L, 11L));
 		Patient patient = new Patient();
-		Doctor doctor = new Doctor();
 		LabTest t1 = new LabTest();
 		t1.setId(10L);
 		LabTest t2 = new LabTest();
 		t2.setId(11L);
-		Appointment appointment = new Appointment();
+		com.vention.medfast.test.model.Test testAppointment = new com.vention.medfast.test.model.Test();
 		when(patientService.getById(2L)).thenReturn(patient);
-		when(doctorService.getCurrentDoctor()).thenReturn(doctor);
 		when(labTestService.findAllById(Set.of(10L, 11L))).thenReturn(List.of(t1, t2));
-		when(appointmentMapper.toLabAppointment(req, doctor, patient)).thenReturn(appointment);
+		when(appointmentMapper.toLabAppointment(req, patient)).thenReturn(testAppointment);
 		appointmentService.createWithLabs(req);
-		verify(appointmentRepository).save(appointment);
-		verify(labResultService).createForAppointment(appointment, List.of(t1, t2));
+		verify(appointmentRepository).save(testAppointment);
+		verify(labResultService).createForAppointment(testAppointment, List.of(t1, t2));
 	}
 
 	@Test
@@ -210,19 +205,15 @@ class AppointmentServiceImplTest {
 		patient.setId(10L);
 		appointment.setPatient(patient);
 
-		Doctor doctor = new Doctor();
-		doctor.setId(1L);
-
 		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now(), LocalTime.now(),
-				AppointmentStatus.SCHEDULED, 1L);
+				AppointmentStatus.SCHEDULED);
 
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
-		when(doctorService.findDoctorById(1L)).thenReturn(doctor);
 
 		Long result = appointmentService.update(dto, 1L);
 
 		assertEquals(1L, result);
-		verify(appointmentMapper).updateFromDto(dto, appointment, doctor);
+		verify(appointmentMapper).updateFromDto(dto, appointment);
 	}
 
 	@Test
@@ -234,13 +225,13 @@ class AppointmentServiceImplTest {
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
 
 		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now(), LocalTime.now(),
-				AppointmentStatus.CANCELLED, 2L);
+				AppointmentStatus.CANCELLED);
 
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> appointmentService.update(dto, 1L));
 
 		assertEquals("Appointment with status CANCELLED cannot be updated", e.getMessage());
 
-		verifyNoInteractions(doctorService, appointmentMapper, eventPublisher);
+		verifyNoInteractions(appointmentMapper, eventPublisher);
 	}
 
 }

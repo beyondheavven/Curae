@@ -20,13 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(ApiPaths.VISIT_ENDPOINT)
@@ -45,8 +39,8 @@ public class VisitController {
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<Long> create(@Valid @RequestBody VisitCreateDto dto) {
-		long id = visitService.create(dto);
+	public ResponseWrapper<Long> create(@Valid @RequestBody VisitCreateDto dto, @RequestParam(name = "patientId") Long patientId) {
+		long id = visitService.create(patientId, dto);
 		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
 	}
 

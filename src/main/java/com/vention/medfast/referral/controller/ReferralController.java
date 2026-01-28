@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
- @RestController
+@RestController
 @RequestMapping(ApiPaths.PRESCRIPTION_ENDPOINT)
 @RequiredArgsConstructor
 @Tag(name = "Prescriptions", description = "Endpoints for managing prescriptions (referrals)")
@@ -50,8 +50,7 @@ public class ReferralController {
 		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
 	}
 
-	@Operation(summary = "Get active referrals by patient",
-			description = "Returns all active referrals for a patient")
+	@Operation(summary = "Get active referrals by patient", description = "Returns all active referrals for a patient")
 	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Referrals retrieved"),
 			@ApiResponse(responseCode = "400", description = "Invalid request",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
@@ -62,8 +61,7 @@ public class ReferralController {
 		return ResponseWrapper.ok(result);
 	}
 
-	@Operation(summary = "Mark referral as used",
-			description = "Marks referral as used after appointment confirmation")
+	@Operation(summary = "Mark referral as used", description = "Marks referral as used after appointment confirmation")
 	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Referral marked as used"),
 			@ApiResponse(responseCode = "400", description = "Invalid referral state",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),

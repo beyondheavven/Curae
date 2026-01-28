@@ -15,12 +15,11 @@ public interface ReferralMapper {
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "patient", source = "patient")
 	@Mapping(target = "service", source = "service")
-	@Mapping(target = "issuedBy", source = "doctor")
+	@Mapping(target = "doctor", source = "doctor")
 	@Mapping(target = "expiresAt", source = "dto.expiresAt")
 	@Mapping(target = "appointmentType", source = "dto.appointmentType")
 	@Mapping(target = "status", constant = "ACTIVE")
 	Referral toEntity(ReferralCreateDto dto, Patient patient, Doctor doctor, ProvidedService service);
-
 
 	@Mapping(target = "serviceId", source = "service.id")
 	ReferralResponseDto toDto(Referral referral);

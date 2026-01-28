@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "doctors")
+@NoArgsConstructor
 public class Doctor {
 
 	@Id
@@ -32,7 +34,7 @@ public class Doctor {
 	@Column(name = "id", nullable = false)
 	private Long id;
 
-	@Column(name = "bio", nullable = false, length = 255)
+	@Column(name = "bio", nullable = false)
 	private String bio;
 
 	@OneToOne(fetch = FetchType.LAZY, optional = false)

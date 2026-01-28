@@ -2,9 +2,7 @@ package com.vention.medfast.appointment.controller;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
-import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
-import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.user.model.RoleType;
@@ -42,31 +40,35 @@ class AppointmentControllerTest {
 		controller = new AppointmentController(appointmentService);
 	}
 
-	@Test
-	void createFirstReturnsCreatedResponseWithId() {
-		FirstAppointmentCreateDto dto = new FirstAppointmentCreateDto(AppointmentType.VISIT,
-				LocalDate.now().plusDays(1), LocalTime.NOON, 10L);
-		when(appointmentService.createFirst(dto)).thenReturn(123L);
+    @Test
+    void createAppointment_ShouldReturnCreatedId() {
+        AppointmentCreateDto dto = new AppointmentCreateDto(
+            null,
+            LocalDate.now().plusDays(1),
+            LocalTime.of(10, 0)
+        );
 
-		ResponseWrapper<Long> response = controller.createFirst(dto);
+        Long expectedId = 123L;
+        when(appointmentService.create(dto)).thenReturn(expectedId);
 
-		assertThat(response.getData()).isEqualTo(123L);
-		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED.value());
-		verify(appointmentService).createFirst(dto);
-	}
+        ResponseWrapper<Long> response = controller.createAppointment(dto);
+
+        assertThat(response.getData()).isEqualTo(expectedId);
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED);
+        verify(appointmentService).create(dto);
+    }
 
 	@Test
 	void createDraftDelegatesToServiceAndReturnsWrapper() {
-		AppointmentCreateDto dto = new AppointmentCreateDto(5L, 7L, LocalDate.now().plusDays(2), LocalTime.of(9, 30));
-		when(appointmentService.createDraft(dto)).thenReturn(77L);
+		AppointmentCreateDto dto = new AppointmentCreateDto(5L, LocalDate.now().plusDays(2), LocalTime.of(9, 30));
+		when(appointmentService.create(dto)).thenReturn(77L);
 
-		ResponseWrapper<Long> response = controller.createDraft(dto);
+		ResponseWrapper<Long> response = controller.createAppointment(dto);
 
 		assertThat(response.getData()).isEqualTo(77L);
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.CREATED);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED.value());
-		verify(appointmentService).createDraft(dto);
+		verify(appointmentService).create(dto);
 	}
 
 	@Test

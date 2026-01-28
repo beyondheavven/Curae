@@ -4,7 +4,6 @@ import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
-import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.auth.core.CustomUserDetails;
@@ -43,23 +42,9 @@ public class AppointmentController {
 
 	private final AppointmentService appointmentService;
 
-	@Operation(summary = "Create first appointment", description = "Creates first appointment without referral")
-	@ApiResponses({
-			@ApiResponse(responseCode = "201", description = "First appointment created",
-					content = @Content(schema = @Schema(implementation = Long.class))),
-			@ApiResponse(responseCode = "400", description = "Validation error",
-					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
-	@PostMapping("/first")
-	@PreAuthorize("hasRole('PATIENT')")
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<Long> createFirst(@Valid @RequestBody FirstAppointmentCreateDto dto) {
-		Long id = appointmentService.createFirst(dto);
-		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
-	}
-
 	@Operation(summary = "Create appointment",
-			description = "Creates appointment draft. Referral is optional and used only if provided")
-	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Appointment draft created"),
+			description = "Creates appointment. Referral is optional and used only if provided")
+	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Appointment created"),
 			@ApiResponse(responseCode = "400", description = "Validation error",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
 			@ApiResponse(responseCode = "404", description = "Doctor or referral not found",
@@ -67,8 +52,8 @@ public class AppointmentController {
 	@PostMapping
 	@PreAuthorize("hasRole('PATIENT')")
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<Long> createDraft(@Valid @RequestBody AppointmentCreateDto dto) {
-		Long id = appointmentService.createDraft(dto);
+	public ResponseWrapper<Long> createAppointment(@Valid @RequestBody AppointmentCreateDto dto) {
+		Long id = appointmentService.create(dto);
 		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
 	}
 

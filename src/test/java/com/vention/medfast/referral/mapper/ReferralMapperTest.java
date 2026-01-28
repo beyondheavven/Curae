@@ -1,4 +1,4 @@
-package com.vention.medfast.appointment.referral.mapper;
+package com.vention.medfast.referral.mapper;
 
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.referral.dto.ReferralCreateDto;
@@ -45,7 +45,7 @@ class ReferralMapperTest {
 
 		assertThat(referral.getId()).isNull();
 		assertThat(referral.getPatient()).isSameAs(patient);
-		assertThat(referral.getIssuedBy()).isSameAs(doctor);
+		assertThat(referral.getDoctor()).isSameAs(doctor);
 		assertThat(referral.getService()).isSameAs(service);
 		assertThat(referral.getAppointmentType()).isEqualTo(AppointmentType.VISIT);
 		assertThat(referral.getExpiresAt()).isEqualTo(dto.expiresAt());

@@ -1,4 +1,4 @@
-package com.vention.medfast.appointment.referral.controller;
+package com.vention.medfast.referral.controller;
 
 import com.vention.medfast.referral.controller.ReferralController;
 import com.vention.medfast.referral.dto.ReferralCreateDto;

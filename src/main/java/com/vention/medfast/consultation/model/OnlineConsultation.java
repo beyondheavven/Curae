@@ -21,12 +21,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class OnlineConsultation extends Appointment {
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "doctor_id", nullable = false)
-    private Doctor doctor;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "doctor_id", nullable = false)
+	private Doctor doctor;
 
-    @Column(name = "meeting_link", nullable = false)
-    private String meetingLink;
-
+	@Column(name = "meeting_link", nullable = false)
+	private String meetingLink;
 
 }
