@@ -27,19 +27,11 @@ class OnlineConsultationMapperTest {
 		patient.setId(2L);
 		Doctor doctor = new Doctor();
 		doctor.setId(3L);
-		Appointment appointment = new Appointment();
-		appointment.setId(99L);
-		appointment.setPatient(patient);
-		appointment.setDoctor(doctor);
-		appointment.setDate(LocalDate.of(2026, 2, 1));
-		appointment.setTime(LocalTime.of(10, 15));
-		appointment.setStatus(AppointmentStatus.SCHEDULED);
-		appointment.setType(AppointmentType.ONLINE);
-		appointment.setUpdatedAt(LocalDateTime.of(2026, 1, 1, 12, 0));
 
 		OnlineConsultation oc = new OnlineConsultation();
-		oc.setAppointmentId(99L);
-		oc.setAppointment(appointment);
+		oc.setId(99L);
+		oc.setPatient(patient);
+        oc.setDoctor(doctor);
 		oc.setMeetingLink("meet-link");
 
 		OnlineConsultationDetails dto = mapper.toDto(oc);
@@ -63,14 +55,12 @@ class OnlineConsultationMapperTest {
 		OnlineConsultation oc = mapper.toEntity(req);
 
 		assertThat(oc.getMeetingLink()).isEqualTo("meet");
-		assertThat(oc.getAppointment()).isNotNull();
-		Appointment appt = oc.getAppointment();
-		assertThat(appt.getDate()).isEqualTo(LocalDate.of(2026, 3, 1));
-		assertThat(appt.getTime()).isEqualTo(LocalTime.of(9, 0));
-		assertThat(appt.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED_CONFIRMED);
-		assertThat(appt.getType()).isEqualTo(AppointmentType.ONLINE);
-		assertThat(appt.getCreatedAt()).isNotNull();
-		assertThat(appt.getUpdatedAt()).isNotNull();
+		assertThat(oc.getDate()).isEqualTo(LocalDate.of(2026, 3, 1));
+		assertThat(oc.getTime()).isEqualTo(LocalTime.of(9, 0));
+		assertThat(oc.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED_CONFIRMED);
+		assertThat(oc.getType()).isEqualTo(AppointmentType.ONLINE);
+		assertThat(oc.getCreatedAt()).isNotNull();
+		assertThat(oc.getUpdatedAt()).isNotNull();
 	}
 
 	@Test

@@ -14,19 +14,24 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring")
 public interface OnlineConsultationMapper {
 
-	@Mapping(target = "id", source = "appointmentId")
-	@Mapping(target = "patientId", source = "appointment.patient.id")
-	@Mapping(target = "doctorId", source = "appointment.doctor.id")
-	@Mapping(target = "date", source = "appointment.date")
-	@Mapping(target = "time", source = "appointment.time")
-	@Mapping(target = "status", source = "appointment.status")
-	@Mapping(target = "type", source = "appointment.type")
-	@Mapping(target = "updatedAt", source = "appointment.updatedAt")
+	@Mapping(target = "id", source = "id")
+	@Mapping(target = "patientId", source = "patient.id")
+	@Mapping(target = "doctorId", source = "doctor.id")
+	@Mapping(target = "date", source = "date")
+	@Mapping(target = "time", source = "time")
+	@Mapping(target = "status", source = "status")
+	@Mapping(target = "type", source = "type")
+	@Mapping(target = "updatedAt", source = "updatedAt")
 	@Mapping(target = "meetingLink", source = "meetingLink")
 	OnlineConsultationDetails toDto(OnlineConsultation oc);
 
-	@Mapping(target = "appointment", source = "dto")
-	@Mapping(target = "appointmentId", ignore = true)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "patient", ignore = true)
+    @Mapping(target = "doctor", ignore = true)
+    @Mapping(target = "referral", ignore = true)
+    @Mapping(target = "notifications", ignore = true)
+    @Mapping(target = "type", constant = "ONLINE")
+    @Mapping(target = "status", constant = "SCHEDULED")
 	OnlineConsultation toEntity(CreateOnlineConsultationRequest dto);
 
 	@Mapping(target = "date", source = "date")
