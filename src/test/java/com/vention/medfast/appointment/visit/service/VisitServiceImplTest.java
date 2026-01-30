@@ -19,7 +19,6 @@ import com.vention.medfast.appointment.model.VisitType;
 import com.vention.medfast.appointment.repository.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -92,34 +91,29 @@ class VisitServiceImplTest {
 		Clinic clinic = new Clinic();
 		clinic.setId(clinicId);
 
+		Visit mappedVisit = new Visit();
+		mappedVisit.setDiagnosis("Diagnosis");
+		mappedVisit.setPatient(patient);
+		mappedVisit.setStatus(AppointmentStatus.COMPLETED);
+		mappedVisit.setType(AppointmentType.VISIT);
+
 		when(patientService.getById(patientId)).thenReturn(patient);
 		when(doctorService.findDoctorById(doctorId)).thenReturn(doctor);
 		when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(service);
 		when(clinicService.findById(clinicId)).thenReturn(clinic);
 
-		when(visitRepository.save(any(Visit.class))).thenAnswer(inv -> {
+		when(visitMapper.toEntity(dto, patient, doctor, service, clinic)).thenReturn(mappedVisit);
+
+		when(visitRepository.save(mappedVisit)).thenAnswer(inv -> {
 			Visit v = inv.getArgument(0);
 			v.setId(100L);
 			return v;
 		});
 
 		long result = visitService.create(patientId, dto);
-
 		assertThat(result).isEqualTo(100L);
-		ArgumentCaptor<Visit> visitCaptor = ArgumentCaptor.forClass(Visit.class);
-		verify(visitRepository).save(visitCaptor.capture());
-		Visit capturedVisit = visitCaptor.getValue();
-
-		assertThat(capturedVisit.getDiagnosis()).isEqualTo("Diagnosis");
-		assertThat(capturedVisit.getSymptoms()).isEqualTo("Symptoms");
-		assertThat(capturedVisit.getDoctor()).isEqualTo(doctor);
-		assertThat(capturedVisit.getProvidedService()).isEqualTo(service);
-		assertThat(capturedVisit.getClinic()).isEqualTo(clinic);
-		assertThat(capturedVisit.getPatient()).isEqualTo(patient);
-
-		assertThat(capturedVisit.getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
-		assertThat(capturedVisit.getType()).isEqualTo(AppointmentType.VISIT);
-		assertThat(capturedVisit.getDate()).isEqualTo(LocalDate.now());
+		verify(visitMapper).toEntity(dto, patient, doctor, service, clinic);
+		verify(visitRepository).save(mappedVisit);
 	}
 
 	@Test

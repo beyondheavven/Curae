@@ -52,9 +52,9 @@ public class VisitServiceImpl implements VisitService {
 
 		Clinic clinic = clinicService.findById(dto.clinicId());
 
-        Visit visit = visitMapper.toEntity(dto, patient, doctor, service, clinic);
+		Visit visit = visitMapper.toEntity(dto, patient, doctor, service, clinic);
 
-        return visitRepository.save(visit).getId();
+		return visitRepository.save(visit).getId();
 	}
 
 	@Override
