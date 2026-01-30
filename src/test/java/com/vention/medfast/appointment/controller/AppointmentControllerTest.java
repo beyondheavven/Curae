@@ -1,6 +1,8 @@
 package com.vention.medfast.appointment.controller;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
+import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
+import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,6 +66,31 @@ class AppointmentControllerTest {
 		controller.confirm(appointmentId);
 
 		verify(appointmentService).confirm(appointmentId);
+	}
+
+	@Test
+	void cancelAppointment_ShouldCallService() {
+		Long appointmentId = 101L;
+
+		controller.cancelAppointment(appointmentId);
+
+		verify(appointmentService).cancelAppointment(appointmentId);
+	}
+
+	@Test
+	void updateAppointment_ShouldDelegateToServiceAndReturnId() {
+		Long appointmentId = 55L;
+
+		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now().plusDays(5), LocalTime.of(14, 0),
+				AppointmentStatus.IN_CONSULTATION);
+
+		when(appointmentService.update(dto, appointmentId)).thenReturn(appointmentId);
+
+		ResponseWrapper<Long> response = controller.update(appointmentId, dto);
+
+		assertThat(response.getData()).isEqualTo(appointmentId);
+		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK);
+		verify(appointmentService).update(dto, appointmentId);
 	}
 
 }
