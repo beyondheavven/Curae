@@ -11,6 +11,7 @@ import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.referral.state.ReferralStateContext;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.service.ProvidedServiceService;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,6 +35,8 @@ public class ReferralServiceImpl implements ReferralService {
 
 	private final ProvidedServiceService providedServiceService;
 
+	private final ReferralStateContext referralStateContext;
+
 	@Override
 	@Transactional(readOnly = true)
 	public List<ReferralResponseDto> getActiveByPatient(Long patientId) {
@@ -48,11 +51,8 @@ public class ReferralServiceImpl implements ReferralService {
 	public Referral getActiveById(Long referralId) {
 		Referral referral = referralRepository.findById(referralId)
 			.orElseThrow(() -> new EntityNotFoundException("Referral not found"));
-		if (referral.getStatus() != ReferralStatus.ACTIVE) {
-			throw new AppointmentException("Referral is not active");
-		}
-		if (isExpired(referral)) {
-			throw new AppointmentException("Referral expired");
+		if (!referralStateContext.isAvailable(referral)) {
+			throw new AppointmentException("Referral is not available or expired");
 		}
 		return referral;
 	}
@@ -60,8 +60,12 @@ public class ReferralServiceImpl implements ReferralService {
 	@Override
 	@Transactional
 	public Referral markUsed(Referral referral) {
-		if (referral.getStatus() != ReferralStatus.ACTIVE) {
-			throw new AppointmentException("Only active referral can be used");
+		if (!referralStateContext.isTransitionAllowed(referral.getStatus(), ReferralStatus.USED)) {
+			throw new AppointmentException("Invalid status transition to USED");
+		}
+
+		if (!referralStateContext.isAvailable(referral)) {
+			throw new AppointmentException("Referral is expired or not active");
 		}
 		referral.setStatus(ReferralStatus.USED);
 		return referral;
@@ -75,10 +79,6 @@ public class ReferralServiceImpl implements ReferralService {
 		Doctor doctor = doctorService.getCurrentDoctor();
 		Referral referral = referralMapper.toEntity(dto, patient, doctor, service);
 		return referralRepository.save(referral).getId();
-	}
-
-	private boolean isExpired(Referral referral) {
-		return referral.getExpiresAt().isBefore(LocalDate.now());
 	}
 
 }
