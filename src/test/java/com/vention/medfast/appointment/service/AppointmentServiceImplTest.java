@@ -2,7 +2,6 @@ package com.vention.medfast.appointment.service;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
-import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
@@ -14,7 +13,6 @@ import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.appointment.state.AppointmentStateContext;
 import com.vention.medfast.labresult.mapper.LabResultMapper;
 import com.vention.medfast.labresult.service.LabResultService;
-import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
@@ -25,15 +23,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -53,19 +46,7 @@ class AppointmentServiceImplTest {
 	private ReferralService referralService;
 
 	@Mock
-	private PatientService patientService;
-
-	@Mock
 	private AppointmentMapper appointmentMapper;
-
-	@Mock
-	private LabTestService labTestService;
-
-	@Mock
-	private LabResultService labResultService;
-
-	@Mock
-	private LabResultMapper labResultMapper;
 
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
