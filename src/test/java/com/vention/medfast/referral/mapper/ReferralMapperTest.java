@@ -3,7 +3,6 @@ package com.vention.medfast.referral.mapper;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.referral.dto.ReferralCreateDto;
 import com.vention.medfast.referral.dto.ReferralResponseDto;
-import com.vention.medfast.referral.mapper.ReferralMapper;
 import com.vention.medfast.referral.model.Referral;
 import com.vention.medfast.referral.model.ReferralStatus;
 import com.vention.medfast.doctor.model.Doctor;

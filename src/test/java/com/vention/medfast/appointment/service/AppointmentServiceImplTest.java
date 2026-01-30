@@ -1,7 +1,6 @@
 package com.vention.medfast.appointment.service;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
-import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
@@ -121,42 +120,6 @@ class AppointmentServiceImplTest {
 
 		assertThatThrownBy(() -> appointmentService.confirm(1L)).isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("Cannot confirm appointment in status COMPLETED");
-	}
-
-	@Test
-	void shouldReturnLabHistoryForUser() {
-		Pageable pageable = Pageable.unpaged();
-		com.vention.medfast.appointment.model.Test testEntity = new com.vention.medfast.appointment.model.Test();
-		testEntity.setId(5L);
-		PatientLabHistoryDTO dto = new PatientLabHistoryDTO(5L, LocalDate.now(), "COMPLETED", List.of());
-
-		when(appointmentRepository.findLabHistoryPage(7L, pageable)).thenReturn(new PageImpl<>(List.of(testEntity)));
-		when(labResultMapper.toHistoryDto(testEntity)).thenReturn(dto);
-
-		Page<PatientLabHistoryDTO> result = appointmentService.getPatientLabHistory(7L, pageable);
-
-		assertThat(result.getContent()).containsExactly(dto);
-	}
-
-	@Test
-	void shouldCreateAppointmentWithLabs() {
-		AppointmentCreateWithLabsDto req = new AppointmentCreateWithLabsDto(2L, LocalDate.of(2031, 1, 1),
-				LocalTime.of(12, 0), List.of(10L, 10L, 11L));
-		Patient patient = new Patient();
-		LabTest t1 = new LabTest();
-		t1.setId(10L);
-		LabTest t2 = new LabTest();
-		t2.setId(11L);
-		com.vention.medfast.appointment.model.Test testAppointment = new com.vention.medfast.appointment.model.Test();
-
-		when(patientService.getById(2L)).thenReturn(patient);
-		when(labTestService.findAllById(Set.of(10L, 11L))).thenReturn(List.of(t1, t2));
-		when(appointmentMapper.toLabAppointment(req, patient)).thenReturn(testAppointment);
-
-		appointmentService.createWithLabs(req);
-
-		verify(appointmentRepository).save(testAppointment);
-		verify(labResultService).createForAppointment(testAppointment, List.of(t1, t2));
 	}
 
 	@Test

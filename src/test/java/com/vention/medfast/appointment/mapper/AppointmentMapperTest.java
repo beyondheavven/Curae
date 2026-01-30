@@ -1,13 +1,10 @@
 package com.vention.medfast.appointment.mapper;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
-import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
-import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.referral.model.Referral;
-import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +12,6 @@ import org.mapstruct.factory.Mappers;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -45,25 +41,6 @@ class AppointmentMapperTest {
 		assertThat(appointment.getId()).isNull();
 		assertThat(appointment.getDate()).isEqualTo(dto.date());
 		assertThat(appointment.getTime()).isEqualTo(dto.time());
-	}
-
-	@Test
-	void toLabAppointmentLeavesReferralNullAndTypeUnset() {
-		AppointmentCreateWithLabsDto dto = new AppointmentCreateWithLabsDto(11L, LocalDate.now().plusDays(2),
-				LocalTime.of(13, 45), List.of(1L, 2L, 3L));
-		Doctor doctor = new Doctor();
-		doctor.setId(1L);
-		Patient patient = new Patient();
-		patient.setId(2L);
-
-		Appointment appointment = mapper.toLabAppointment(dto, patient);
-
-		assertThat(appointment.getReferral()).isNull();
-		assertThat(appointment.getType()).isNull();
-		assertThat(appointment.getPatient()).isSameAs(patient);
-		assertThat(appointment.getDate()).isEqualTo(dto.date());
-		assertThat(appointment.getTime()).isEqualTo(dto.time());
-		assertThat(appointment.getStatus()).isNull();
 	}
 
 	@Test

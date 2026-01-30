@@ -1,7 +1,6 @@
 package com.vention.medfast.appointment.controller;
 
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
-import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.service.AppointmentService;
 import com.vention.medfast.auth.core.CustomUserDetails;
@@ -74,35 +73,6 @@ class AppointmentControllerTest {
 		controller.confirm(appointmentId);
 
 		verify(appointmentService).confirm(appointmentId);
-	}
-
-	@Test
-	void getLabHistoryReturnsPageWrappedWithOkStatus() {
-		CustomUserDetails user = new CustomUserDetails(3L, "user@mail.com", "pwd", RoleType.PATIENT);
-		Pageable pageable = PageRequest.of(0, 10);
-		Page<PatientLabHistoryDTO> history = new PageImpl<>(
-				List.of(new PatientLabHistoryDTO(1L, LocalDate.now(), "DONE", List.of())));
-		when(appointmentService.getPatientLabHistory(user.getId(), pageable)).thenReturn(history);
-
-		ResponseWrapper<Page<PatientLabHistoryDTO>> response = controller.getLabHistory(user, pageable);
-
-		assertThat(response.getData()).isEqualTo(history);
-		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK);
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.value());
-		verify(appointmentService).getPatientLabHistory(user.getId(), pageable);
-	}
-
-	@Test
-	void createWithLabsDelegatesToService() {
-		AppointmentCreateWithLabsDto request = new AppointmentCreateWithLabsDto(11L, LocalDate.now(),
-				LocalTime.of(14, 0), List.of(1L, 2L));
-
-		controller.createWithLabs(request);
-
-		ArgumentCaptor<AppointmentCreateWithLabsDto> captor = ArgumentCaptor
-			.forClass(AppointmentCreateWithLabsDto.class);
-		verify(appointmentService).createWithLabs(captor.capture());
-		assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(request);
 	}
 
 }

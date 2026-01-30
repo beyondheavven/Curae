@@ -1,6 +1,5 @@
 package com.vention.medfast.referral.controller;
 
-import com.vention.medfast.referral.controller.ReferralController;
 import com.vention.medfast.referral.dto.ReferralCreateDto;
 import com.vention.medfast.referral.dto.ReferralResponseDto;
 import com.vention.medfast.referral.model.Referral;

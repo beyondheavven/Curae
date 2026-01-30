@@ -3,9 +3,6 @@ package com.vention.medfast.appointment.repository;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,20 +12,6 @@ import java.time.LocalDate;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
-
-	@EntityGraph(attributePaths = { "labResults", "labResults.labTest" })
-	@Query(value = """
-			    SELECT DISTINCT t
-			    FROM Test t
-			    JOIN t.labResults lr
-			    WHERE t.patient.user.id = :userId
-			""", countQuery = """
-			    SELECT COUNT(DISTINCT t.id)
-			    FROM Test t
-			    JOIN t.labResults lr
-			    WHERE t.patient.user.id = :userId
-			""")
-	Page<Appointment> findLabHistoryPage(@Param("userId") Long userId, Pageable pageable);
 
 	@Query("""
 			    SELECT new com.vention.medfast.statistics.dto.response.AppointmentStatusCounts(
