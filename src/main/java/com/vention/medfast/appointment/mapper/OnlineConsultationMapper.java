@@ -14,28 +14,28 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring")
 public interface OnlineConsultationMapper {
 
-	@Mapping(target = "id", source = "appointmentId")
-	@Mapping(target = "patientId", source = "appointment.patient.id")
-	@Mapping(target = "doctorId", source = "appointment.doctor.id")
-	@Mapping(target = "date", source = "appointment.date")
-	@Mapping(target = "time", source = "appointment.time")
-	@Mapping(target = "status", source = "appointment.status")
-	@Mapping(target = "type", source = "appointment.type")
-	@Mapping(target = "updatedAt", source = "appointment.updatedAt")
-	@Mapping(target = "meetingLink", source = "meetingLink")
-	OnlineConsultationDetails toDto(OnlineConsultation oc);
-
-	@Mapping(target = "appointment", source = "dto")
-	@Mapping(target = "appointmentId", ignore = true)
-	OnlineConsultation toEntity(CreateOnlineConsultationRequest dto);
-
+	@Mapping(target = "id", source = "id")
+	@Mapping(target = "patientId", source = "patient.id")
+	@Mapping(target = "doctorId", source = "doctor.id")
 	@Mapping(target = "date", source = "date")
 	@Mapping(target = "time", source = "time")
 	@Mapping(target = "status", source = "status")
+	@Mapping(target = "type", source = "type")
+	@Mapping(target = "updatedAt", source = "updatedAt")
+	@Mapping(target = "meetingLink", source = "meetingLink")
+	OnlineConsultationDetails toDto(OnlineConsultation oc);
+
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "patient.id", source = "patientId")
+	@Mapping(target = "doctor.id", source = "doctorId")
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "referral", ignore = true)
+	@Mapping(target = "notifications", ignore = true)
+
 	@Mapping(target = "type", constant = "ONLINE")
-	@Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-	@Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
-	Appointment toAppointment(CreateOnlineConsultationRequest dto);
+	@Mapping(target = "status", source = "dto.status")
+	OnlineConsultation toEntity(CreateOnlineConsultationRequest dto);
 
 	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 	void updateOnlineConsultation(UpdateOnlineConsultationRequest req, @MappingTarget OnlineConsultation oc);

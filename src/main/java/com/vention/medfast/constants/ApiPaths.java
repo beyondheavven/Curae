@@ -60,4 +60,6 @@ public final class ApiPaths {
 
 	public static final String ONLINE_CONSULTATION_ENDPOINT = "/online-consultation";
 
+	public static final String TEST_ENDPOINT = "/test";
+
 }

@@ -19,8 +19,8 @@ public interface LabResultRepository extends JpaRepository<LabResult, Long> {
 			        COALESCE(SUM(CASE WHEN lr.status = 'FAILED' THEN 1 ELSE 0 END), 0)
 			        )
 			FROM LabResult lr
-			JOIN lr.appointment a
-			WHERE a.date BETWEEN :startDate and :endDate
+			JOIN lr.test t
+			WHERE t.date BETWEEN :startDate and :endDate
 			""")
 	LabResultStatusCounts getStatusCounts(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 

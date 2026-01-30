@@ -1,11 +1,9 @@
 package com.vention.medfast.appointment.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.vention.medfast.appointment.referral.model.Referral;
-import com.vention.medfast.doctor.model.Doctor;
-import com.vention.medfast.labresult.model.LabResult;
 import com.vention.medfast.notification.model.Notification;
 import com.vention.medfast.patient.model.Patient;
+import com.vention.medfast.appointment.referral.model.Referral;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,12 +16,15 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -34,6 +35,8 @@ import org.hibernate.type.SqlTypes;
 @Setter
 @Entity
 @Table(name = "appointments")
+@Inheritance(strategy = InheritanceType.JOINED)
+@NoArgsConstructor
 public class Appointment {
 
 	@Id
@@ -47,12 +50,9 @@ public class Appointment {
 	private LocalTime time;
 
 	@Enumerated(EnumType.STRING)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "status", nullable = false)
 	private AppointmentStatus status;
-
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "doctor_id", nullable = true)
-	private Doctor doctor;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "patient_id", nullable = false)
@@ -66,9 +66,6 @@ public class Appointment {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "referral_id")
 	private Referral referral;
-
-	@OneToMany(mappedBy = "appointment", fetch = FetchType.LAZY)
-	private List<LabResult> labResults = new ArrayList<>();
 
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false, nullable = false)

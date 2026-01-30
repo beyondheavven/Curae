@@ -10,9 +10,9 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.vention.medfast.appointment.referral.model.ReferralStatus.ACTIVE;
-import static com.vention.medfast.appointment.referral.model.ReferralStatus.EXPIRED;
 import static com.vention.medfast.appointment.referral.model.ReferralStatus.USED;
+import static com.vention.medfast.appointment.referral.model.ReferralStatus.EXPIRED;
+import static com.vention.medfast.appointment.referral.model.ReferralStatus.ACTIVE;
 
 /**
  * Centralizes validation logic for {@link ReferralStatus} transitions.

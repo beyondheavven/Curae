@@ -1,11 +1,11 @@
-package com.vention.medfast.visit.controller;
+package com.vention.medfast.appointment.controller;
 
 import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.visit.dto.VisitCreateDto;
-import com.vention.medfast.visit.dto.VisitResponseDto;
-import com.vention.medfast.visit.model.VisitType;
-import com.vention.medfast.visit.service.VisitService;
+import com.vention.medfast.appointment.dto.VisitCreateDto;
+import com.vention.medfast.appointment.dto.VisitResponseDto;
+import com.vention.medfast.appointment.model.VisitType;
+import com.vention.medfast.appointment.service.VisitService;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,13 +20,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(ApiPaths.VISIT_ENDPOINT)
@@ -45,8 +45,9 @@ public class VisitController {
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseWrapper<Long> create(@Valid @RequestBody VisitCreateDto dto) {
-		long id = visitService.create(dto);
+	public ResponseWrapper<Long> create(@Valid @RequestBody VisitCreateDto dto,
+			@RequestParam(name = "patientId") Long patientId) {
+		long id = visitService.create(patientId, dto);
 		return ResponseWrapper.withStatus(HttpStatus.CREATED, id);
 	}
 

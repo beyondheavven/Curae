@@ -1,17 +1,22 @@
-package com.vention.medfast.visit.service;
+package com.vention.medfast.appointment.visit.service;
 
-import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.service.AppointmentService;
+import com.vention.medfast.appointment.service.VisitServiceImpl;
+import com.vention.medfast.clinic.model.Clinic;
+import com.vention.medfast.clinic.service.ClinicService;
+import com.vention.medfast.doctor.model.Doctor;
+import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.visit.dto.VisitCreateDto;
-import com.vention.medfast.visit.dto.VisitResponseDto;
-import com.vention.medfast.visit.mapper.VisitMapper;
-import com.vention.medfast.visit.model.Visit;
-import com.vention.medfast.visit.model.VisitType;
-import com.vention.medfast.visit.repository.VisitRepository;
+import com.vention.medfast.service.model.ProvidedService;
+import com.vention.medfast.service.service.ProvidedServiceService;
+import com.vention.medfast.appointment.dto.VisitCreateDto;
+import com.vention.medfast.appointment.dto.VisitResponseDto;
+import com.vention.medfast.appointment.mapper.VisitMapper;
+import com.vention.medfast.appointment.model.Visit;
+import com.vention.medfast.appointment.model.VisitType;
+import com.vention.medfast.appointment.repository.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +34,6 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -46,10 +50,16 @@ class VisitServiceImplTest {
 	private VisitMapper visitMapper;
 
 	@Mock
-	private AppointmentService appointmentService;
+	private PatientService patientService;
 
 	@Mock
-	private PatientService patientService;
+	private DoctorService doctorService;
+
+	@Mock
+	private ProvidedServiceService providedServiceService;
+
+	@Mock
+	private ClinicService clinicService;
 
 	@Mock
 	private Authentication authentication;
@@ -62,28 +72,48 @@ class VisitServiceImplTest {
 
 	@Test
 	public void shouldCreateVisitWhenInputIsValid() {
-		VisitCreateDto dto = new VisitCreateDto(1L, "Diagnosis", "Symptoms", "Medical report");
-		Appointment appointment = new Appointment();
-		appointment.setId(1L);
-		appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
-		appointment.setType(AppointmentType.VISIT);
-		Visit visit = new Visit();
-		visit.setAppointment(appointment);
-		when(appointmentService.getConfirmed(1L)).thenReturn(appointment);
-		when(visitRepository.existsById(1L)).thenReturn(false);
-		when(visitMapper.toEntity(dto, appointment)).thenReturn(visit);
-		when(visitRepository.save(any())).thenAnswer(inv -> {
+		Long patientId = 1L;
+		Long doctorId = 2L;
+		Long serviceId = 1L;
+		Long clinicId = 2L;
+
+		VisitCreateDto dto = new VisitCreateDto("Diagnosis", "Symptoms", "Report", doctorId, serviceId, clinicId);
+
+		Patient patient = new Patient();
+		patient.setId(patientId);
+
+		Doctor doctor = new Doctor();
+		doctor.setId(doctorId);
+
+		ProvidedService service = new ProvidedService();
+		service.setId(serviceId);
+
+		Clinic clinic = new Clinic();
+		clinic.setId(clinicId);
+
+		Visit mappedVisit = new Visit();
+		mappedVisit.setDiagnosis("Diagnosis");
+		mappedVisit.setPatient(patient);
+		mappedVisit.setStatus(AppointmentStatus.COMPLETED);
+		mappedVisit.setType(AppointmentType.VISIT);
+
+		when(patientService.getById(patientId)).thenReturn(patient);
+		when(doctorService.findDoctorById(doctorId)).thenReturn(doctor);
+		when(providedServiceService.getProvidedServiceById(serviceId)).thenReturn(service);
+		when(clinicService.findById(clinicId)).thenReturn(clinic);
+
+		when(visitMapper.toEntity(dto, patient, doctor, service, clinic)).thenReturn(mappedVisit);
+
+		when(visitRepository.save(mappedVisit)).thenAnswer(inv -> {
 			Visit v = inv.getArgument(0);
-			v.setId(1L);
+			v.setId(100L);
 			return v;
 		});
-		long result = visitService.create(dto);
-		assertEquals(1L, result);
-		assertEquals(AppointmentStatus.COMPLETED, appointment.getStatus());
-		verify(appointmentService).getConfirmed(1L);
-		verify(visitRepository).existsById(1L);
-		verify(visitMapper).toEntity(dto, appointment);
-		verify(visitRepository).save(visit);
+
+		long result = visitService.create(patientId, dto);
+		assertThat(result).isEqualTo(100L);
+		verify(visitMapper).toEntity(dto, patient, doctor, service, clinic);
+		verify(visitRepository).save(mappedVisit);
 	}
 
 	@Test

@@ -23,9 +23,9 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 @Table(name = "referrals")
+@NoArgsConstructor
 public class Referral {
 
 	@Id
@@ -37,25 +37,26 @@ public class Referral {
 	private Patient patient;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "issued_by", nullable = false)
-	private Doctor issuedBy;
+	@JoinColumn(name = "doctor_id", nullable = false)
+	private Doctor doctor;
 
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "service_id", nullable = false)
 	private ProvidedService service;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "appointment_type", nullable = false, length = 20)
+	@Column(name = "appointment_type", nullable = false)
 	private AppointmentType appointmentType;
 
-	@Column(nullable = false)
+	@Column(name = "expires_at", nullable = false)
 	private LocalDate expiresAt;
 
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	@Column(name = "status", nullable = false)
 	private ReferralStatus status;
 
 	@CreationTimestamp
+	@Column(name = "created_at", updatable = false, nullable = false)
 	private LocalDateTime createdAt;
 
 }

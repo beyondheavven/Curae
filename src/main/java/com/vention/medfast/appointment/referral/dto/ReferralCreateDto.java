@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
-@Schema(description = "DTO for creating prescription (referral)")
+@Schema(description = "DTO for creating referral")
 public record ReferralCreateDto(
 
 		@Schema(description = "Patient id") @NotNull(message = "Patient id is required") @Positive(
@@ -18,7 +18,6 @@ public record ReferralCreateDto(
 
 		@Schema(description = "Appointment type") @NotNull AppointmentType appointmentType,
 
-		@Schema(description = "Expiration date of prescription") @NotNull(
-				message = "Expiration date is required") @Future(
-						message = "Expiration date must be in the future") LocalDate expiresAt) {
+		@Schema(description = "Expiration date of referral") @NotNull(message = "Expiration date is required") @Future(
+				message = "Expiration date must be in the future") LocalDate expiresAt) {
 }

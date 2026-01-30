@@ -4,9 +4,7 @@ import com.vention.medfast.appointment.dto.CreateOnlineConsultationRequest;
 import com.vention.medfast.appointment.dto.OnlineConsultationDetails;
 import com.vention.medfast.appointment.dto.UpdateOnlineConsultationRequest;
 import com.vention.medfast.appointment.mapper.OnlineConsultationMapper;
-import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.OnlineConsultation;
-import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.appointment.repository.OnlineConsultationRepository;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
@@ -29,8 +27,6 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 
 	private final DoctorService doctorService;
 
-	private final AppointmentRepository appointmentRepository;
-
 	@Override
 	@Transactional(readOnly = true)
 	public OnlineConsultationDetails getDetails(Long consultationId) {
@@ -46,13 +42,10 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 
 		Patient patient = patientService.getById(createOnlineConsultationRequest.patientId());
 		Doctor doctor = doctorService.findDoctorById(createOnlineConsultationRequest.doctorId());
-
-		Appointment appointment = onlineConsultationMapper.toAppointment(createOnlineConsultationRequest);
-		appointment.setPatient(patient);
-		appointment.setDoctor(doctor);
-
 		OnlineConsultation oc = onlineConsultationMapper.toEntity(createOnlineConsultationRequest);
-		oc.setAppointment(appointment);
+
+		oc.setPatient(patient);
+		oc.setDoctor(doctor);
 
 		onlineConsultationRepository.save(oc);
 	}
@@ -60,24 +53,20 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 	@Override
 	@Transactional
 	public void deleteById(Long consultationId) {
-
-		OnlineConsultation oc = onlineConsultationRepository.findById(consultationId)
-			.orElseThrow(() -> new EntityNotFoundException("Online consultation not found: " + consultationId));
-
-		appointmentRepository.delete(oc.getAppointment());
+		OnlineConsultation oc = findById(consultationId);
+		onlineConsultationRepository.delete(oc);
 	}
 
 	@Override
 	@Transactional
 	public void update(UpdateOnlineConsultationRequest req) {
-
 		OnlineConsultation oc = findById(req.onlineConsultationId());
-		Appointment appt = oc.getAppointment();
 		onlineConsultationMapper.updateOnlineConsultation(req, oc);
-		onlineConsultationMapper.updateAppointment(req, appt);
-		Doctor doctor = doctorService.findDoctorById(req.doctorId());
-		appt.setDoctor(doctor);
-
+		if (req.doctorId() != null && !req.doctorId().equals(oc.getDoctor().getId())) {
+			Doctor newDoctor = doctorService.findDoctorById(req.doctorId());
+			oc.setDoctor(newDoctor);
+		}
+		onlineConsultationRepository.save(oc);
 	}
 
 	private OnlineConsultation findById(Long consultationId) {

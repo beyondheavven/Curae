@@ -63,11 +63,11 @@ class OnlineConsultationControllerIntegrationTest extends AbstractControllerInte
 		OnlineConsultation updated = em.find(OnlineConsultation.class, EXISTING_ID);
 		assertThat(updated).isNotNull();
 		assertThat(updated.getMeetingLink()).isEqualTo("https://zoom.us/j/updated");
-		assertThat(updated.getAppointment().getDoctor().getId()).isEqualTo(1L);
-		assertThat(updated.getAppointment().getDate()).isEqualTo(req.date());
-		assertThat(updated.getAppointment().getTime()).isEqualTo(req.time());
-		assertThat(updated.getAppointment().getStatus()).isEqualTo(AppointmentStatus.IN_CONSULTATION);
-		assertThat(updated.getAppointment().getType().name()).isEqualTo("ONLINE");
+		assertThat(updated.getDoctor().getId()).isEqualTo(1L);
+		assertThat(updated.getDate()).isEqualTo(req.date());
+		assertThat(updated.getTime()).isEqualTo(req.time());
+		assertThat(updated.getStatus()).isEqualTo(AppointmentStatus.IN_CONSULTATION);
+		assertThat(updated.getType().name()).isEqualTo("ONLINE");
 	}
 
 	@Test

@@ -4,7 +4,6 @@ import com.vention.medfast.appointment.model.AppointmentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,8 +15,7 @@ public record AppointmentUpdateDto(
 
 		@Schema(description = "Scheduled time") @NotNull(message = "Scheduled time is required") LocalTime time,
 
-		@NotNull(message = "Status is required") AppointmentStatus status,
+		@NotNull(message = "Status is required") AppointmentStatus status
 
-		@Schema(description = "Doctor id for appointment") @NotNull(message = "Doctor id is required") @Positive(
-				message = "Doctor id must be positive") Long doctorId) {
+) {
 }
