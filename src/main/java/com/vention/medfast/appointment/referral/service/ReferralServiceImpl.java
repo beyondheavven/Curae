@@ -1,17 +1,17 @@
-package com.vention.medfast.referral.service;
+package com.vention.medfast.appointment.referral.service;
 
 import com.vention.medfast.api.exception.AppointmentException;
-import com.vention.medfast.referral.dto.ReferralCreateDto;
-import com.vention.medfast.referral.dto.ReferralResponseDto;
-import com.vention.medfast.referral.mapper.ReferralMapper;
-import com.vention.medfast.referral.model.Referral;
-import com.vention.medfast.referral.model.ReferralStatus;
-import com.vention.medfast.referral.repository.ReferralRepository;
+import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralResponseDto;
+import com.vention.medfast.appointment.referral.mapper.ReferralMapper;
+import com.vention.medfast.appointment.referral.model.Referral;
+import com.vention.medfast.appointment.referral.model.ReferralStatus;
+import com.vention.medfast.appointment.referral.repository.ReferralRepository;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.referral.state.ReferralStateContext;
+import com.vention.medfast.appointment.referral.state.ReferralStateContext;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.service.ProvidedServiceService;
 import jakarta.persistence.EntityNotFoundException;

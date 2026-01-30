@@ -4,7 +4,7 @@ import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
-import com.vention.medfast.referral.model.Referral;
+import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.patient.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

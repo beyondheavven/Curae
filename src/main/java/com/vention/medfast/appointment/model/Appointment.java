@@ -3,7 +3,7 @@ package com.vention.medfast.appointment.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vention.medfast.notification.model.Notification;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.referral.model.Referral;
+import com.vention.medfast.appointment.referral.model.Referral;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

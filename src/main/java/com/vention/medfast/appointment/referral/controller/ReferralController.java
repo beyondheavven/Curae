@@ -1,10 +1,10 @@
-package com.vention.medfast.referral.controller;
+package com.vention.medfast.appointment.referral.controller;
 
 import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.referral.dto.ReferralCreateDto;
-import com.vention.medfast.referral.dto.ReferralResponseDto;
-import com.vention.medfast.referral.service.ReferralService;
+import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralResponseDto;
+import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

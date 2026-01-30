@@ -1,10 +1,11 @@
-package com.vention.medfast.referral.mapper;
+package com.vention.medfast.appointment.referral.mapper;
 
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.referral.dto.ReferralCreateDto;
-import com.vention.medfast.referral.dto.ReferralResponseDto;
-import com.vention.medfast.referral.model.Referral;
-import com.vention.medfast.referral.model.ReferralStatus;
+import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralResponseDto;
+import com.vention.medfast.appointment.referral.mapper.ReferralMapper;
+import com.vention.medfast.appointment.referral.model.Referral;
+import com.vention.medfast.appointment.referral.model.ReferralStatus;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.service.model.ProvidedService;

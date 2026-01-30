@@ -1,7 +1,5 @@
 package com.vention.medfast.appointment.service;
 
-import com.vention.medfast.appointment.model.AppointmentStatus;
-import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.clinic.service.ClinicService;
 import com.vention.medfast.doctor.model.Doctor;
@@ -54,22 +52,9 @@ public class VisitServiceImpl implements VisitService {
 
 		Clinic clinic = clinicService.findById(dto.clinicId());
 
-		Visit visit = new Visit();
+        Visit visit = visitMapper.toEntity(dto, patient, doctor, service, clinic);
 
-		visit.setDate(LocalDate.now());
-		visit.setTime(LocalTime.now());
-		visit.setStatus(AppointmentStatus.COMPLETED);
-		visit.setType(AppointmentType.VISIT);
-		visit.setPatient(patient);
-
-		visit.setDiagnosis(dto.diagnosis());
-		visit.setSymptoms(dto.symptoms());
-		visit.setMedicalReport(dto.medicalReport());
-		visit.setDoctor(doctor);
-		visit.setProvidedService(service);
-		visit.setClinic(clinic);
-
-		return visitRepository.save(visit).getId();
+        return visitRepository.save(visit).getId();
 	}
 
 	@Override

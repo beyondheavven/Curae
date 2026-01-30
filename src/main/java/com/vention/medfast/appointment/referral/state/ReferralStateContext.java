@@ -1,7 +1,7 @@
-package com.vention.medfast.referral.state;
+package com.vention.medfast.appointment.referral.state;
 
-import com.vention.medfast.referral.model.Referral;
-import com.vention.medfast.referral.model.ReferralStatus;
+import com.vention.medfast.appointment.referral.model.Referral;
+import com.vention.medfast.appointment.referral.model.ReferralStatus;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -10,9 +10,9 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Set;
 
-import static com.vention.medfast.referral.model.ReferralStatus.USED;
-import static com.vention.medfast.referral.model.ReferralStatus.EXPIRED;
-import static com.vention.medfast.referral.model.ReferralStatus.ACTIVE;
+import static com.vention.medfast.appointment.referral.model.ReferralStatus.USED;
+import static com.vention.medfast.appointment.referral.model.ReferralStatus.EXPIRED;
+import static com.vention.medfast.appointment.referral.model.ReferralStatus.ACTIVE;
 
 /**
  * Centralizes validation logic for {@link ReferralStatus} transitions.

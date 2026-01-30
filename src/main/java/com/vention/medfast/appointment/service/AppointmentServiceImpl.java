@@ -9,15 +9,12 @@ import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.appointment.state.AppointmentStateContext;
-import com.vention.medfast.labresult.mapper.LabResultMapper;
-import com.vention.medfast.labresult.service.LabResultService;
-import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.notification.eventListener.eventModel.StatusChangedEvent;
 import com.vention.medfast.notification.model.NotificationType;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.referral.model.Referral;
-import com.vention.medfast.referral.service.ReferralService;
+import com.vention.medfast.appointment.referral.model.Referral;
+import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
 

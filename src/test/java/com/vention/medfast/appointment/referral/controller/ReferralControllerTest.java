@@ -1,10 +1,11 @@
-package com.vention.medfast.referral.controller;
+package com.vention.medfast.appointment.referral.controller;
 
-import com.vention.medfast.referral.dto.ReferralCreateDto;
-import com.vention.medfast.referral.dto.ReferralResponseDto;
-import com.vention.medfast.referral.model.Referral;
-import com.vention.medfast.referral.model.ReferralStatus;
-import com.vention.medfast.referral.service.ReferralService;
+import com.vention.medfast.appointment.referral.controller.ReferralController;
+import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
+import com.vention.medfast.appointment.referral.dto.ReferralResponseDto;
+import com.vention.medfast.appointment.referral.model.Referral;
+import com.vention.medfast.appointment.referral.model.ReferralStatus;
+import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import org.junit.jupiter.api.BeforeEach;

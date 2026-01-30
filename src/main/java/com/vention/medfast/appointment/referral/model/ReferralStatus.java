@@ -1,4 +1,4 @@
-package com.vention.medfast.referral.model;
+package com.vention.medfast.appointment.referral.model;
 
 /**
  * Represents the state lifecycle of a Referral.

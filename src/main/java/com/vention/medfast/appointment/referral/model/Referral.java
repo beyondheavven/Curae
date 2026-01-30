@@ -1,4 +1,4 @@
-package com.vention.medfast.referral.model;
+package com.vention.medfast.appointment.referral.model;
 
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.doctor.model.Doctor;
