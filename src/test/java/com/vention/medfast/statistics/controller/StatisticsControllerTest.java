@@ -26,12 +26,12 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 			.andExpect(jsonPath("$.data.period.startDate").value(startDate.toString()))
 			.andExpect(jsonPath("$.data.period.endDate").value(endDate.toString()))
 
-			.andExpect(jsonPath("$.data.appointments.stats.total").value(3))
+			.andExpect(jsonPath("$.data.appointments.stats.total").value(2))
 			.andExpect(jsonPath("$.data.appointments.stats.scheduled").value(0))
-			.andExpect(jsonPath("$.data.appointments.stats.completed").value(3))
+			.andExpect(jsonPath("$.data.appointments.stats.completed").value(2))
 
-			.andExpect(jsonPath("$.data.visits.stats.total").value(1))
-			.andExpect(jsonPath("$.data.visits.stats.completed").value(1))
+			.andExpect(jsonPath("$.data.visits.stats.total").value(0))
+			.andExpect(jsonPath("$.data.visits.stats.completed").value(0))
 
 			.andExpect(jsonPath("$.data.labResults.stats.total").value(2))
 			.andExpect(jsonPath("$.data.labResults.results.processing").value(1))

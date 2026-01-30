@@ -1,6 +1,5 @@
 package com.vention.medfast.appointment.service;
 
-import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
 import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
@@ -13,6 +12,7 @@ import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.model.ReferralStatus;
 import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
+import com.vention.medfast.appointment.state.AppointmentStateContext;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.labresult.mapper.LabResultMapper;
@@ -42,8 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -78,6 +76,9 @@ class AppointmentServiceImplTest {
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
 
+	@Mock
+	private AppointmentStateContext stateContext;
+
 	@InjectMocks
 	private AppointmentServiceImpl appointmentService;
 
@@ -104,8 +105,13 @@ class AppointmentServiceImplTest {
 		Appointment appointment = new Appointment();
 		appointment.setStatus(AppointmentStatus.SCHEDULED);
 		appointment.setReferral(referral);
+
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+		when(stateContext.isTransitionAllowed(AppointmentStatus.SCHEDULED, AppointmentStatus.SCHEDULED_CONFIRMED))
+			.thenReturn(true);
+
 		appointmentService.confirm(1L);
+
 		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED_CONFIRMED);
 		verify(referralService).markUsed(referral);
 	}
@@ -114,8 +120,12 @@ class AppointmentServiceImplTest {
 	void shouldThrowException_whenConfirmingNotDraftAppointment() {
 		Appointment appointment = new Appointment();
 		appointment.setStatus(AppointmentStatus.COMPLETED);
+
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
-		assertThatThrownBy(() -> appointmentService.confirm(1L)).isInstanceOf(AppointmentException.class);
+		when(stateContext.isTransitionAllowed(AppointmentStatus.COMPLETED, AppointmentStatus.SCHEDULED_CONFIRMED))
+			.thenReturn(false);
+
+		assertThatThrownBy(() -> appointmentService.confirm(1L)).isInstanceOf(IllegalStateException.class);
 	}
 
 	@Test
@@ -219,6 +229,7 @@ class AppointmentServiceImplTest {
 
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
 		when(doctorService.findDoctorById(1L)).thenReturn(doctor);
+		when(stateContext.isEditable(AppointmentStatus.SCHEDULED)).thenReturn(true);
 
 		Long result = appointmentService.update(dto, 1L);
 
@@ -237,9 +248,11 @@ class AppointmentServiceImplTest {
 		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now(), LocalTime.now(),
 				AppointmentStatus.CANCELLED, 2L);
 
+		when(stateContext.isEditable(AppointmentStatus.CANCELLED)).thenReturn(false);
+
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> appointmentService.update(dto, 1L));
 
-		assertEquals("Appointment with status CANCELLED cannot be updated", e.getMessage());
+		assertEquals("Appointment cannot be edited in status CANCELLED", e.getMessage());
 
 		verifyNoInteractions(doctorService, appointmentMapper, eventPublisher);
 	}

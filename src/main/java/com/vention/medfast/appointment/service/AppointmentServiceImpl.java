@@ -8,11 +8,11 @@ import com.vention.medfast.appointment.dto.FirstAppointmentCreateDto;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
-import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
+import com.vention.medfast.appointment.state.AppointmentStateContext;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.labresult.mapper.LabResultMapper;
@@ -38,6 +38,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.vention.medfast.appointment.model.AppointmentStatus.CANCELLED;
+import static com.vention.medfast.appointment.model.AppointmentStatus.SCHEDULED;
+import static com.vention.medfast.appointment.model.AppointmentStatus.SCHEDULED_CONFIRMED;
+
 @Service
 @RequiredArgsConstructor
 public class AppointmentServiceImpl implements AppointmentService {
@@ -58,6 +62,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
 	private final LabResultMapper labResultMapper;
 
+	private final AppointmentStateContext appointmentStateContext;
+
 	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
@@ -66,7 +72,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 		Patient patient = patientService.getCurrentPatient();
 		Doctor doctor = doctorService.findDoctorById(dto.doctorId());
 		Appointment appointment = appointmentMapper.toFirstAppointment(dto, doctor, patient);
-		appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+		appointment.setStatus(SCHEDULED_CONFIRMED);
 		return appointmentRepository.save(appointment).getId();
 	}
 
@@ -78,13 +84,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 			Referral referral = referralService.getActiveById(dto.referralId());
 			appointment = appointmentMapper.toAppointment(dto, referral.getIssuedBy(), referral.getPatient(), referral);
 			appointment.setType(referral.getAppointmentType());
-			appointment.setStatus(AppointmentStatus.SCHEDULED);
+			appointment.setStatus(SCHEDULED);
 		}
 		else {
 			Patient patient = patientService.getCurrentPatient();
 			Doctor doctor = doctorService.findDoctorById(dto.doctorId());
 			appointment = appointmentMapper.toAppointment(dto, doctor, patient, null);
-			appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+			appointment.setStatus(SCHEDULED_CONFIRMED);
 		}
 		return appointmentRepository.save(appointment).getId();
 	}
@@ -93,10 +99,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Transactional
 	public void confirm(Long appointmentId) {
 		Appointment appointment = findAppointment(appointmentId);
-		if (appointment.getStatus() != AppointmentStatus.SCHEDULED) {
-			throw new AppointmentException("Only draft appointment can be confirmed");
+		if (!appointmentStateContext.isTransitionAllowed(appointment.getStatus(), SCHEDULED_CONFIRMED)) {
+			throw new IllegalStateException("Cannot confirm appointment in status " + appointment.getStatus());
 		}
-		appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+		appointment.setStatus(SCHEDULED_CONFIRMED);
 		if (appointment.getReferral() != null) {
 			referralService.markUsed(appointment.getReferral());
 		}
@@ -106,7 +112,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Transactional(readOnly = true)
 	public Appointment getConfirmed(Long appointmentId) {
 		Appointment appointment = findAppointment(appointmentId);
-		if (appointment.getStatus() != AppointmentStatus.SCHEDULED_CONFIRMED) {
+		if (!appointmentStateContext.isConfirmed(appointment.getStatus())) {
 			throw new AppointmentException("Appointment is not confirmed");
 		}
 		return appointment;
@@ -123,7 +129,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
 		Appointment appointment = appointmentMapper.toLabAppointment(req, doctor, patient);
 		appointment.setType(AppointmentType.TEST);
-		appointment.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+		appointment.setStatus(SCHEDULED_CONFIRMED);
 
 		appointmentRepository.save(appointment);
 		labResultService.createForAppointment(appointment, tests);
@@ -158,7 +164,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Override
 	public void cancelAppointment(Long appointmentId) {
 		Appointment appointment = findAppointment(appointmentId);
-		appointment.setStatus(AppointmentStatus.CANCELLED);
+		if (!appointmentStateContext.isTransitionAllowed(appointment.getStatus(), CANCELLED)) {
+			throw new IllegalStateException("Cannot cancel appointment in status " + appointment.getStatus());
+		}
 		appointmentRepository.save(appointment);
 
 		eventPublisher.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_CANCELLED, appointment.getId(),
@@ -171,10 +179,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 	public Long update(AppointmentUpdateDto dto, Long id) {
 		Appointment appointment = findAppointment(id);
 
-		if (appointment.getStatus() != AppointmentStatus.SCHEDULED
-				&& appointment.getStatus() != AppointmentStatus.SCHEDULED_CONFIRMED) {
-			throw new IllegalStateException(
-					"Appointment with status " + appointment.getStatus() + " cannot be updated");
+		if (!appointmentStateContext.isEditable(appointment.getStatus())) {
+			throw new IllegalStateException("Appointment cannot be edited in status " + appointment.getStatus());
 		}
 		Doctor doctor = doctorService.findDoctorById(dto.doctorId());
 		appointmentMapper.updateFromDto(dto, appointment, doctor);
