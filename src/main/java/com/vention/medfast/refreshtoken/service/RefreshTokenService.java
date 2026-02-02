@@ -5,12 +5,14 @@ import com.vention.medfast.user.model.User;
 
 public interface RefreshTokenService {
 
-	public RefreshToken getByToken(String token);
+	RefreshToken getByToken(String token);
 
-	public RefreshToken createToken(User user, String tokenValue);
+	RefreshToken createToken(User user, String tokenValue);
 
-	public RefreshToken rotateToken(RefreshToken oldToken, String newTokenValue);
+	RefreshToken rotateToken(RefreshToken oldToken, String newTokenValue);
 
-	public void revokeRefreshToken(String tokenValue);
+	void revokeRefreshToken(String tokenValue);
+
+	void deleteAllExpired();
 
 }

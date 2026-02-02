@@ -55,11 +55,12 @@ spring:
           starttls:
             enable: ${MAIL_SMTP_STARTTLS:true}
 
-  rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guestGUEST777}
-    password: ${RABBITMQ_PASSWORD:guestGUEST777}
+  quartz:
+    job-store-type: jdbc
+    properties:
+      org.quartz.jobStore:
+        isClustered: true
+        driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
 
 server:
   servlet:

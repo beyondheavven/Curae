@@ -1,10 +1,7 @@
 package com.vention.medfast.appointment.service;
 
-import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.dto.AppointmentCreateDto;
-import com.vention.medfast.appointment.dto.AppointmentCreateWithLabsDto;
 import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
-import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
@@ -13,14 +10,8 @@ import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.model.ReferralStatus;
 import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
-import com.vention.medfast.doctor.model.Doctor;
-import com.vention.medfast.doctor.service.DoctorService;
-import com.vention.medfast.labresult.mapper.LabResultMapper;
-import com.vention.medfast.labresult.service.LabResultService;
-import com.vention.medfast.labtest.model.LabTest;
-import com.vention.medfast.labtest.service.LabTestService;
+import com.vention.medfast.appointment.state.AppointmentStateContext;
 import com.vention.medfast.patient.model.Patient;
-import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,22 +19,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -58,43 +42,31 @@ class AppointmentServiceImplTest {
 	private ReferralService referralService;
 
 	@Mock
-	private DoctorService doctorService;
-
-	@Mock
-	private PatientService patientService;
-
-	@Mock
 	private AppointmentMapper appointmentMapper;
 
 	@Mock
-	private LabTestService labTestService;
-
-	@Mock
-	private LabResultService labResultService;
-
-	@Mock
-	private LabResultMapper labResultMapper;
-
-	@Mock
 	private ApplicationEventPublisher eventPublisher;
+
+	@Mock
+	private AppointmentStateContext stateContext;
 
 	@InjectMocks
 	private AppointmentServiceImpl appointmentService;
 
 	@Test
 	void shouldCreateDraftWithReferral() {
-		AppointmentCreateDto dto = new AppointmentCreateDto(10L, null, LocalDate.now().plusDays(1),
-				LocalTime.of(10, 0));
+		AppointmentCreateDto dto = new AppointmentCreateDto(10L, LocalDate.now().plusDays(1), LocalTime.of(10, 0));
 		Referral referral = new Referral();
 		referral.setAppointmentType(AppointmentType.VISIT);
 		Appointment appointment = new Appointment();
+
 		when(referralService.getActiveById(10L)).thenReturn(referral);
-		when(appointmentMapper.toAppointment(dto, referral.getIssuedBy(), referral.getPatient(), referral))
-			.thenReturn(appointment);
+		when(appointmentMapper.toAppointment(dto, referral.getPatient(), referral)).thenReturn(appointment);
 		when(appointmentRepository.save(appointment)).thenReturn(appointment);
-		appointmentService.createDraft(dto);
+		appointmentService.create(dto);
 		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
 		assertThat(appointment.getType()).isEqualTo(AppointmentType.VISIT);
+		verify(appointmentRepository).save(appointment);
 	}
 
 	@Test
@@ -104,8 +76,12 @@ class AppointmentServiceImplTest {
 		Appointment appointment = new Appointment();
 		appointment.setStatus(AppointmentStatus.SCHEDULED);
 		appointment.setReferral(referral);
+
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
+		when(stateContext.isTransitionAllowed(AppointmentStatus.SCHEDULED, AppointmentStatus.SCHEDULED_CONFIRMED))
+			.thenReturn(true);
 		appointmentService.confirm(1L);
+
 		assertThat(appointment.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED_CONFIRMED);
 		verify(referralService).markUsed(referral);
 	}
@@ -114,47 +90,19 @@ class AppointmentServiceImplTest {
 	void shouldThrowException_whenConfirmingNotDraftAppointment() {
 		Appointment appointment = new Appointment();
 		appointment.setStatus(AppointmentStatus.COMPLETED);
+
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
-		assertThatThrownBy(() -> appointmentService.confirm(1L)).isInstanceOf(AppointmentException.class);
-	}
+		when(stateContext.isTransitionAllowed(AppointmentStatus.COMPLETED, AppointmentStatus.SCHEDULED_CONFIRMED))
+			.thenReturn(false);
 
-	@Test
-	void shouldReturnLabHistoryForUser() {
-		Pageable pageable = Pageable.unpaged();
-		Appointment appointment = new Appointment();
-		appointment.setId(5L);
-		PatientLabHistoryDTO dto = new PatientLabHistoryDTO(5L, LocalDate.now(), "COMPLETED", List.of());
-		when(appointmentRepository.findLabHistoryPage(7L, pageable)).thenReturn(new PageImpl<>(List.of(appointment)));
-		when(labResultMapper.toHistoryDto(appointment)).thenReturn(dto);
-		Page<PatientLabHistoryDTO> result = appointmentService.getPatientLabHistory(7L, pageable);
-		assertThat(result.getContent()).containsExactly(dto);
-	}
-
-	@Test
-	void shouldCreateAppointmentWithLabs() {
-		AppointmentCreateWithLabsDto req = new AppointmentCreateWithLabsDto(2L, LocalDate.of(2031, 1, 1),
-				LocalTime.of(12, 0), List.of(10L, 10L, 11L));
-		Patient patient = new Patient();
-		Doctor doctor = new Doctor();
-		LabTest t1 = new LabTest();
-		t1.setId(10L);
-		LabTest t2 = new LabTest();
-		t2.setId(11L);
-		Appointment appointment = new Appointment();
-		when(patientService.getById(2L)).thenReturn(patient);
-		when(doctorService.getCurrentDoctor()).thenReturn(doctor);
-		when(labTestService.findAllById(Set.of(10L, 11L))).thenReturn(List.of(t1, t2));
-		when(appointmentMapper.toLabAppointment(req, doctor, patient)).thenReturn(appointment);
-		appointmentService.createWithLabs(req);
-		verify(appointmentRepository).save(appointment);
-		verify(labResultService).createForAppointment(appointment, List.of(t1, t2));
+		assertThatThrownBy(() -> appointmentService.confirm(1L)).isInstanceOf(IllegalStateException.class)
+			.hasMessageContaining("Cannot confirm appointment in status COMPLETED");
 	}
 
 	@Test
 	void shouldReturnAllStatusStatistics() {
 		LocalDate startDate = LocalDate.of(2026, 1, 1);
 		LocalDate endDate = LocalDate.of(2026, 1, 31);
-
 		AppointmentStatusCounts expectedCounts = new AppointmentStatusCounts(10L, 5L, 2L, 3L, 0L);
 
 		when(appointmentRepository.getAllStatusStatistics(startDate, endDate)).thenReturn(expectedCounts);
@@ -164,7 +112,6 @@ class AppointmentServiceImplTest {
 		assertThat(result).isNotNull();
 		assertThat(result.total()).isEqualTo(10L);
 		assertThat(result.scheduled()).isEqualTo(5L);
-
 		verify(appointmentRepository).getAllStatusStatistics(startDate, endDate);
 	}
 
@@ -173,7 +120,6 @@ class AppointmentServiceImplTest {
 		LocalDate startDate = LocalDate.of(2026, 1, 1);
 		LocalDate endDate = LocalDate.of(2026, 1, 31);
 		AppointmentType type = AppointmentType.VISIT;
-
 		AppointmentStatusCounts expectedCounts = new AppointmentStatusCounts(5L, 2L, 1L, 2L, 0L);
 
 		when(appointmentRepository.getStatusStatisticsByType(startDate, endDate, type)).thenReturn(expectedCounts);
@@ -182,7 +128,6 @@ class AppointmentServiceImplTest {
 
 		assertThat(result).isNotNull();
 		assertThat(result.total()).isEqualTo(5L);
-
 		verify(appointmentRepository).getStatusStatisticsByType(startDate, endDate, type);
 	}
 
@@ -190,7 +135,6 @@ class AppointmentServiceImplTest {
 	void shouldReturnZeroCountsWhenNoAppointmentsExist() {
 		LocalDate startDate = LocalDate.of(2099, 1, 1);
 		LocalDate endDate = LocalDate.of(2099, 1, 31);
-
 		AppointmentStatusCounts emptyCounts = new AppointmentStatusCounts(0L, 0L, 0L, 0L, 0L);
 
 		when(appointmentRepository.getAllStatusStatistics(startDate, endDate)).thenReturn(emptyCounts);
@@ -211,19 +155,16 @@ class AppointmentServiceImplTest {
 		patient.setId(10L);
 		appointment.setPatient(patient);
 
-		Doctor doctor = new Doctor();
-		doctor.setId(1L);
-
 		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now(), LocalTime.now(),
-				AppointmentStatus.SCHEDULED, 1L);
+				AppointmentStatus.SCHEDULED);
 
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
-		when(doctorService.findDoctorById(1L)).thenReturn(doctor);
+		when(stateContext.isEditable(AppointmentStatus.SCHEDULED)).thenReturn(true);
 
 		Long result = appointmentService.update(dto, 1L);
 
 		assertEquals(1L, result);
-		verify(appointmentMapper).updateFromDto(dto, appointment, doctor);
+		verify(appointmentMapper).updateFromDto(dto, appointment);
 	}
 
 	@Test
@@ -235,13 +176,13 @@ class AppointmentServiceImplTest {
 		when(appointmentRepository.findById(1L)).thenReturn(Optional.of(appointment));
 
 		AppointmentUpdateDto dto = new AppointmentUpdateDto(LocalDate.now(), LocalTime.now(),
-				AppointmentStatus.CANCELLED, 2L);
+				AppointmentStatus.CANCELLED);
+
+		when(stateContext.isEditable(AppointmentStatus.CANCELLED)).thenReturn(false);
 
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> appointmentService.update(dto, 1L));
-
-		assertEquals("Appointment with status CANCELLED cannot be updated", e.getMessage());
-
-		verifyNoInteractions(doctorService, appointmentMapper, eventPublisher);
+		assertEquals("Appointment cannot be edited in status CANCELLED", e.getMessage());
+		verifyNoInteractions(appointmentMapper, eventPublisher);
 	}
 
 }

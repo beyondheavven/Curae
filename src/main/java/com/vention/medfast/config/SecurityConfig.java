@@ -97,6 +97,9 @@ public class SecurityConfig {
 				.requestMatchers(ApiPaths.WEBHOOK_ENDPOINT)
 				.permitAll()
 
+				.requestMatchers(ApiPaths.ONLINE_CONSULTATION_ENDPOINT, ApiPaths.ONLINE_CONSULTATION_ENDPOINT + "/**")
+				.authenticated()
+
 				.anyRequest()
 				.authenticated())
 			.authenticationProvider(authenticationProvider)

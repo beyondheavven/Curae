@@ -1,12 +1,6 @@
 package com.vention.medfast.auth.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
 
-@Getter
-@Setter
-public class RefreshTokenRequestDto {
-
-	String refreshToken;
-
+public record RefreshTokenRequestDto(@NotNull(message = "refresh token is required") String refreshToken) {
 }

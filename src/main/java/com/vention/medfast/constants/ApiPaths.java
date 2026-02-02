@@ -58,4 +58,8 @@ public final class ApiPaths {
 
 	public static final String NOTIFICATION_ENDPOINT = "/notifications";
 
+	public static final String ONLINE_CONSULTATION_ENDPOINT = "/online-consultation";
+
+	public static final String TEST_ENDPOINT = "/test";
+
 }

@@ -1,14 +1,6 @@
 package com.vention.medfast.auth.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class LogoutRequestDto {
-
-	String refreshToken;
-
+public record LogoutRequestDto(@NotNull(message = "refresh token is required") String refreshToken) {
 }
