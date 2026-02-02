@@ -38,7 +38,7 @@ public class AuthController {
 			description = "Accepts a refresh token and returns a new access token.")
 	@PostMapping("/refresh")
 	public ResponseWrapper<AuthResponseDto> refresh(@Valid @RequestBody RefreshTokenRequestDto request) {
-		AuthResponseDto response = authService.refresh(request.getRefreshToken());
+		AuthResponseDto response = authService.refresh(request.refreshToken());
 
 		return ResponseWrapper.ok(response);
 	}
@@ -48,7 +48,7 @@ public class AuthController {
 	@PostMapping("/logout")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void logout(@RequestBody LogoutRequestDto request) {
-		authService.logout(request.getRefreshToken());
+		authService.logout(request.refreshToken());
 	}
 
 }

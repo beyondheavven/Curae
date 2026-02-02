@@ -55,6 +55,13 @@ spring:
           starttls:
             enable: ${MAIL_SMTP_STARTTLS:true}
 
+  quartz:
+    job-store-type: jdbc
+    properties:
+      org.quartz.jobStore:
+        isClustered: true
+        driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+
 server:
   servlet:
     context-path: /api
@@ -90,5 +97,3 @@ app:
   email-verification:
     ttl-ms: ${EMAIL_VERIFICATION_TTL_MS}
     verify-url: ${EMAIL_VERIFICATION_VERIFY_URL}
-
-

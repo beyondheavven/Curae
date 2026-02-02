@@ -1,16 +1,6 @@
 package com.vention.medfast.auth.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+public record AuthResponseDto(String accessToken,
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class AuthResponseDto {
-
-	private String accessToken;
-
-	private String refreshToken;
-
+		String refreshToken) {
 }

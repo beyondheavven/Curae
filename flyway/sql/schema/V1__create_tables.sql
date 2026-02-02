@@ -24,15 +24,10 @@ CREATE TABLE users
 -- Table: refresh_tokens
 CREATE TABLE refresh_tokens
 (
-    id         BIGSERIAL PRIMARY KEY,
-    users_id   BIGINT       NOT NULL,
-    token      VARCHAR(512) NOT NULL UNIQUE,
-
-    status     varchar(15)  NOT NULL,
-    created_at timestamp    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT refresh_tokens_status_chk
-        CHECK (status IN ('VALID', 'EXPIRED', 'REVOKED')),
+    id              BIGSERIAL PRIMARY KEY,
+    users_id        BIGINT       NOT NULL,
+    token           VARCHAR(512) NOT NULL UNIQUE,
+    expiration_time timestamp    NOT NULL,
 
     CONSTRAINT refresh_tokens_user_fk
         FOREIGN KEY (users_id)

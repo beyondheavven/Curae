@@ -83,6 +83,7 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.period.startDate").value(startDate.toString()))
 			.andExpect(jsonPath("$.data.period.endDate").value(endDate.toString()))
+
 			.andExpect(jsonPath("$.data.appointments.stats.total").value(Matchers.greaterThanOrEqualTo(2)))
 			.andExpect(jsonPath("$.data.appointments.stats.completed").value(Matchers.greaterThanOrEqualTo(2)))
 			.andExpect(jsonPath("$.data.visits.stats.total").value(Matchers.greaterThanOrEqualTo(1)))

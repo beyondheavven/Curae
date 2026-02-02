@@ -79,7 +79,7 @@ public abstract class AbstractControllerIntegrationTest extends AbstractIntegrat
 	protected void login(String email, String pass) {
 		AuthRequestDto loginRequest = new AuthRequestDto(email, pass);
 
-		token = authService.login(loginRequest).getAccessToken();
+		token = authService.login(loginRequest).accessToken();
 	}
 
 }

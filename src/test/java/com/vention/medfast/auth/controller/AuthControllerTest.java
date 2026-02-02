@@ -50,8 +50,7 @@ public class AuthControllerTest extends AbstractControllerIntegrationTest {
 
 	@Test
 	void shouldReturn401_WhenRefreshTokenIsMalformed() throws Exception {
-		RefreshTokenRequestDto request = new RefreshTokenRequestDto();
-		request.setRefreshToken("invalid");
+		RefreshTokenRequestDto request = new RefreshTokenRequestDto("invalid");
 
 		performRequest(HttpMethod.POST, "/auth/refresh", request).andExpect(status().isUnauthorized())
 			.andExpect(jsonPath("$.error.errorCode").value("AUTH_ERROR"))
@@ -73,15 +72,14 @@ public class AuthControllerTest extends AbstractControllerIntegrationTest {
 		em.flush();
 
 		AuthResponseDto initialAuth = authService.login(new AuthRequestDto(uniqueEmail, "pass"));
-		String oldRefreshToken = initialAuth.getRefreshToken();
+		String oldRefreshToken = initialAuth.refreshToken();
 		Thread.sleep(1001);
 		em.clear();
 
-		RefreshTokenRequestDto refreshRequest = new RefreshTokenRequestDto();
-		refreshRequest.setRefreshToken(oldRefreshToken);
+		RefreshTokenRequestDto refreshRequest = new RefreshTokenRequestDto(oldRefreshToken);
 
 		mockMvc
-			.perform(post("/auth/refresh").header("Authorization", "Bearer " + initialAuth.getAccessToken())
+			.perform(post("/auth/refresh").header("Authorization", "Bearer " + initialAuth.accessToken())
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(refreshRequest)))
 			.andExpect(status().isOk())
@@ -91,8 +89,7 @@ public class AuthControllerTest extends AbstractControllerIntegrationTest {
 
 	@Test
 	void shouldReturn404_whenLogoutWithNonExistentToken() throws Exception {
-		LogoutRequestDto request = new LogoutRequestDto();
-		request.setRefreshToken("");
+		LogoutRequestDto request = new LogoutRequestDto("");
 
 		performRequest(HttpMethod.POST, "/auth/logout", request).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.error.errorCode").value("BAD_REQUEST"));

@@ -6,7 +6,6 @@ import com.vention.medfast.auth.dto.AuthRequestDto;
 import com.vention.medfast.auth.dto.AuthResponseDto;
 import com.vention.medfast.auth.jwt.service.JwtService;
 import com.vention.medfast.refreshtoken.model.RefreshToken;
-import com.vention.medfast.refreshtoken.model.RefreshTokenStatus;
 import com.vention.medfast.refreshtoken.service.RefreshTokenService;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.service.UserService;
@@ -38,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
 	public AuthResponseDto login(AuthRequestDto request) {
 		try {
 			Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+				.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
 			CustomUserDetails customUser = (CustomUserDetails) authentication.getPrincipal();
 
@@ -71,9 +70,6 @@ public class AuthServiceImpl implements AuthService {
 			}
 
 			RefreshToken stored = refreshTokenService.getByToken(refreshToken);
-			if (stored.getStatus() != RefreshTokenStatus.VALID) {
-				throw new InvalidRefreshTokenException("Refresh token is no longer valid");
-			}
 
 			String newRefresh = jwtService.generateRefreshToken(userDetails);
 			refreshTokenService.rotateToken(stored, newRefresh);
