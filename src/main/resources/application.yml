@@ -98,4 +98,7 @@ app:
     ttl-ms: ${EMAIL_VERIFICATION_TTL_MS}
     verify-url: ${EMAIL_VERIFICATION_VERIFY_URL}
 
+  rabbit:
+    enabled: false
+
 

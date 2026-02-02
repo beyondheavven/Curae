@@ -110,3 +110,6 @@ app:
 
     paths:
       verify-email: /auth/verify
+
+  rabbit:
+    enabled: false
