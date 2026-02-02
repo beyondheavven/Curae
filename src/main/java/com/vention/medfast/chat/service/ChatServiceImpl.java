@@ -4,6 +4,8 @@ import com.vention.medfast.api.exception.ChatOperationException;
 import com.vention.medfast.chat.message.model.Message;
 import com.vention.medfast.chat.message.repository.MessageRepository;
 import com.vention.medfast.chat.model.Chat;
+import com.vention.medfast.chat.rabbitmq.event.ChatMessageEvent;
+import com.vention.medfast.chat.rabbitmq.publisher.ChatMessagePublisher;
 import com.vention.medfast.chat.repository.ChatRepository;
 import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.User;
@@ -29,6 +31,8 @@ public class ChatServiceImpl implements ChatService {
 	private final MessageRepository messageRepository;
 
 	private final UserService userService;
+
+	private final ChatMessagePublisher chatMessagePublisher;
 
 	@Override
 	@Transactional
@@ -68,8 +72,12 @@ public class ChatServiceImpl implements ChatService {
 		Chat chat = getChatOrThrow(chatId);
 		validateChatParticipant(chat, senderId);
 
-		Message message = Message.create(chatId, senderId, normalizedContent);
-		return messageRepository.save(message);
+		Message message = messageRepository.save(Message.create(chatId, senderId, normalizedContent));
+
+		chatMessagePublisher.publish(new ChatMessageEvent(message.getChatId(), message.getId(), message.getSenderId(),
+				message.getContent(), message.getCreatedAt()));
+
+		return message;
 	}
 
 	private void validateChatInitiator(User patient, User doctor) {

@@ -77,6 +77,12 @@ spring:
           starttls:
             enable: true
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guestGUEST777}
+    password: ${RABBITMQ_PASSWORD:guestGUEST777}
+
 validation:
   password:
     regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
@@ -89,8 +95,7 @@ app:
   base-url: ${openapi.server-url}
 
   websocket:
-    allowed-origins:
-      - http://localhost:8000
+    allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:8000}
 
   email-verification:
     ttl-ms: 3600000

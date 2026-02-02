@@ -72,6 +72,9 @@ public class SecurityConfig {
 				.requestMatchers(actuatorEndpoints)
 				.permitAll()
 
+				.requestMatchers("/ws/**", "/api/ws")
+				.permitAll()
+
 				.requestMatchers(ApiPaths.PROFILE_ENDPOINT)
 				.authenticated()
 
