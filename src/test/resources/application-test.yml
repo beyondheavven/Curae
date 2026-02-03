@@ -39,3 +39,6 @@ app:
     secret: "very-long-secret-should-be-at-least-256-bit"
     access-token-expiration-ms: 900000        # 15 min
     refresh-token-expiration-ms: 2592000000   # 30 days
+
+  rabbit:
+    enabled: false

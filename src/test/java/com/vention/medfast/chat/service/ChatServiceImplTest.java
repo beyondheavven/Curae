@@ -4,6 +4,7 @@ import com.vention.medfast.api.exception.ChatOperationException;
 import com.vention.medfast.chat.message.model.Message;
 import com.vention.medfast.chat.message.repository.MessageRepository;
 import com.vention.medfast.chat.model.Chat;
+import com.vention.medfast.chat.rabbitmq.publisher.ChatMessagePublisher;
 import com.vention.medfast.chat.repository.ChatRepository;
 import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.User;
@@ -43,11 +44,14 @@ public class ChatServiceImplTest {
 	@Mock
 	private UserService userService;
 
+	@Mock
+	private ChatMessagePublisher chatMessagePublisher;
+
 	private ChatServiceImpl service;
 
 	@BeforeEach
 	void setUp() {
-		service = new ChatServiceImpl(chatRepository, messageRepository, userService);
+		service = new ChatServiceImpl(chatRepository, messageRepository, userService, chatMessagePublisher);
 	}
 
 	@Test

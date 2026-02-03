@@ -2,8 +2,6 @@ package com.vention.medfast.chat.websocket;
 
 import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.chat.mapper.ChatMapper;
-import com.vention.medfast.chat.message.dto.MessageResponseDto;
-import com.vention.medfast.chat.message.model.Message;
 import com.vention.medfast.chat.service.ChatService;
 import com.vention.medfast.chat.websocket.controller.ChatWebSocketController;
 import com.vention.medfast.chat.websocket.dto.ChatMessageSendWsDto;
@@ -17,7 +15,6 @@ import org.springframework.security.access.AccessDeniedException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ChatWebSocketControllerTest {
@@ -39,21 +36,13 @@ public class ChatWebSocketControllerTest {
 		Long chatId = 1L;
 		Long userId = 10L;
 
-		ChatMessageSendWsDto dto = new ChatMessageSendWsDto("hello");
-
 		CustomUserDetails user = new CustomUserDetails(userId, "test@mail.com", "pass", null);
 
-		Message message = Message.create(chatId, userId, "hello");
-		MessageResponseDto responseDto = new MessageResponseDto(1L, chatId, userId, "hello", null);
-
-		when(chatService.createMessage(chatId, userId, "hello")).thenReturn(message);
-		when(chatMapper.toMessageResponse(message)).thenReturn(responseDto);
+		ChatMessageSendWsDto dto = new ChatMessageSendWsDto("hello");
 
 		controller.sendMessage(chatId, user, dto);
 
 		verify(chatService).createMessage(chatId, userId, "hello");
-		verify(chatMapper).toMessageResponse(message);
-		verify(messagingTemplate).convertAndSend("/topic/chats/" + chatId, responseDto);
 	}
 
 	@Test

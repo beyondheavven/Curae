@@ -89,8 +89,7 @@ app:
   base-url: ${openapi.server-url}
 
   websocket:
-    allowed-origins:
-      - http://localhost:8000
+    allowed-origins: ${WEBSOCKET_ALLOWED_ORIGINS:http://localhost:8000}
 
   email-verification:
     ttl-ms: 3600000
@@ -111,3 +110,6 @@ app:
 
     paths:
       verify-email: /auth/verify
+
+  rabbit:
+    enabled: false

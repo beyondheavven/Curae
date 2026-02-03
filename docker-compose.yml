@@ -3,7 +3,7 @@ services:
     container_name: medfast_api
     build: .
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=dev,rabbit
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -21,11 +21,17 @@ services:
       - WEBHOOK_SECRET_KEY=${WEBHOOK_SECRET_KEY}
       - PAYMENT_SUCCESS_URL=${PAYMENT_SUCCESS_URL}
       - PAYMENT_CANCEL_URL=${PAYMENT_CANCEL_URL}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USERNAME=${RABBITMQ_USERNAME}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_started
       loki:
         condition: service_started
 
@@ -112,6 +118,16 @@ services:
     depends_on:
       - app
     restart: on-failure
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
 
 volumes:
   pgdata:

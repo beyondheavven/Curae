@@ -231,7 +231,13 @@
       <artifactId>spring-boot-starter-websocket</artifactId>
     </dependency>
 
-    <!-- Quartz-->
+    <!-- RabbitMQ -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+
+    <!-- Quartz -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-quartz</artifactId>

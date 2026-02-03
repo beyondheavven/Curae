@@ -86,8 +86,10 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 
 			.andExpect(jsonPath("$.data.appointments.stats.total").value(Matchers.greaterThanOrEqualTo(2)))
 			.andExpect(jsonPath("$.data.appointments.stats.completed").value(Matchers.greaterThanOrEqualTo(2)))
+
 			.andExpect(jsonPath("$.data.visits.stats.total").value(Matchers.greaterThanOrEqualTo(1)))
 			.andExpect(jsonPath("$.data.visits.stats.completed").value(Matchers.greaterThanOrEqualTo(1)))
+
 			.andExpect(jsonPath("$.data.labResults.stats.total").value(Matchers.greaterThanOrEqualTo(2)))
 			.andExpect(jsonPath("$.data.labResults.results.processing").value(Matchers.greaterThanOrEqualTo(1)))
 			.andExpect(jsonPath("$.data.labResults.results.ready").value(Matchers.greaterThanOrEqualTo(1)));
