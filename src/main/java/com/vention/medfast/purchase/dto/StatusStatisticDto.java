@@ -6,11 +6,11 @@ import java.math.BigDecimal;
 
 public record StatusStatisticDto(
 
-        PaymentStatus status,
+		PaymentStatus status,
 
 		Long count,
 
-		BigDecimal totalAmount
+		BigDecimal amount
 
 ) {
 }

@@ -52,7 +52,7 @@ public class PurchaseServiceImpl implements PurchaseService {
 			.orElse(0L);
 
 		Long totalAmount = statistics.stream()
-			.map(StatusStatisticDto::totalAmount)
+			.map(StatusStatisticDto::amount)
 			.reduce(BigDecimal.ZERO, BigDecimal::add)
 			.longValue();
 

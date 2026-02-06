@@ -2,7 +2,6 @@ package com.vention.medfast.purchase.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 
 public record PurchaseResponseDto(Long id,
 
@@ -18,7 +17,7 @@ public record PurchaseResponseDto(Long id,
 
 		String status,
 
-                                  LocalDateTime createdAt,
+		LocalDateTime createdAt,
 
-                                  LocalDateTime updatedAt) {
+		LocalDateTime updatedAt) {
 }
