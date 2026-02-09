@@ -1,5 +1,11 @@
+INSERT INTO tests (appointment_id, clinic_id)
+VALUES
+    (4, 1),
+    (5, 1)
+    ON CONFLICT (appointment_id) DO NOTHING;
+
 INSERT INTO lab_results (
-    appointment_id,
+    test_id,
     lab_test_id,
     status,
     result_url,

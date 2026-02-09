@@ -23,7 +23,6 @@ class PaymentControllerTest extends AbstractControllerIntegrationTest {
 
 	@Test
 	void shouldReturnPaymentUrlOnSuccessfulCheckout() throws Exception {
-		login("john.smith@mail.com", "pass");
 
 		Long patientId = 1L;
 		Long serviceId = 2L;
@@ -41,7 +40,6 @@ class PaymentControllerTest extends AbstractControllerIntegrationTest {
 
 	@Test
 	void shouldReturnBadRequestWhenStripeExceptionOccurs() throws Exception {
-		login("john.smith@mail.com", "pass");
 
 		PaymentRequestDto requestDto = new PaymentRequestDto(99L, 1L, "usd");
 		String errorMessage = "Invalid API Key or Service unavailable";

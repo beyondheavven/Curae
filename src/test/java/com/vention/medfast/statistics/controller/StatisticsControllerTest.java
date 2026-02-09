@@ -49,23 +49,32 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 		visit.setMedicalReport("Test");
 		em.persist(visit);
 
-		com.vention.medfast.appointment.model.Test testAppointment = new com.vention.medfast.appointment.model.Test();
-		testAppointment.setPatient(patient);
-		testAppointment.setClinic(clinic);
-		testAppointment.setDate(LocalDate.of(2026, 1, 15));
-		testAppointment.setTime(LocalTime.NOON);
-		testAppointment.setStatus(AppointmentStatus.COMPLETED);
-		testAppointment.setType(AppointmentType.TEST);
-		em.persist(testAppointment);
+		com.vention.medfast.appointment.model.Test test1 = new com.vention.medfast.appointment.model.Test();
+		test1.setPatient(patient);
+		test1.setClinic(clinic);
+		test1.setDate(LocalDate.of(2026, 1, 15));
+		test1.setTime(LocalTime.NOON);
+		test1.setStatus(AppointmentStatus.COMPLETED);
+		test1.setType(AppointmentType.TEST);
+		em.persist(test1);
 
 		LabResult resultProcessing = new LabResult();
-		resultProcessing.setTest(testAppointment);
+		resultProcessing.setTest(test1);
 		resultProcessing.setLabTest(labTestRef);
 		resultProcessing.setStatus(LabResultStatus.PROCESSING);
 		em.persist(resultProcessing);
 
+		com.vention.medfast.appointment.model.Test test2 = new com.vention.medfast.appointment.model.Test();
+		test2.setPatient(patient);
+		test2.setClinic(clinic);
+		test2.setDate(LocalDate.of(2026, 1, 16));
+		test2.setTime(LocalTime.of(14, 0));
+		test2.setStatus(AppointmentStatus.COMPLETED);
+		test2.setType(AppointmentType.TEST);
+		em.persist(test2);
+
 		LabResult resultReady = new LabResult();
-		resultReady.setTest(testAppointment);
+		resultReady.setTest(test2);
 		resultReady.setLabTest(labTestRef);
 		resultReady.setStatus(LabResultStatus.READY);
 		resultReady.setResultUrl("http://test.com");
