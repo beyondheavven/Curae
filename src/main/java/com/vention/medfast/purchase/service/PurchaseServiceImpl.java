@@ -4,6 +4,7 @@ import com.vention.medfast.purchase.dto.PurchaseReportDto;
 import com.vention.medfast.purchase.dto.PurchaseResponseDto;
 import com.vention.medfast.purchase.dto.StatusStatisticDto;
 import com.vention.medfast.purchase.mapper.PurchaseMapper;
+import com.vention.medfast.purchase.model.PaymentStatus;
 import com.vention.medfast.purchase.model.Purchase;
 import com.vention.medfast.purchase.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,13 +41,13 @@ public class PurchaseServiceImpl implements PurchaseService {
 		List<StatusStatisticDto> statistics = purchaseRepository.getStatisticsByStatus(from, to);
 
 		Long completedCount = statistics.stream()
-			.filter(s -> "SUCCESS".equalsIgnoreCase(s.status().toString()))
+			.filter(s -> PaymentStatus.SUCCESS.equals(s.status()))
 			.map(StatusStatisticDto::count)
 			.findFirst()
 			.orElse(0L);
 
 		Long canceledCount = statistics.stream()
-			.filter(s -> "FAILED".equalsIgnoreCase(s.status().toString()))
+			.filter(s -> PaymentStatus.FAILED.equals(s.status()))
 			.map(StatusStatisticDto::count)
 			.findFirst()
 			.orElse(0L);
