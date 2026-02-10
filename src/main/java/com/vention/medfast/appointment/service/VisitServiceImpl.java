@@ -1,5 +1,11 @@
 package com.vention.medfast.appointment.service;
 
+import com.vention.medfast.appointment.dto.VisitCreateDto;
+import com.vention.medfast.appointment.dto.VisitResponseDto;
+import com.vention.medfast.appointment.mapper.VisitMapper;
+import com.vention.medfast.appointment.model.Visit;
+import com.vention.medfast.appointment.model.VisitType;
+import com.vention.medfast.appointment.repository.VisitRepository;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.clinic.service.ClinicService;
 import com.vention.medfast.doctor.model.Doctor;
@@ -8,22 +14,17 @@ import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.service.ProvidedServiceService;
-import com.vention.medfast.appointment.dto.VisitCreateDto;
-import com.vention.medfast.appointment.dto.VisitResponseDto;
-import com.vention.medfast.appointment.mapper.VisitMapper;
-import com.vention.medfast.appointment.model.Visit;
-import com.vention.medfast.appointment.model.VisitType;
-import com.vention.medfast.appointment.repository.VisitRepository;
+import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Service
 @RequiredArgsConstructor
@@ -70,6 +71,16 @@ public class VisitServiceImpl implements VisitService {
 			case UPCOMING -> visitRepository.findUpcomingByPatient(patient.getId(), today, time, pageable);
 		};
 		return visits.map(visitMapper::toVisitResponseDto);
+	}
+
+	@Override
+	public AppointmentStatusCounts getStatusStatisticsByClinic(Long clinicId, LocalDate startDate, LocalDate endDate) {
+		return visitRepository.getStatusStatisticsByClinic(clinicId, startDate, endDate);
+	}
+
+	@Override
+	public AppointmentStatusCounts getStatusStatisticsByDoctor(Long doctorId, LocalDate start, LocalDate end) {
+		return visitRepository.getStatusStatisticsByDoctor(doctorId, start, end);
 	}
 
 }

@@ -12,15 +12,13 @@ import com.vention.medfast.labresult.model.LabResultStatus;
 import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.service.model.ProvidedService;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
-
+import org.hamcrest.Matchers;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpMethod;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -158,6 +156,52 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 			.andExpect(jsonPath("$.error.validationErrors[0].field").value("startDate"))
 			.andExpect(jsonPath("$.error.validationErrors[0].rejectedValue").value(futureStartDate.toString()))
 			.andExpect(jsonPath("$.error.validationErrors[0].message").value("Start date cannot be in the future"));
+	}
+
+	@Test
+	void shouldReturnDoctorStatsWhenInputIsValid() throws Exception {
+		Patient patient = em.find(Patient.class, 1L);
+		Clinic clinic = em.find(Clinic.class, 1L);
+		Doctor doctor = em.find(Doctor.class, 1L);
+		ProvidedService service = em.find(ProvidedService.class, 1L);
+
+		doctor.addClinic(clinic);
+
+		Visit visit = new Visit();
+		visit.setPatient(patient);
+		visit.setDoctor(doctor);
+		visit.setClinic(clinic);
+		visit.setProvidedService(service);
+		visit.setDate(LocalDate.of(2026, 2, 1));
+		visit.setTime(LocalTime.NOON);
+		visit.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+		visit.setType(AppointmentType.VISIT);
+		em.persist(visit);
+
+		com.vention.medfast.appointment.model.OnlineConsultation oc = new com.vention.medfast.appointment.model.OnlineConsultation();
+		oc.setPatient(patient);
+		oc.setDoctor(doctor);
+		oc.setDate(LocalDate.of(2026, 2, 2));
+		oc.setTime(LocalTime.of(16, 0));
+		oc.setStatus(AppointmentStatus.COMPLETED);
+		oc.setType(AppointmentType.ONLINE);
+		oc.setMeetingLink("https://example.com/meeting");
+		em.persist(oc);
+
+		em.flush();
+
+		LocalDate startDate = LocalDate.of(2026, 1, 28);
+		LocalDate endDate = LocalDate.of(2026, 2, 5);
+
+		String url = String.format("%s/doctor/%d/statistics?startDate=%s&endDate=%s", ApiPaths.STATISTICS_ENDPOINT,
+				doctor.getId(), startDate, endDate);
+
+		performRequest(HttpMethod.GET, url, null).andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.doctorId").value(doctor.getId()))
+			.andExpect(jsonPath("$.data.visits.stats.total").value(2))
+			.andExpect(jsonPath("$.data.onlineConsultations.stats.total").value(1))
+			.andExpect(jsonPath("$.data.onlineConsultations.stats.completed").value(1));
 	}
 
 }

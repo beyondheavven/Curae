@@ -5,7 +5,6 @@ import com.vention.medfast.appointment.dto.AppointmentUpdateDto;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
-
 import java.time.LocalDate;
 
 public interface AppointmentService {

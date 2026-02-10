@@ -15,15 +15,16 @@ import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
+import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +65,11 @@ public class TestServiceImpl implements TestService {
 
 		testRepository.save(testAppointment);
 		labResultService.createForAppointment(testAppointment, labTests);
+	}
+
+	@Override
+	public AppointmentStatusCounts getStatusStatisticsByClinic(Long clinicId, LocalDate startDate, LocalDate endDate) {
+		return testRepository.getStatusStatisticsByClinic(clinicId, startDate, endDate);
 	}
 
 }
