@@ -1,15 +1,13 @@
 package com.vention.medfast.labresult.service;
 
+import com.vention.medfast.appointment.model.Test;
 import com.vention.medfast.labresult.model.LabResult;
 import com.vention.medfast.labresult.model.LabResultStatus;
 import com.vention.medfast.labresult.repository.LabResultRepository;
 import com.vention.medfast.labtest.model.LabTest;
-
+import com.vention.medfast.statistics.dto.response.LabResultStatusCounts;
 import java.time.LocalDate;
 import java.util.List;
-
-import com.vention.medfast.statistics.dto.response.LabResultStatusCounts;
-import com.vention.medfast.appointment.model.Test;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +35,11 @@ public class LabResultServiceImpl implements LabResultService {
 	@Transactional(readOnly = true)
 	public LabResultStatusCounts getStatusStatistics(LocalDate startDate, LocalDate endDate) {
 		return labResultRepository.getStatusCounts(startDate, endDate);
+	}
+
+	@Override
+	public LabResultStatusCounts getStatusCountsByClinic(Long clinicId, LocalDate startDate, LocalDate endDate) {
+		return labResultRepository.getStatusCountsByClinic(clinicId, startDate, endDate);
 	}
 
 }

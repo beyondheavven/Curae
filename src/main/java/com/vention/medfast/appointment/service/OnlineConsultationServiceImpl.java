@@ -10,7 +10,9 @@ import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -70,6 +72,16 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 			oc.setDoctor(newDoctor);
 		}
 		onlineConsultationRepository.save(oc);
+	}
+
+	@Override
+	public AppointmentStatusCounts getStatusStatisticsByClinic(Long clinicId, LocalDate startDate, LocalDate endDate) {
+		return onlineConsultationRepository.getStatusStatisticsByClinic(clinicId, startDate, endDate);
+	}
+
+	@Override
+	public AppointmentStatusCounts getStatusStatisticsByDoctor(Long doctorId, LocalDate start, LocalDate end) {
+		return onlineConsultationRepository.getStatusStatisticsByDoctor(doctorId, start, end);
 	}
 
 	private OnlineConsultation findById(Long consultationId) {

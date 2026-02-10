@@ -7,19 +7,18 @@ import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
+import com.vention.medfast.appointment.referral.model.Referral;
+import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.appointment.state.AppointmentStateContext;
 import com.vention.medfast.notification.eventListener.eventModel.StatusChangedEvent;
 import com.vention.medfast.notification.model.NotificationType;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
-import com.vention.medfast.appointment.referral.model.Referral;
-import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
-
 import java.time.LocalDate;
-
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -129,6 +128,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 		eventPublisher.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_DETAILS_CHANGED,
 				appointment.getId(), appointment.getPatient().getId()));
 		return id;
+	}
+
+	@Override
+	public boolean existsByPatientIdDoctorIdAndStatus(Long patientId, Long doctorId, AppointmentStatus status) {
+		return appointmentRepository.existsByPatientIdAndDoctorIdAndStatus(patientId, doctorId, status);
 	}
 
 }

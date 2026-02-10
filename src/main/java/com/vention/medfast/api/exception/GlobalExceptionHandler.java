@@ -11,6 +11,7 @@ import jakarta.validation.ConstraintViolationException;
 
 import java.util.List;
 import java.util.Objects;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -172,6 +173,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(ChatOperationException.class)
 	public ResponseEntity<ResponseWrapper<?>> handleChatOperationException(ChatOperationException ex) {
+		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
+	}
+
+	@ExceptionHandler(FeedbackNotAllowedException.class)
+	public ResponseEntity<ResponseWrapper<?>> handleFeedbackNotAllowed(FeedbackNotAllowedException ex) {
 		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
 	}
 

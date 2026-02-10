@@ -44,6 +44,8 @@ public final class ApiPaths {
 
 	public static final String PAYMENT_ENDPOINT = "/payment";
 
+	public static final String PURCHASE_ENDPOINT = "/purchase";
+
 	public static final String WEBHOOK_ENDPOINT = "/webhook";
 
 	public static final String APPOINTMENT_ENDPOINT = "/appointments";
@@ -61,5 +63,7 @@ public final class ApiPaths {
 	public static final String ONLINE_CONSULTATION_ENDPOINT = "/online-consultation";
 
 	public static final String TEST_ENDPOINT = "/test";
+
+	public static final String FEEDBACK_ENDPOINT = "/feedbacks";
 
 }

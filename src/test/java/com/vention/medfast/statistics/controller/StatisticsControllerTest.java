@@ -12,15 +12,12 @@ import com.vention.medfast.labresult.model.LabResultStatus;
 import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.service.model.ProvidedService;
-import org.hamcrest.Matchers;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,23 +46,32 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 		visit.setMedicalReport("Test");
 		em.persist(visit);
 
-		com.vention.medfast.appointment.model.Test testAppointment = new com.vention.medfast.appointment.model.Test();
-		testAppointment.setPatient(patient);
-		testAppointment.setClinic(clinic);
-		testAppointment.setDate(LocalDate.of(2026, 1, 15));
-		testAppointment.setTime(LocalTime.NOON);
-		testAppointment.setStatus(AppointmentStatus.COMPLETED);
-		testAppointment.setType(AppointmentType.TEST);
-		em.persist(testAppointment);
+		com.vention.medfast.appointment.model.Test test1 = new com.vention.medfast.appointment.model.Test();
+		test1.setPatient(patient);
+		test1.setClinic(clinic);
+		test1.setDate(LocalDate.of(2026, 1, 15));
+		test1.setTime(LocalTime.NOON);
+		test1.setStatus(AppointmentStatus.COMPLETED);
+		test1.setType(AppointmentType.TEST);
+		em.persist(test1);
 
 		LabResult resultProcessing = new LabResult();
-		resultProcessing.setTest(testAppointment);
+		resultProcessing.setTest(test1);
 		resultProcessing.setLabTest(labTestRef);
 		resultProcessing.setStatus(LabResultStatus.PROCESSING);
 		em.persist(resultProcessing);
 
+		com.vention.medfast.appointment.model.Test test2 = new com.vention.medfast.appointment.model.Test();
+		test2.setPatient(patient);
+		test2.setClinic(clinic);
+		test2.setDate(LocalDate.of(2026, 1, 16));
+		test2.setTime(LocalTime.of(14, 0));
+		test2.setStatus(AppointmentStatus.COMPLETED);
+		test2.setType(AppointmentType.TEST);
+		em.persist(test2);
+
 		LabResult resultReady = new LabResult();
-		resultReady.setTest(testAppointment);
+		resultReady.setTest(test2);
 		resultReady.setLabTest(labTestRef);
 		resultReady.setStatus(LabResultStatus.READY);
 		resultReady.setResultUrl("http://test.com");
@@ -83,16 +89,13 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.period.startDate").value(startDate.toString()))
 			.andExpect(jsonPath("$.data.period.endDate").value(endDate.toString()))
-
-			.andExpect(jsonPath("$.data.appointments.stats.total").value(Matchers.greaterThanOrEqualTo(2)))
-			.andExpect(jsonPath("$.data.appointments.stats.completed").value(Matchers.greaterThanOrEqualTo(2)))
-
-			.andExpect(jsonPath("$.data.visits.stats.total").value(Matchers.greaterThanOrEqualTo(1)))
-			.andExpect(jsonPath("$.data.visits.stats.completed").value(Matchers.greaterThanOrEqualTo(1)))
-
-			.andExpect(jsonPath("$.data.labResults.stats.total").value(Matchers.greaterThanOrEqualTo(2)))
-			.andExpect(jsonPath("$.data.labResults.results.processing").value(Matchers.greaterThanOrEqualTo(1)))
-			.andExpect(jsonPath("$.data.labResults.results.ready").value(Matchers.greaterThanOrEqualTo(1)));
+			.andExpect(jsonPath("$.data.appointments.stats.total").value(greaterThanOrEqualTo(2)))
+			.andExpect(jsonPath("$.data.appointments.stats.completed").value(greaterThanOrEqualTo(2)))
+			.andExpect(jsonPath("$.data.visits.stats.total").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.visits.stats.completed").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.labResults.stats.total").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.labResults.results.processing").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.labResults.results.ready").value(greaterThanOrEqualTo(1)));
 	}
 
 	@Test
@@ -149,6 +152,52 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 			.andExpect(jsonPath("$.error.validationErrors[0].field").value("startDate"))
 			.andExpect(jsonPath("$.error.validationErrors[0].rejectedValue").value(futureStartDate.toString()))
 			.andExpect(jsonPath("$.error.validationErrors[0].message").value("Start date cannot be in the future"));
+	}
+
+	@Test
+	void shouldReturnDoctorStatsWhenInputIsValid() throws Exception {
+		Patient patient = em.find(Patient.class, 1L);
+		Clinic clinic = em.find(Clinic.class, 1L);
+		Doctor doctor = em.find(Doctor.class, 1L);
+		ProvidedService service = em.find(ProvidedService.class, 1L);
+
+		doctor.addClinic(clinic);
+
+		Visit visit = new Visit();
+		visit.setPatient(patient);
+		visit.setDoctor(doctor);
+		visit.setClinic(clinic);
+		visit.setProvidedService(service);
+		visit.setDate(LocalDate.of(2026, 2, 1));
+		visit.setTime(LocalTime.NOON);
+		visit.setStatus(AppointmentStatus.COMPLETED);
+		visit.setType(AppointmentType.VISIT);
+		em.persist(visit);
+
+		com.vention.medfast.appointment.model.OnlineConsultation oc = new com.vention.medfast.appointment.model.OnlineConsultation();
+		oc.setPatient(patient);
+		oc.setDoctor(doctor);
+		oc.setDate(LocalDate.of(2026, 2, 2));
+		oc.setTime(LocalTime.of(16, 0));
+		oc.setStatus(AppointmentStatus.COMPLETED);
+		oc.setType(AppointmentType.ONLINE);
+		oc.setMeetingLink("https://example.com/meeting");
+		em.persist(oc);
+
+		em.flush();
+
+		LocalDate startDate = LocalDate.of(2026, 1, 28);
+		LocalDate endDate = LocalDate.of(2026, 2, 5);
+
+		String url = String.format("%s/doctor/%d/statistics?startDate=%s&endDate=%s", ApiPaths.STATISTICS_ENDPOINT,
+				doctor.getId(), startDate, endDate);
+
+		performRequest(HttpMethod.GET, url, null).andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.doctorId").value(doctor.getId()))
+			.andExpect(jsonPath("$.data.visits.stats.total").value(1))
+			.andExpect(jsonPath("$.data.onlineConsultations.stats.total").value(1))
+			.andExpect(jsonPath("$.data.onlineConsultations.stats.completed").value(1));
 	}
 
 }

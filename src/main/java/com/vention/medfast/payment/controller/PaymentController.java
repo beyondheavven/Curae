@@ -8,6 +8,7 @@ import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +22,9 @@ public class PaymentController {
 
 	private final PaymentService paymentService;
 
-	@Operation(summary = "Create checkout session",
+	@Operation(summary = "Create checkout session (admin)",
 			description = "Creates a Stripe Checkout Session based on the provided service and patient ID. Returns a URL to redirect the user to Stripe's hosted payment page.")
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/checkout")
 	public ResponseWrapper<String> createCheckoutSession(@RequestBody PaymentRequestDto requestDto)
 			throws StripeException {
