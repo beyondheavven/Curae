@@ -1,7 +1,8 @@
 package com.vention.medfast.appointment.repository;
 
+import com.vention.medfast.appointment.dto.VisitListItemDto;
 import com.vention.medfast.appointment.model.Visit;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,27 +15,51 @@ import java.time.LocalTime;
 public interface VisitRepository extends JpaRepository<Visit, Long> {
 
 	@Query("""
-			    select v from Visit v
-			    where v.patient.id = :patientId
-			      and (
-			          v.date > :today
-			          or (v.date = :today and v.time > :now)
-			      )
-			    order by v.date, v.time
+			    select new com.vention.medfast.appointment.dto.VisitListItemDto(
+			        du.firstName,
+			        du.lastName,
+			        c.name,
+			        addr.city,
+			        a.date,
+			        a.time,
+			        a.status
+			    )
+			    from Appointment a
+			    join Visit v on v.id = a.id
+			    join v.doctor d
+			    join d.user du
+			    join v.clinic c
+			    join c.address addr
+			    where a.patient.id = :patientId
+			      and a.type = com.vention.medfast.appointment.model.AppointmentType.VISIT
+			      and (a.date, a.time) > (:today, :now)
+			    order by a.date, a.time
 			""")
-	Page<Visit> findUpcomingByPatient(@Param("patientId") Long patientId, @Param("today") LocalDate today,
+	Slice<VisitListItemDto> findUpcomingByPatient(@Param("patientId") Long patientId, @Param("today") LocalDate today,
 			@Param("now") LocalTime now, Pageable pageable);
 
 	@Query("""
-			    select v from Visit v
-			    where v.patient.id = :patientId
-			      and (
-			          v.date < :today
-			          or (v.date = :today and v.time <= :now)
-			      )
-			    order by v.date desc, v.time desc
+			    select new com.vention.medfast.appointment.dto.VisitListItemDto(
+			        du.firstName,
+			        du.lastName,
+			        c.name,
+			        addr.city,
+			        a.date,
+			        a.time,
+			        a.status
+			    )
+			    from Appointment a
+			    join Visit v on v.id = a.id
+			    join v.doctor d
+			    join d.user du
+			    join v.clinic c
+			    join c.address addr
+			    where a.patient.id = :patientId
+			      and a.type = com.vention.medfast.appointment.model.AppointmentType.VISIT
+			      and (a.date, a.time) <= (:today, :now)
+			    order by a.date desc, a.time desc
 			""")
-	Page<Visit> findPastByPatient(@Param("patientId") Long patientId, @Param("today") LocalDate today,
+	Slice<VisitListItemDto> findPastByPatient(@Param("patientId") Long patientId, @Param("today") LocalDate today,
 			@Param("now") LocalTime now, Pageable pageable);
 
 }

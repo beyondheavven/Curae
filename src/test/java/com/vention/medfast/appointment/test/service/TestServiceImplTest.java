@@ -1,7 +1,9 @@
 package com.vention.medfast.appointment.test.service;
 
+import com.vention.medfast.appointment.dto.LabResultRow;
 import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.dto.TestCreateWithLabsDto;
+import com.vention.medfast.appointment.dto.TestHistoryRow;
 import com.vention.medfast.appointment.mapper.TestMapper;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
@@ -11,6 +13,8 @@ import com.vention.medfast.appointment.service.TestServiceImpl;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.clinic.service.ClinicService;
 import com.vention.medfast.labresult.mapper.LabResultMapper;
+import com.vention.medfast.labresult.model.LabResultStatus;
+import com.vention.medfast.labresult.repository.LabResultRepository;
 import com.vention.medfast.labresult.service.LabResultService;
 import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
@@ -26,6 +30,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +64,9 @@ class TestServiceImplTest {
 	@Mock
 	private TestMapper testMapper;
 
+	@Mock
+	private LabResultRepository labResultRepository;
+
 	@InjectMocks
 	private TestServiceImpl testService;
 
@@ -67,22 +75,27 @@ class TestServiceImplTest {
 	void shouldReturnPatientLabHistory() {
 		Long userId = 1L;
 		Pageable pageable = Pageable.unpaged();
-		Test testEntity = new Test();
-		testEntity.setId(10L);
+		TestHistoryRow historyRow = new TestHistoryRow(10L, LocalDate.now(), AppointmentStatus.COMPLETED);
 
-		PatientLabHistoryDTO historyDto = new PatientLabHistoryDTO(10L, LocalDate.now(), "COMPLETED", List.of());
+		when(testRepository.findLabHistoryRows(userId, pageable)).thenReturn(new PageImpl<>(List.of(historyRow)));
 
-		when(testRepository.findLabHistoryPage(userId, pageable)).thenReturn(new PageImpl<>(List.of(testEntity)));
-		when(labResultMapper.toHistoryDto(testEntity)).thenReturn(historyDto);
+		LabResultRow labRow = new LabResultRow(10L, 100L, "Blood Test", LabResultStatus.READY, "url",
+				LocalDateTime.now());
+
+		when(labResultRepository.findHistoryRowsByTestIds(List.of(10L))).thenReturn(List.of(labRow));
 
 		Page<PatientLabHistoryDTO> result = testService.getPatientLabHistory(userId, pageable);
 
 		assertThat(result).isNotNull();
 		assertThat(result.getContent()).hasSize(1);
-		assertThat(result.getContent().get(0)).isEqualTo(historyDto);
 
-		verify(testRepository).findLabHistoryPage(userId, pageable);
-		verify(labResultMapper).toHistoryDto(testEntity);
+		PatientLabHistoryDTO dto = result.getContent().get(0);
+		assertThat(dto.appointmentId()).isEqualTo(10L);
+		assertThat(dto.tests()).hasSize(1);
+		assertThat(dto.tests().get(0).testName()).isEqualTo("Blood Test");
+
+		verify(testRepository).findLabHistoryRows(userId, pageable);
+		verify(labResultRepository).findHistoryRowsByTestIds(List.of(10L));
 	}
 
 	@org.junit.jupiter.api.Test

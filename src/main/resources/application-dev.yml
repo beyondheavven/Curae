@@ -64,6 +64,7 @@ spring:
       hibernate:
         format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_batch_fetch_size: 50
 
   mail:
     host: smtp.gmail.com
@@ -77,6 +78,9 @@ spring:
           starttls:
             enable: true
 
+  flyway:
+    enabled: false
+
 validation:
   password:
     regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
@@ -84,6 +88,11 @@ validation:
 server:
   servlet:
     context-path: /api
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
 
 app:
   base-url: ${openapi.server-url}

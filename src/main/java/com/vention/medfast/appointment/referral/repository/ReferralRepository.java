@@ -17,11 +17,10 @@ public interface ReferralRepository extends JpaRepository<Referral, Long> {
 			    select r
 			    from Referral r
 			    where r.patient.id = :patientId
-			      and r.status = :status
+			      and r.status = com.vention.medfast.appointment.referral.model.ReferralStatus.ACTIVE
 			      and r.expiresAt >= :today
 			    order by r.expiresAt asc
 			""")
-	List<Referral> findActiveByPatient(@Param("patientId") Long patientId, @Param("status") ReferralStatus status,
-			@Param("today") LocalDate today);
+	List<Referral> findActiveByPatient(@Param("patientId") Long patientId, @Param("today") LocalDate today);
 
 }

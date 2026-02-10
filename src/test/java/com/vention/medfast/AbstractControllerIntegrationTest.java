@@ -1,5 +1,6 @@
 package com.vention.medfast;
 
+import com.vention.medfast.appointment.service.cache.VisitCacheService;
 import com.vention.medfast.auth.dto.AuthRequestDto;
 import com.vention.medfast.auth.service.AuthService;
 import jakarta.persistence.EntityManager;
@@ -10,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -37,6 +39,9 @@ public abstract class AbstractControllerIntegrationTest extends AbstractIntegrat
 
 	@Autowired
 	protected EntityManager em;
+
+	@MockitoBean
+	protected VisitCacheService visitCacheService;
 
 	@Autowired
 	protected AuthService authService;
