@@ -11,7 +11,7 @@ CREATE TABLE referrals (
     service_id BIGINT NOT NULL,
     appointment_type VARCHAR(20) NOT NULL,
     expires_at DATE NOT NULL,
-    status referral_status NOT NULL,
+    status VARCHAR(20) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT now(),
 
     CONSTRAINT fk_referral_patient

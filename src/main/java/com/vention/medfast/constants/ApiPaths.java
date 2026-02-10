@@ -64,4 +64,6 @@ public final class ApiPaths {
 
 	public static final String TEST_ENDPOINT = "/test";
 
+	public static final String FEEDBACK_ENDPOINT = "/feedbacks";
+
 }

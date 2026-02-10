@@ -18,6 +18,7 @@ import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -127,6 +128,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 		eventPublisher.publishEvent(new StatusChangedEvent(NotificationType.APPOINTMENT_DETAILS_CHANGED,
 				appointment.getId(), appointment.getPatient().getId()));
 		return id;
+	}
+
+	@Override
+	public boolean existsByPatientIdDoctorIdAndStatus(Long patientId, Long doctorId, AppointmentStatus status) {
+		return appointmentRepository.existsByPatientIdAndDoctorIdAndStatus(patientId, doctorId, status);
 	}
 
 }

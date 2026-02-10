@@ -37,7 +37,7 @@ public class Referral {
 	private Patient patient;
 
 	@ManyToOne(optional = false)
-	@JoinColumn(name = "doctor_id", nullable = false)
+	@JoinColumn(name = "issued_by", nullable = false)
 	private Doctor doctor;
 
 	@ManyToOne(optional = false)
