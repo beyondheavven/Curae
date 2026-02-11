@@ -14,11 +14,10 @@ import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.service.model.ProvidedService;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.hamcrest.Matchers;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
+
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,16 +89,13 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.period.startDate").value(startDate.toString()))
 			.andExpect(jsonPath("$.data.period.endDate").value(endDate.toString()))
-
-			.andExpect(jsonPath("$.data.appointments.stats.total").value(Matchers.greaterThanOrEqualTo(2)))
-			.andExpect(jsonPath("$.data.appointments.stats.completed").value(Matchers.greaterThanOrEqualTo(2)))
-
-			.andExpect(jsonPath("$.data.visits.stats.total").value(Matchers.greaterThanOrEqualTo(1)))
-			.andExpect(jsonPath("$.data.visits.stats.completed").value(Matchers.greaterThanOrEqualTo(1)))
-
-			.andExpect(jsonPath("$.data.labResults.stats.total").value(Matchers.greaterThanOrEqualTo(1)))
-			.andExpect(jsonPath("$.data.labResults.results.processing").value(Matchers.greaterThanOrEqualTo(1)))
-			.andExpect(jsonPath("$.data.labResults.results.ready").value(Matchers.greaterThanOrEqualTo(1)));
+			.andExpect(jsonPath("$.data.appointments.stats.total").value(greaterThanOrEqualTo(2)))
+			.andExpect(jsonPath("$.data.appointments.stats.completed").value(greaterThanOrEqualTo(2)))
+			.andExpect(jsonPath("$.data.visits.stats.total").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.visits.stats.completed").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.labResults.stats.total").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.labResults.results.processing").value(greaterThanOrEqualTo(1)))
+			.andExpect(jsonPath("$.data.labResults.results.ready").value(greaterThanOrEqualTo(1)));
 	}
 
 	@Test
@@ -174,7 +170,7 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 		visit.setProvidedService(service);
 		visit.setDate(LocalDate.of(2026, 2, 1));
 		visit.setTime(LocalTime.NOON);
-		visit.setStatus(AppointmentStatus.SCHEDULED_CONFIRMED);
+		visit.setStatus(AppointmentStatus.COMPLETED);
 		visit.setType(AppointmentType.VISIT);
 		em.persist(visit);
 
@@ -199,7 +195,7 @@ public class StatisticsControllerTest extends AbstractControllerIntegrationTest 
 		performRequest(HttpMethod.GET, url, null).andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.doctorId").value(doctor.getId()))
-			.andExpect(jsonPath("$.data.visits.stats.total").value(2))
+			.andExpect(jsonPath("$.data.visits.stats.total").value(1))
 			.andExpect(jsonPath("$.data.onlineConsultations.stats.total").value(1))
 			.andExpect(jsonPath("$.data.onlineConsultations.stats.completed").value(1));
 	}

@@ -1,6 +1,5 @@
 package com.vention.medfast.appointment.referral.controller;
 
-import com.vention.medfast.appointment.referral.controller.ReferralController;
 import com.vention.medfast.appointment.referral.dto.ReferralCreateDto;
 import com.vention.medfast.appointment.referral.dto.ReferralResponseDto;
 import com.vention.medfast.appointment.referral.model.Referral;
@@ -54,14 +53,15 @@ class ReferralControllerTest {
 		Long patientId = 3L;
 		List<ReferralResponseDto> referrals = List
 			.of(new ReferralResponseDto(10L, 20L, LocalDate.now().plusDays(10), ReferralStatus.ACTIVE));
-		when(referralService.getActiveByPatient(patientId)).thenReturn(referrals);
+		when(referralService.getActiveByPatient()).thenReturn(referrals);
 
-		ResponseWrapper<List<ReferralResponseDto>> response = controller.getActiveByPatient(patientId);
+		ResponseWrapper<List<ReferralResponseDto>> response = controller.getActiveByPatient();
 
 		assertThat(response.getData()).isEqualTo(referrals);
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK);
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK.value());
-		verify(referralService).getActiveByPatient(patientId);
+
+		verify(referralService).getActiveByPatient();
 	}
 
 	@Test

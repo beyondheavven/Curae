@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ReferralService {
 
-	List<ReferralResponseDto> getActiveByPatient(Long patientId);
+	List<ReferralResponseDto> getActiveByPatient();
 
 	Referral getActiveById(Long referralId);
 

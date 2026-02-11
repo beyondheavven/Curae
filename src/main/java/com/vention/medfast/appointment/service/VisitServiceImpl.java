@@ -1,11 +1,12 @@
 package com.vention.medfast.appointment.service;
 
 import com.vention.medfast.appointment.dto.VisitCreateDto;
-import com.vention.medfast.appointment.dto.VisitResponseDto;
+import com.vention.medfast.appointment.dto.VisitListItemDto;
 import com.vention.medfast.appointment.mapper.VisitMapper;
 import com.vention.medfast.appointment.model.Visit;
 import com.vention.medfast.appointment.model.VisitType;
 import com.vention.medfast.appointment.repository.VisitRepository;
+import com.vention.medfast.appointment.service.cache.VisitCacheService;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.clinic.service.ClinicService;
 import com.vention.medfast.doctor.model.Doctor;
@@ -17,11 +18,10 @@ import com.vention.medfast.service.service.ProvidedServiceService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -42,35 +42,28 @@ public class VisitServiceImpl implements VisitService {
 
 	private final ClinicService clinicService;
 
+	private final VisitCacheService visitCacheService;
+
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = "patientVisits", allEntries = true)
 	public Long create(Long patientId, VisitCreateDto dto) {
 		Patient patient = patientService.getById(patientId);
-
 		Doctor doctor = doctorService.findDoctorById(dto.doctorId());
-
 		ProvidedService service = providedServiceService.getProvidedServiceById(dto.serviceId());
-
 		Clinic clinic = clinicService.findById(dto.clinicId());
 
 		Visit visit = visitMapper.toEntity(dto, patient, doctor, service, clinic);
-
 		return visitRepository.save(visit).getId();
 	}
 
 	@Override
-	public Page<VisitResponseDto> findAllForPatient(VisitType type, Pageable pageable) {
+	public Slice<VisitListItemDto> findAllForPatient(VisitType type, Pageable pageable) {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		String email = auth.getName();
 		Patient patient = patientService.getPatientByEmail(email);
-		LocalDateTime now = LocalDateTime.now();
-		LocalDate today = now.toLocalDate();
-		LocalTime time = now.toLocalTime();
-		Page<Visit> visits = switch (type) {
-			case PAST -> visitRepository.findPastByPatient(patient.getId(), today, time, pageable);
-			case UPCOMING -> visitRepository.findUpcomingByPatient(patient.getId(), today, time, pageable);
-		};
-		return visits.map(visitMapper::toVisitResponseDto);
+
+		return visitCacheService.getVisits(patient.getId(), type, pageable.getPageNumber(), pageable.getPageSize());
 	}
 
 	@Override

@@ -15,7 +15,8 @@ spring:
   flyway:
     enabled: true
     locations:
-      - filesystem:${user.dir}/flyway/sql
+      - filesystem:${user.dir}/flyway/sql/schema
+      - filesystem:${user.dir}/flyway/sql/data
     clean-disabled: false
 
 custom:

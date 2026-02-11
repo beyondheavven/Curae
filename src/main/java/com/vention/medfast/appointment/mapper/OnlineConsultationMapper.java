@@ -41,7 +41,11 @@ public interface OnlineConsultationMapper {
 	void updateOnlineConsultation(UpdateOnlineConsultationRequest req, @MappingTarget OnlineConsultation oc);
 
 	@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+	@Mapping(target = "date", source = "req.date")
+	@Mapping(target = "time", source = "req.time")
+	@Mapping(target = "status", source = "req.status")
 	@Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
+	@Mapping(target = "type", ignore = true)
 	void updateAppointment(UpdateOnlineConsultationRequest req, @MappingTarget Appointment appt);
 
 }

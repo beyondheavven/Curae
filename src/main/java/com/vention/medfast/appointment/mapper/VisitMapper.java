@@ -9,7 +9,6 @@ import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.specialization.model.Specialization;
 import com.vention.medfast.appointment.dto.DoctorForVisitResponseDto;
 import com.vention.medfast.appointment.dto.VisitCreateDto;
-import com.vention.medfast.appointment.dto.VisitResponseDto;
 import com.vention.medfast.appointment.model.Visit;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -38,14 +37,6 @@ public interface VisitMapper {
 	@Mapping(target = "updatedAt", ignore = true)
 	@Mapping(target = "notifications", ignore = true)
 	Visit toEntity(VisitCreateDto dto, Patient patient, Doctor doctor, ProvidedService service, Clinic clinic);
-
-	@Mapping(source = "doctor", target = "doctor")
-	@Mapping(source = "clinic.address", target = "address")
-	@Mapping(source = "clinic.name", target = "clinic")
-	@Mapping(source = "date", target = "date")
-	@Mapping(source = "time", target = "time")
-	@Mapping(source = "status", target = "status")
-	VisitResponseDto toVisitResponseDto(Visit visit);
 
 	@Mapping(source = "user.firstName", target = "firstName")
 	@Mapping(source = "user.lastName", target = "lastName")

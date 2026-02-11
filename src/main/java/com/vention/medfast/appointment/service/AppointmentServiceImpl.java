@@ -18,7 +18,6 @@ import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

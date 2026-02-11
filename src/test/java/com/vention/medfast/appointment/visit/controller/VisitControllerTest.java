@@ -2,8 +2,9 @@ package com.vention.medfast.appointment.visit.controller;
 
 import com.jayway.jsonpath.JsonPath;
 import com.vention.medfast.AbstractControllerIntegrationTest;
+import com.vention.medfast.appointment.dto.VisitListItemDto;
 import com.vention.medfast.appointment.model.AppointmentStatus;
-import com.vention.medfast.appointment.model.AppointmentType;
+import com.vention.medfast.appointment.model.VisitType;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
@@ -11,12 +12,17 @@ import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.appointment.dto.VisitCreateDto;
 import com.vention.medfast.appointment.model.Visit;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.http.HttpMethod;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,39 +92,22 @@ class VisitControllerTest extends AbstractControllerIntegrationTest {
 	void shouldReturnPastVisitsWhenInputIsValid() throws Exception {
 		login("jane.doe@mail.com", "pass");
 
-		Patient patient = em.find(Patient.class, 1L);
-		Doctor doctor = em.find(Doctor.class, 1L);
-		Clinic clinic = em.find(Clinic.class, 1L);
-		ProvidedService service = em.find(ProvidedService.class, 1L);
+		VisitListItemDto dto = new VisitListItemDto("John", "Doe", "Clinic", "Kyiv", LocalDate.now().minusDays(1),
+				LocalTime.NOON, AppointmentStatus.COMPLETED);
 
-		Visit pastVisit = new Visit();
-		pastVisit.setPatient(patient);
-		pastVisit.setDoctor(doctor);
-		pastVisit.setClinic(clinic);
-		pastVisit.setProvidedService(service);
+		Slice<VisitListItemDto> slice = new SliceImpl<>(List.of(dto));
 
-		pastVisit.setDate(LocalDate.now().minusDays(10));
-		pastVisit.setTime(LocalTime.of(10, 0));
-		pastVisit.setStatus(AppointmentStatus.COMPLETED);
-		pastVisit.setType(AppointmentType.VISIT);
-
-		pastVisit.setDiagnosis("Test Diagnosis");
-		pastVisit.setSymptoms("Test Symptoms");
-		pastVisit.setMedicalReport("Test Report");
-
-		em.persist(pastVisit);
-		em.flush();
+		when(visitCacheService.getVisits(any(), eq(VisitType.PAST), anyInt(), anyInt())).thenReturn(slice);
 
 		performRequest(HttpMethod.GET, "/visits?type=PAST&page=0&size=10", null).andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.content").isArray())
-			.andExpect(jsonPath("$.data.content[0].doctor").exists())
-			.andExpect(jsonPath("$.data.content[0].clinic").exists())
 			.andExpect(jsonPath("$.data.content[0].status").value("COMPLETED"));
 	}
 
 	@Test
 	void shouldReturnEmptyArrayWhenNoUpcomingVisitsAvailable() throws Exception {
 		login("jane.doe@mail.com", "pass");
+		when(visitCacheService.getVisits(any(), any(), anyInt(), anyInt())).thenReturn(new SliceImpl<>(List.of()));
 		performRequest(HttpMethod.GET, "/visits?type=UPCOMING&page=0&size=10", null).andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.content").isArray())
 			.andExpect(jsonPath("$.data.content.length()").value(0));

@@ -14,6 +14,8 @@ import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +31,12 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 
 	private final DoctorService doctorService;
 
+	@Cacheable(cacheNames = "onlineConsultationDetails", key = "#consultationId")
 	@Override
 	@Transactional(readOnly = true)
 	public OnlineConsultationDetails getDetails(Long consultationId) {
-		OnlineConsultation consultation = onlineConsultationRepository.findById(consultationId)
-			.orElseThrow(() -> new EntityNotFoundException("Consultation not found"));
-
-		return onlineConsultationMapper.toDto(consultation);
+		return onlineConsultationRepository.findDetailsById(consultationId)
+			.orElseThrow(() -> new EntityNotFoundException("Online consultation not found: " + consultationId));
 	}
 
 	@Override
@@ -52,6 +53,7 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 		onlineConsultationRepository.save(oc);
 	}
 
+	@CacheEvict(cacheNames = "onlineConsultationDetails", key = "#consultationId")
 	@Override
 	@Transactional
 	public void deleteById(Long consultationId) {
@@ -59,6 +61,7 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 		onlineConsultationRepository.delete(oc);
 	}
 
+	@CacheEvict(cacheNames = "onlineConsultationDetails", key = "#req.onlineConsultationId()")
 	@Override
 	@Transactional
 	public void update(UpdateOnlineConsultationRequest req) {

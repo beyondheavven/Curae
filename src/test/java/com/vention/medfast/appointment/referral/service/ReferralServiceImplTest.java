@@ -2,7 +2,6 @@ package com.vention.medfast.appointment.referral.service;
 
 import com.vention.medfast.api.exception.AppointmentException;
 import com.vention.medfast.appointment.model.AppointmentType;
-import com.vention.medfast.appointment.referral.service.ReferralServiceImpl;
 import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.model.Patient;

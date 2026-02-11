@@ -3,7 +3,7 @@ package com.vention.medfast.appointment.controller;
 import com.vention.medfast.api.response.ErrorResponseDto;
 import com.vention.medfast.constants.ApiPaths;
 import com.vention.medfast.appointment.dto.VisitCreateDto;
-import com.vention.medfast.appointment.dto.VisitResponseDto;
+import com.vention.medfast.appointment.dto.VisitListItemDto;
 import com.vention.medfast.appointment.model.VisitType;
 import com.vention.medfast.appointment.service.VisitService;
 import com.vention.medfast.wrapper.ResponseWrapper;
@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,15 +53,16 @@ public class VisitController {
 
 	@Operation(summary = "Get all visits")
 	@ApiResponses({
-			@ApiResponse(responseCode = "200", description = "Successfully retrieved page of visits",
+			@ApiResponse(responseCode = "200", description = "Successfully retrieved slice of visits",
 					content = @Content(mediaType = "application/json",
-							schema = @Schema(implementation = VisitResponseDto.class))),
+							schema = @Schema(implementation = VisitListItemDto.class))),
 			@ApiResponse(responseCode = "204", description = "No visits found") })
 	@PreAuthorize("hasRole('PATIENT')")
 	@GetMapping
-	public ResponseWrapper<Page<VisitResponseDto>> getAll(
+	public ResponseWrapper<Slice<VisitListItemDto>> getAll(
 			@RequestParam(name = "type", defaultValue = "UPCOMING") VisitType type,
 			@ParameterObject Pageable pageable) {
+
 		return ResponseWrapper.ok(visitService.findAllForPatient(type, pageable));
 	}
 

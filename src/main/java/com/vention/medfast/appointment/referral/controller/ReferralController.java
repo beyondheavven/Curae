@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
@@ -54,11 +53,10 @@ public class ReferralController {
 	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Referrals retrieved"),
 			@ApiResponse(responseCode = "400", description = "Invalid request",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
-	@PreAuthorize("hasAnyRole('DOCTOR', 'PATIENT')")
+	@PreAuthorize("hasAnyRole('PATIENT')")
 	@GetMapping
-	public ResponseWrapper<List<ReferralResponseDto>> getActiveByPatient(@RequestParam Long patientId) {
-		List<ReferralResponseDto> result = referralService.getActiveByPatient(patientId);
-		return ResponseWrapper.ok(result);
+	public ResponseWrapper<List<ReferralResponseDto>> getActiveByPatient() {
+		return ResponseWrapper.ok(referralService.getActiveByPatient());
 	}
 
 	@Operation(summary = "Mark referral as used", description = "Marks referral as used after appointment confirmation")
