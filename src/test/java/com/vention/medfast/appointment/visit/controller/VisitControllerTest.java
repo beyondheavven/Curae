@@ -4,7 +4,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.vention.medfast.AbstractControllerIntegrationTest;
 import com.vention.medfast.appointment.dto.VisitListItemDto;
 import com.vention.medfast.appointment.model.AppointmentStatus;
-import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.model.VisitType;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.doctor.model.Doctor;
