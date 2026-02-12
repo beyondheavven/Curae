@@ -1,6 +1,7 @@
 package com.vention.medfast.auth.core;
 
 import com.vention.medfast.user.model.RoleType;
+import com.vention.medfast.user.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,11 +19,26 @@ public class CustomUserDetails implements UserDetails {
 
 	private final RoleType role;
 
-	public CustomUserDetails(Long id, String email, String passwordHash, RoleType role) {
+	private final Long patientId;
+
+	private final Long doctorId;
+
+	public CustomUserDetails(Long id, String email, String passwordHash, RoleType role, Long patientId, Long doctorId) {
 		this.id = id;
 		this.email = email;
 		this.passwordHash = passwordHash;
 		this.role = role;
+		this.patientId = patientId;
+		this.doctorId = doctorId;
+	}
+
+	public CustomUserDetails(User user, Long patientId, Long doctorId) {
+		this.id = user.getId();
+		this.email = user.getEmail();
+		this.passwordHash = user.getPasswordHash();
+		this.role = user.getRole();
+		this.patientId = patientId;
+		this.doctorId = doctorId;
 	}
 
 	public Long getId() {
@@ -35,6 +51,14 @@ public class CustomUserDetails implements UserDetails {
 
 	public String getRoleName() {
 		return "ROLE_" + role.name();
+	}
+
+	public Long getPatientId() {
+		return patientId;
+	}
+
+	public Long getDoctorId() {
+		return doctorId;
 	}
 
 	@Override

@@ -2,6 +2,9 @@ package com.vention.medfast.auth.jwt;
 
 import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.auth.jwt.service.JwtServiceImpl;
+import com.vention.medfast.doctor.repository.DoctorRepository;
+import com.vention.medfast.patient.repository.PatientRepository;
+import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -28,6 +31,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtServiceImpl jwtServiceImpl;
 
 	private final UserRepository userRepository;
+
+	private final PatientRepository patientRepository;
+
+	private final DoctorRepository doctorRepository;
 
 	private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
@@ -70,8 +77,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		try {
 			User user = userRepository.findById(uid).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+			Long patientId = null;
+			Long doctorId = null;
+
+			if (user.getRole() == RoleType.PATIENT) {
+				patientId = patientRepository.findIdByUserId(user.getId()).orElse(null);
+			}
+			else if (user.getRole() == RoleType.DOCTOR) {
+				doctorId = doctorRepository.findIdByUserId(user.getId()).orElse(null);
+			}
+
 			CustomUserDetails userDetails = new CustomUserDetails(user.getId(), user.getEmail(), user.getPasswordHash(),
-					user.getRole());
+					user.getRole(), patientId, doctorId);
 
 			if (jwtServiceImpl.isAccessToken(token) && jwtServiceImpl.isTokenValid(token, userDetails)) {
 				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails,

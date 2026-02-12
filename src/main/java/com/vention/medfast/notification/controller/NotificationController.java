@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -58,6 +59,7 @@ public class NotificationController {
 			@ApiResponse(responseCode = "404", description = "Notification not found",
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('PATIENT') && @securityService.isNotificationAvailable(#id))")
 	@GetMapping("/{id}")
 	public ResponseWrapper<NotificationDetailsDto> getNotificationDetails(
 			@Parameter(description = "ID of the notification") @PathVariable Long id) {
@@ -74,6 +76,7 @@ public class NotificationController {
 			@ApiResponse(responseCode = "404", description = "Notification not found",
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('PATIENT') && @securityService.isNotificationAvailable(#id))")
 	@PatchMapping("/{id}/read")
 	public void markNotificationAsRead(@Parameter(description = "ID of the notification") @PathVariable Long id,
 			@AuthenticationPrincipal CustomUserDetails user) {

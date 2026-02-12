@@ -41,7 +41,7 @@ class NotificationControllerTest {
 
 	@Test
 	void getNotificationsReturnsPageWrappedWithOkStatus() {
-		CustomUserDetails user = new CustomUserDetails(1L, "user@mail.com", "pwd", RoleType.PATIENT);
+		CustomUserDetails user = new CustomUserDetails(1L, "user@mail.com", "pwd", RoleType.PATIENT, 1L, null);
 		Pageable pageable = PageRequest.of(0, 10);
 		Page<NotificationDto> page = new PageImpl<>(List.of(new NotificationDto(2L, 3L,
 				NotificationType.LAB_RESULT_READY, NotificationStatus.UNREAD, Instant.now())));
@@ -73,7 +73,7 @@ class NotificationControllerTest {
 	@Test
 	void markNotificationAsReadDelegatesToService() {
 		Long id = 9L;
-		CustomUserDetails user = new CustomUserDetails(4L, "patient@mail.com", "pwd", RoleType.PATIENT);
+		CustomUserDetails user = new CustomUserDetails(4L, "patient@mail.com", "pwd", RoleType.PATIENT, 4L, null);
 
 		controller.markNotificationAsRead(id, user);
 

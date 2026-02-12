@@ -16,4 +16,6 @@ public interface ReferralService {
 
 	Long create(ReferralCreateDto dto);
 
+	boolean isOwner(Long referralId, Long patientId);
+
 }

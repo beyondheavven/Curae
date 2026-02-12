@@ -20,6 +20,8 @@ public interface UserService {
 
 	Optional<User> findByEmail(String email);
 
+	User findByUsername(String username);
+
 	UserResponseDto getById(Long id);
 
 	Page<UserResponseDto> getAll(Pageable pageable);

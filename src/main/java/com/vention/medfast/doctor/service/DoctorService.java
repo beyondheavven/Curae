@@ -33,4 +33,6 @@ public interface DoctorService {
 
 	Doctor getCurrentDoctor();
 
+	Long findIdByUserId(Long userId);
+
 }

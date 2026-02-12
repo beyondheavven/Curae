@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,7 @@ public class PatientController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<PatientResponseDto> create(@Valid @RequestBody PatientCreateDto request) {
 		PatientResponseDto response = patientService.create(request);
@@ -55,6 +57,7 @@ public class PatientController {
 			@ApiResponse(responseCode = "404", description = "Patient not found",
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
+	@PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR') or (hasRole('PATIENT') && #id == authentication.principal.patientId)")
 	@GetMapping("/{id}")
 	public ResponseWrapper<PatientResponseDto> getById(
 			@Parameter(description = "ID of patient to find") @PathVariable(name = "id") Long id) {

@@ -41,7 +41,7 @@ public class AppointmentController {
 			@ApiResponse(responseCode = "404", description = "Doctor or referral not found",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping
-	@PreAuthorize("hasRole('PATIENT')")
+	@PreAuthorize("hasRole('PATIENT') && @securityService.canUseReferral(#dto.referralId)")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<Long> createAppointment(@Valid @RequestBody AppointmentCreateDto dto) {
 		Long id = appointmentService.create(dto);
@@ -55,13 +55,14 @@ public class AppointmentController {
 			@ApiResponse(responseCode = "404", description = "Appointment not found",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PostMapping("/{id}/confirm")
-	@PreAuthorize("hasRole('PATIENT')")
+	@PreAuthorize("hasRole('PATIENT') && @securityService.isAppointmentAvailable(#id)")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void confirm(@PathVariable Long id) {
 		appointmentService.confirm(id);
 	}
 
 	@PatchMapping("/{id}/cancel")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('PATIENT', 'DOCTOR') && @securityService.isAppointmentAvailableExtended(#id))")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void cancelAppointment(@PathVariable Long id) {
 		appointmentService.cancelAppointment(id);
@@ -74,7 +75,7 @@ public class AppointmentController {
 			@ApiResponse(responseCode = "404", description = "Appointment not found",
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PutMapping("/{id}")
-	@PreAuthorize("hasRole('PATIENT')")
+	@PreAuthorize("hasRole('PATIENT') && @securityService.isAppointmentAvailable(#id)")
 	public ResponseWrapper<Long> update(@PathVariable Long id, @Valid @RequestBody AppointmentUpdateDto dto) {
 		return ResponseWrapper.ok(appointmentService.update(dto, id));
 	}

@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -41,6 +42,7 @@ public class OnlineConsultationController {
 							schema = @Schema(implementation = OnlineConsultationDetails.class))),
 			@ApiResponse(responseCode = "404", description = "Not found", content = @Content) })
 	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('PATIENT', 'DOCTOR') && @securityService.isAppointmentAvailableExtended(#consultationId))")
 	public ResponseWrapper<OnlineConsultationDetails> getDetails(
 			@Parameter(description = "Consultation ID", required = true) @PathVariable("id") Long consultationId) {
 		return ResponseWrapper.ok(onlineConsultationService.getDetails(consultationId));
@@ -63,6 +65,8 @@ public class OnlineConsultationController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ResponseWrapper.class))) })
 	@PatchMapping
+	@PreAuthorize("hasRole('ADMIN') or " + "(hasAnyRole('DOCTOR', 'PATIENT') && "
+			+ "@securityService.isAppointmentAvailableExtended(#updateOnlineConsultationRequest.onlineConsultationId))")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void update(@Valid @RequestBody UpdateOnlineConsultationRequest updateOnlineConsultationRequest) {
 		onlineConsultationService.update(updateOnlineConsultationRequest);
@@ -72,6 +76,7 @@ public class OnlineConsultationController {
 	@ApiResponses({ @ApiResponse(responseCode = "204", description = "Deleted"),
 			@ApiResponse(responseCode = "404", description = "Not found", content = @Content) })
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN') or @securityService.isAppointmentAvailableExtended(#consultationId)")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(
 			@Parameter(description = "Consultation ID", required = true) @PathVariable("id") Long consultationId) {

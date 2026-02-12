@@ -18,4 +18,7 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
 	boolean existsByUser(User user);
 
+	@Query("SELECT p.id FROM Patient p WHERE p.user.id = :userId")
+	Optional<Long> findIdByUserId(Long userId);
+
 }

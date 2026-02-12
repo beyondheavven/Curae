@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,6 +68,7 @@ public class ProvidedServiceController {
 	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Successfully created"),
 			@ApiResponse(responseCode = "400", description = "Validation error") })
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseWrapper<Long> create(@Valid @RequestBody ProvidedServiceCreateDto dto) {
 		return ResponseWrapper.ok(providedServiceService.create(dto));
@@ -76,6 +78,7 @@ public class ProvidedServiceController {
 	@ApiResponses({ @ApiResponse(responseCode = "204", description = "Service successfully deleted"),
 			@ApiResponse(responseCode = "404", description = "Service not found") })
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@Parameter(description = "ID of the service to delete",
 			required = true) @PathVariable(name = "id") Long id) {
@@ -87,6 +90,7 @@ public class ProvidedServiceController {
 			@ApiResponse(responseCode = "400", description = "Validation error"),
 			@ApiResponse(responseCode = "404", description = "Service not found") })
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseWrapper<Long> update(
 			@Parameter(description = "ID of the service to update", required = true) @PathVariable(name = "id") Long id,
 			@Parameter(description = "Fields to update") @Valid @RequestBody ProvidedServiceCreateDto dto) {

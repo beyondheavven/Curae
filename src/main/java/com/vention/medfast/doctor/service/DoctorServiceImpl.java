@@ -152,4 +152,10 @@ public class DoctorServiceImpl implements DoctorService {
 			.orElseThrow(() -> new EntityNotFoundException("Doctor profile not found"));
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public Long findIdByUserId(Long userId) {
+		return doctorRepository.findIdByUserId(userId).orElse(null);
+	}
+
 }

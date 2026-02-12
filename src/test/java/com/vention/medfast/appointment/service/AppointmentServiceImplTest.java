@@ -6,13 +6,17 @@ import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
+import com.vention.medfast.appointment.model.Visit;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.model.ReferralStatus;
 import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.appointment.state.AppointmentStateContext;
+import com.vention.medfast.auth.core.CustomUserDetails;
+import com.vention.medfast.doctor.model.Doctor;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
+import com.vention.medfast.user.model.RoleType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -184,5 +189,67 @@ class AppointmentServiceImplTest {
 		assertEquals("Appointment cannot be edited in status CANCELLED", e.getMessage());
 		verifyNoInteractions(appointmentMapper, eventPublisher);
 	}
+
+	@Test
+	void shouldReturnTrueWhenPatientIsOwnerOfAppointment() {
+		Long appointmentId = 1L;
+		Long patientId = 10L;
+		Patient patient = new Patient();
+		patient.setId(patientId);
+		Appointment appointment = new Appointment();
+		appointment.setPatient(patient);
+
+		when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
+
+		boolean result = appointmentService.isOwner(appointmentId, patientId);
+
+		assertThat(result).isTrue();
+	}
+
+	@Test
+	void shouldReturnTrueWhenPatientAccessesOwnAppointmentInExtendedCheck() {
+		Long appointmentId = 1L;
+		CustomUserDetails principal = new CustomUserDetails(1L, "u", "p", RoleType.PATIENT, 10L, null);
+
+		Patient patient = new Patient();
+		patient.setId(10L);
+		Appointment appointment = new Appointment();
+		appointment.setPatient(patient);
+
+		when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
+
+		boolean result = appointmentService.isOwnerExtended(appointmentId, principal);
+
+		assertThat(result).isTrue();
+	}
+
+	@Test
+	void shouldReturnTrueWhenDoctorAccessesAssignedVisitInExtendedCheck() {
+		Long appointmentId = 1L;
+		CustomUserDetails principal = new CustomUserDetails(2L, "d", "p", RoleType.DOCTOR, null, 20L);
+
+		Doctor doctor = new Doctor();
+		doctor.setId(20L);
+		Visit visit = new Visit();
+		visit.setPatient(new Patient());
+		visit.getPatient().setId(99L);
+		visit.setDoctor(doctor);
+
+		when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(visit));
+
+		boolean result = appointmentService.isOwnerExtended(appointmentId, principal);
+
+		assertThat(result).isTrue();
+	}
+
+	@Test
+    void shouldReturnFalseWhenAppointmentNotFoundInExtendedCheck() {
+        when(appointmentRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        boolean result = appointmentService.isOwnerExtended(1L,
+            new CustomUserDetails(1L, "u", "p", RoleType.PATIENT, 10L, null));
+
+        assertThat(result).isFalse();
+    }
 
 }

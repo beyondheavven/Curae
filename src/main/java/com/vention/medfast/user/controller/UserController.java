@@ -43,6 +43,7 @@ public class UserController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN') || (hasAnyRole('PATIENT', 'DOCTOR') && #id == authentication.principal.id)")
 	public ResponseWrapper<UserResponseDto> getById(
 			@Parameter(description = "ID of user to be retrieved") @PathVariable Long id) {
 		return ResponseWrapper.ok(userService.getById(id));
@@ -53,6 +54,7 @@ public class UserController {
 			content = @Content(mediaType = "application/json",
 					schema = @Schema(implementation = UserResponseDto.class))), })
 	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseWrapper<Page<UserResponseDto>> getAll(
 			@Parameter(description = "Pagination") @PageableDefault(size = 20) Pageable pageable) {
 		return ResponseWrapper.ok(userService.getAll(pageable));

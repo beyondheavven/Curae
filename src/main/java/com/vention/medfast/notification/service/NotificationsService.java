@@ -13,4 +13,6 @@ public interface NotificationsService {
 
 	void markAsRead(Long notificationId, Long userId);
 
+	boolean isOwner(Long notificationId, Long patientId);
+
 }

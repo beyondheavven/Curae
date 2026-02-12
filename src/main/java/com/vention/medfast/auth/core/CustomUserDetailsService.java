@@ -1,31 +1,39 @@
 package com.vention.medfast.auth.core;
 
+import com.vention.medfast.doctor.service.DoctorService;
+import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.User;
-import com.vention.medfast.user.repository.UserRepository;
+import com.vention.medfast.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-	private final UserRepository userRepository;
+	private final UserService userService;
+
+	private final PatientService patientService;
+
+	private final DoctorService doctorService;
 
 	@Override
 	public UserDetails loadUserByUsername(String username) {
-		User user = userRepository.findByEmail(username)
-			.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		User user = userService.findByUsername(username);
+		Long patientId = null;
+		Long doctorId = null;
 
-		return new CustomUserDetails(user.getId(), user.getEmail(), user.getPasswordHash(), user.getRole());
-	}
+		if (user.getRole() == RoleType.PATIENT) {
+			patientId = patientService.findIdByUserId(user.getId());
+		}
+		else if (user.getRole() == RoleType.DOCTOR) {
+			doctorId = doctorService.findIdByUserId(user.getId());
+		}
 
-	public UserDetails loadByUserId(Long userId) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-		return new CustomUserDetails(user.getId(), user.getEmail(), user.getPasswordHash(), user.getRole());
+		return new CustomUserDetails(user, patientId, doctorId);
 	}
 
 }

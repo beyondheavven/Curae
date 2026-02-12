@@ -58,4 +58,12 @@ public class NotificationServiceImpl implements NotificationsService {
 		notificationRepository.save(notification);
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isOwner(Long notificationId, Long patientId) {
+		return notificationRepository.findById(notificationId)
+			.map(notification -> notification.getPatient().getId().equals(patientId))
+			.orElse(false);
+	}
+
 }

@@ -116,4 +116,38 @@ public class ReferralServiceImplTest {
 			.hasMessageContaining("Invalid status transition");
 	}
 
+	@Test
+	void shouldReturnTrueWhenPatientIsOwnerOfReferral() {
+		Long referralId = 1L;
+		Long patientId = 10L;
+
+		Patient patient = new Patient();
+		patient.setId(patientId);
+		Referral referral = new Referral();
+		referral.setPatient(patient);
+
+		when(referralRepository.findById(referralId)).thenReturn(Optional.of(referral));
+
+		boolean result = referralService.isOwner(referralId, patientId);
+
+		assertThat(result).isTrue();
+	}
+
+	@Test
+	void shouldReturnFalseWhenOtherPatientTriesToUseReferral() {
+		Long referralId = 1L;
+		Long wrongPatientId = 99L;
+
+		Patient actualOwner = new Patient();
+		actualOwner.setId(10L);
+		Referral referral = new Referral();
+		referral.setPatient(actualOwner);
+
+		when(referralRepository.findById(referralId)).thenReturn(Optional.of(referral));
+
+		boolean result = referralService.isOwner(referralId, wrongPatientId);
+
+		assertThat(result).isFalse();
+	}
+
 }

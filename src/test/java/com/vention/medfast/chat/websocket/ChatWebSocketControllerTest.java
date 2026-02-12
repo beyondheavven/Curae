@@ -36,7 +36,7 @@ public class ChatWebSocketControllerTest {
 		Long chatId = 1L;
 		Long userId = 10L;
 
-		CustomUserDetails user = new CustomUserDetails(userId, "test@mail.com", "pass", null);
+		CustomUserDetails user = new CustomUserDetails(userId, "test@mail.com", "pass", null, null, null);
 
 		ChatMessageSendWsDto dto = new ChatMessageSendWsDto("hello");
 

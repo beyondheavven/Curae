@@ -49,7 +49,7 @@ class OnlineConsultationControllerIntegrationTest extends AbstractControllerInte
 				LocalDate.now().plusDays(5), LocalTime.of(15, 0), AppointmentStatus.IN_CONSULTATION,
 				"https://zoom.us/j/updated");
 
-		String token = authService.login(new AuthRequestDto("watson@med.com", "pass")).accessToken();
+		String token = authService.login(new AuthRequestDto("house@med.com", "pass")).accessToken();
 
 		mockMvc
 			.perform(patch(ApiPaths.ONLINE_CONSULTATION_ENDPOINT).header("Authorization", "Bearer " + token)

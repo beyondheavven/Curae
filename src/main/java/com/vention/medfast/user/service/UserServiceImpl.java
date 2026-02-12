@@ -64,6 +64,12 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional(readOnly = true)
+	public User findByUsername(String username) {
+		return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
 	public UserResponseDto getById(Long id) {
 		return userRepository.findById(id)
 			.map(userMapper::toResponseDto)

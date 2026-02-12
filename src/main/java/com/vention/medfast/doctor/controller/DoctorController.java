@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -73,6 +74,7 @@ public class DoctorController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PutMapping("/{id}" + ApiPaths.CLINIC_ENDPOINT)
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseWrapper<DoctorResponseDto> setClinics(
 			@Parameter(description = "ID of doctor to set clinic") @PathVariable Long id,
 			@Valid @RequestBody DoctorClinicAssignmentRequestDto dto) {
@@ -114,6 +116,7 @@ public class DoctorController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseWrapper<DoctorResponseDto> update(
 			@Parameter(description = "ID of doctor to update") @PathVariable Long id,
 			@Valid @RequestBody DoctorUpdateDto dto) {
@@ -128,6 +131,7 @@ public class DoctorController {
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@Parameter(description = "ID of doctor to delete") @PathVariable Long id) {
 		doctorService.delete(id);

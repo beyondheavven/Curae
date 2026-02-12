@@ -24,4 +24,6 @@ public interface PatientService {
 
 	Patient getPatientByEmail(String email);
 
+	Long findIdByUserId(Long userId);
+
 }

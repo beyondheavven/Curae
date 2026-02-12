@@ -11,10 +11,10 @@ import com.vention.medfast.registration.dto.PersonDto;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -91,6 +91,12 @@ public class PatientServiceImpl implements PatientService {
 
 	public Patient findById(Long id) {
 		return patientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Long findIdByUserId(Long userId) {
+		return patientRepository.findIdByUserId(userId).orElse(null);
 	}
 
 }

@@ -83,4 +83,12 @@ public class ReferralServiceImpl implements ReferralService {
 		return referralRepository.save(referral).getId();
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isOwner(Long referralId, Long patientId) {
+		return referralRepository.findById(referralId)
+			.map(referral -> referral.getPatient().getId().equals(patientId))
+			.orElse(false);
+	}
+
 }

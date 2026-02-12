@@ -47,7 +47,7 @@ public class ChatControllerTest {
 
 	@Test
 	void createChatReturnsCreatedResponse() {
-		CustomUserDetails user = new CustomUserDetails(1L, "patient@mail.com", "pwd", RoleType.PATIENT);
+		CustomUserDetails user = new CustomUserDetails(1L, "patient@mail.com", "pwd", RoleType.PATIENT, 1L, null);
 
 		ChatCreateRequestDto request = new ChatCreateRequestDto(2L);
 
@@ -72,7 +72,7 @@ public class ChatControllerTest {
 
 	@Test
 	void getMyChatsReturnsOkResponseWithMappedList() {
-		CustomUserDetails user = new CustomUserDetails(5L, "doctor@mail.com", "pwd", RoleType.DOCTOR);
+		CustomUserDetails user = new CustomUserDetails(5L, "doctor@mail.com", "pwd", RoleType.DOCTOR, null, 5L);
 
 		Chat chat = Chat.create(10L, 5L);
 		chat.setId(1L);
@@ -95,7 +95,7 @@ public class ChatControllerTest {
 
 	@Test
 	void getMessagesReturnsPagedResponse() {
-		CustomUserDetails user = new CustomUserDetails(3L, "patient@mail.com", "pwd", RoleType.PATIENT);
+		CustomUserDetails user = new CustomUserDetails(3L, "patient@mail.com", "pwd", RoleType.PATIENT, 3L, null);
 
 		Pageable pageable = PageRequest.of(0, 20);
 
@@ -121,7 +121,7 @@ public class ChatControllerTest {
 
 	@Test
 	void sendMessageReturnsCreatedResponse() {
-		CustomUserDetails user = new CustomUserDetails(9L, "doctor@mail.com", "pwd", RoleType.DOCTOR);
+		CustomUserDetails user = new CustomUserDetails(9L, "doctor@mail.com", "pwd", RoleType.DOCTOR, null, 9L);
 
 		MessageSendRequestDto request = new MessageSendRequestDto("hello");
 

@@ -7,10 +7,13 @@ import com.vention.medfast.appointment.mapper.AppointmentMapper;
 import com.vention.medfast.appointment.model.Appointment;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
+import com.vention.medfast.appointment.model.OnlineConsultation;
+import com.vention.medfast.appointment.model.Visit;
 import com.vention.medfast.appointment.referral.model.Referral;
 import com.vention.medfast.appointment.referral.service.ReferralService;
 import com.vention.medfast.appointment.repository.AppointmentRepository;
 import com.vention.medfast.appointment.state.AppointmentStateContext;
+import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.notification.eventListener.eventModel.StatusChangedEvent;
 import com.vention.medfast.notification.model.NotificationType;
 import com.vention.medfast.patient.model.Patient;
@@ -132,6 +135,32 @@ public class AppointmentServiceImpl implements AppointmentService {
 	@Override
 	public boolean existsByPatientIdDoctorIdAndStatus(Long patientId, Long doctorId, AppointmentStatus status) {
 		return appointmentRepository.existsByPatientIdAndDoctorIdAndStatus(patientId, doctorId, status);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isOwner(Long appointmentId, Long patientId) {
+		return appointmentRepository.findById(appointmentId)
+			.map(appointment -> appointment.getPatient().getId().equals(patientId))
+			.orElse(false);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public boolean isOwnerExtended(Long appointmentId, CustomUserDetails principal) {
+		return appointmentRepository.findById(appointmentId).map(appointment -> {
+			if (principal.getPatientId() != null && appointment.getPatient().getId().equals(principal.getPatientId())) {
+				return true;
+			}
+
+			return switch (appointment) {
+				case OnlineConsultation oc ->
+					principal.getDoctorId() != null && oc.getDoctor().getId().equals(principal.getDoctorId());
+				case Visit v ->
+					principal.getDoctorId() != null && v.getDoctor().getId().equals(principal.getDoctorId());
+				default -> false;
+			};
+		}).orElse(false);
 	}
 
 }
