@@ -90,6 +90,9 @@ public class SecurityConfig {
 				.requestMatchers(ApiPaths.ONLINE_CONSULTATION_ENDPOINT, ApiPaths.ONLINE_CONSULTATION_ENDPOINT + "/**")
 				.authenticated()
 
+				.requestMatchers(ApiPaths.COUNTRY_ENDPOINT)
+				.permitAll()
+
 				.anyRequest()
 				.authenticated())
 			.authenticationProvider(authenticationProvider)
