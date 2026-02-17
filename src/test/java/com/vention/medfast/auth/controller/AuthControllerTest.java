@@ -50,7 +50,7 @@ public class AuthControllerTest extends AbstractControllerIntegrationTest {
 
 	@Test
 	void shouldReturn401_WhenRefreshTokenIsMalformed() throws Exception {
-		RefreshTokenRequestDto request = new RefreshTokenRequestDto("invalid");
+		RefreshTokenRequestDto request = new RefreshTokenRequestDto("invalid-uuid-string");
 
 		performRequest(HttpMethod.POST, "/auth/refresh", request).andExpect(status().isUnauthorized())
 			.andExpect(jsonPath("$.error.errorCode").value("AUTH_ERROR"))
@@ -91,8 +91,8 @@ public class AuthControllerTest extends AbstractControllerIntegrationTest {
 	void shouldReturn404_whenLogoutWithNonExistentToken() throws Exception {
 		LogoutRequestDto request = new LogoutRequestDto("");
 
-		performRequest(HttpMethod.POST, "/auth/logout", request).andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.error.errorCode").value("BAD_REQUEST"));
+		performRequest(HttpMethod.POST, "/auth/logout", request).andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.error.errorCode").value("AUTH_ERROR"));
 	}
 
 	@Test

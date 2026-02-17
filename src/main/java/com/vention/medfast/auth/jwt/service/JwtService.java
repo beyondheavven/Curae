@@ -10,8 +10,6 @@ public interface JwtService {
 
 	String generateAccessToken(CustomUserDetails user);
 
-	String generateRefreshToken(CustomUserDetails user);
-
 	<T> T extractClaim(String token, Function<Claims, T> resolver);
 
 	String extractUsername(String token);
@@ -21,8 +19,6 @@ public interface JwtService {
 	boolean isTokenExpired(String token);
 
 	boolean isAccessToken(String token);
-
-	boolean isRefreshToken(String token);
 
 	boolean isTokenValid(String token, CustomUserDetails userDetails);
 

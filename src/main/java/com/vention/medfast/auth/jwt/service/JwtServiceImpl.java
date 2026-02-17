@@ -21,8 +21,6 @@ public class JwtServiceImpl implements JwtService {
 
 	public static final String ACCESS = "access";
 
-	public static final String REFRESH = "refresh";
-
 	public static final String CLAIM_UID = "uid";
 
 	public static final String CLAIM_ROLE = "role";
@@ -42,28 +40,17 @@ public class JwtServiceImpl implements JwtService {
 
 	@Override
 	public String generateAccessToken(CustomUserDetails user) {
-		Map<String, Object> claims = buildBaseClaims(user);
-		return buildToken(claims, user.getUsername(), jwtProperties.getAccessTokenExpirationMs(), ACCESS);
-	}
-
-	@Override
-	public String generateRefreshToken(CustomUserDetails user) {
-		Map<String, Object> claims = buildBaseClaims(user);
-		return buildToken(claims, user.getUsername(), jwtProperties.getRefreshTokenExpirationMs(), REFRESH);
-	}
-
-	private Map<String, Object> buildBaseClaims(CustomUserDetails user) {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put(CLAIM_UID, user.getId());
 		claims.put(CLAIM_ROLE, user.getRoleName());
-		return claims;
+		return buildAccessToken(claims, user.getUsername(), jwtProperties.getAccessTokenExpirationMs());
 	}
 
-	private String buildToken(Map<String, Object> extraClaims, String subject, long expirationMs, String tokenType) {
+	private String buildAccessToken(Map<String, Object> extraClaims, String subject, long expirationMs) {
 		Instant now = Instant.now();
 		Instant expiry = now.plusMillis(expirationMs);
 
-		extraClaims.put(CLAIM_TYPE, tokenType);
+		extraClaims.put(CLAIM_TYPE, ACCESS);
 
 		return Jwts.builder()
 			.header()
@@ -115,12 +102,6 @@ public class JwtServiceImpl implements JwtService {
 	public boolean isAccessToken(String token) {
 		String type = extractClaim(token, c -> c.get(CLAIM_TYPE, String.class));
 		return ACCESS.equals(type);
-	}
-
-	@Override
-	public boolean isRefreshToken(String token) {
-		String type = extractClaim(token, c -> c.get(CLAIM_TYPE, String.class));
-		return REFRESH.equals(type);
 	}
 
 	@Override

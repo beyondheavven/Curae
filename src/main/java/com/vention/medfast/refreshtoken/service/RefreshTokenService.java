@@ -7,9 +7,11 @@ public interface RefreshTokenService {
 
 	RefreshToken getByToken(String token);
 
-	RefreshToken createToken(User user, String tokenValue);
+	RefreshToken createToken(User user);
 
-	RefreshToken rotateToken(RefreshToken oldToken, String newTokenValue);
+	RefreshToken rotateToken(RefreshToken refreshToken);
+
+	void verifyExpiration(RefreshToken token);
 
 	void revokeRefreshToken(String tokenValue);
 

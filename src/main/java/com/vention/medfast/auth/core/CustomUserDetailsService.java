@@ -23,6 +23,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) {
 		User user = userService.findByUsername(username);
+		return loadUserEntity(user);
+	}
+
+	public UserDetails loadUserEntity(User user) {
 		Long patientId = null;
 		Long doctorId = null;
 
