@@ -118,13 +118,14 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 	@Transactional
 	public EmailVerificationToken createToken(User user, String code) {
 		EmailVerificationToken token = emailVerificationTokenMapper.createResetPasswordToken(user, code,
-				UUID.randomUUID().toString(), Instant.now().plus(1, ChronoUnit.MINUTES));
+				UUID.randomUUID().toString(), Instant.now().plusMillis(emailVerificationProperties.getTtlMs()));
 		return emailVerificationTokenRepository.save(token);
 	}
 
 	@Override
 	@Transactional
-	public EmailVerificationToken updateToken(EmailVerificationToken token, Instant now) {
+	public EmailVerificationToken updateToken(EmailVerificationToken token) {
+		Instant now = Instant.now();
 		validateResendRules(token, now);
 		token.setResendCount(token.getResendCount() + 1);
 		if (token.getResendCount() >= 3) {
@@ -133,7 +134,7 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 		String code = String.format("%04d", ThreadLocalRandom.current().nextInt(0, 10000));
 		token.setCode(code);
 		token.setTokenHash(UUID.randomUUID().toString());
-		token.setExpiresAt(now.plus(1, ChronoUnit.MINUTES));
+		token.setExpiresAt(now.plusMillis(emailVerificationProperties.getTtlMs()));
 		token.setStatus(EmailTokenStatus.SENT);
 		return token;
 	}

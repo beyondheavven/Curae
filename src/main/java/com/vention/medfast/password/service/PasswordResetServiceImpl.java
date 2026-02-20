@@ -35,7 +35,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 		EmailVerificationToken token;
 		try {
 			EmailVerificationToken oldToken = tokenService.getLatestResetToken(email, EmailTokenType.RESET_PASSWORD);
-			token = tokenService.updateToken(oldToken, Instant.now());
+			token = tokenService.updateToken(oldToken);
 		}
 		catch (EntityNotFoundException e) {
 			token = tokenService.createToken(user, code);

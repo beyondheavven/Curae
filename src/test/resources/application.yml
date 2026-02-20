@@ -8,6 +8,10 @@ spring:
   servlet:
     context-path: /api
 
+app:
+  email-verification:
+    ttl-ms: 3600000
+
 openapi:
   server-url: http://localhost:8080
   server-description: Test server

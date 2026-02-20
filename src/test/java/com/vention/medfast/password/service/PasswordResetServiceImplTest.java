@@ -68,11 +68,11 @@ public class PasswordResetServiceImplTest {
 
 		when(userService.findByUsername(email)).thenReturn(user);
 		when(tokenService.getLatestResetToken(email, EmailTokenType.RESET_PASSWORD)).thenReturn(oldToken);
-		when(tokenService.updateToken(any(), any())).thenReturn(updatedToken);
+		when(tokenService.updateToken(any())).thenReturn(updatedToken);
 
 		service.sendResetCode(email);
 
-		verify(tokenService).updateToken(any(), any());
+		verify(tokenService).updateToken(any());
 		verify(eventPublisher).publishEvent(any(PasswordResetCreatedEvent.class));
 	}
 
@@ -139,11 +139,11 @@ public class PasswordResetServiceImplTest {
 
 		when(userService.findByUsername(email)).thenReturn(user);
 		when(tokenService.getLatestResetToken(email, EmailTokenType.RESET_PASSWORD)).thenReturn(existingToken);
-		when(tokenService.updateToken(any(), any())).thenReturn(updatedToken);
+		when(tokenService.updateToken(any())).thenReturn(updatedToken);
 
 		service.sendResetCode(email);
 
-		verify(tokenService).updateToken(any(), any());
+		verify(tokenService).updateToken(any());
 		verify(eventPublisher).publishEvent(any(PasswordResetCreatedEvent.class));
 
 		assertThat(updatedToken.getResendCount()).isEqualTo(3);

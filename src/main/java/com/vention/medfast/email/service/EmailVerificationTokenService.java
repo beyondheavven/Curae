@@ -23,6 +23,6 @@ public interface EmailVerificationTokenService {
 
 	EmailVerificationToken createToken(User user, String code);
 
-	EmailVerificationToken updateToken(EmailVerificationToken token, Instant now);
+	EmailVerificationToken updateToken(EmailVerificationToken token);
 
 }
