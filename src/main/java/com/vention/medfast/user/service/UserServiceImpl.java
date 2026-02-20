@@ -1,11 +1,13 @@
 package com.vention.medfast.user.service;
 
 import com.vention.medfast.api.exception.EmailAlreadyExistsException;
+import com.vention.medfast.api.exception.UserNotActiveException;
 import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
 import com.vention.medfast.registration.dto.PersonDto;
 import com.vention.medfast.user.dto.UserResponseDto;
 import com.vention.medfast.user.dto.UserUpdateRequestDto;
 import com.vention.medfast.user.mapper.UserMapper;
+import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
 import com.vention.medfast.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -59,13 +61,18 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional(readOnly = true)
 	public Optional<User> findByEmail(String email) {
-		return userRepository.findByEmail(email);
+		Optional<User> byEmail = userRepository.findByEmail(email.toLowerCase());
+		if (byEmail.isPresent() && byEmail.get().getStatus() == Status.UNVERIFIED) {
+			throw new UserNotActiveException("User is not verified");
+		}
+		return byEmail;
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public User findByUsername(String username) {
-		return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+		return userRepository.findByEmail(username.toLowerCase())
+			.orElseThrow(() -> new UsernameNotFoundException("User not found"));
 	}
 
 	@Override

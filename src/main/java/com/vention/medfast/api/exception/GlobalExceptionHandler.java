@@ -68,6 +68,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
 	}
 
+	@ExceptionHandler(UserNotActiveException.class)
+	public ResponseEntity<ResponseWrapper<?>> handleIllegalArgument(UserNotActiveException ex) {
+		return buildError(HttpStatus.BAD_REQUEST, ErrorCode.BAD_REQUEST, ex.getMessage());
+	}
+
 	@ExceptionHandler(IllegalStateException.class)
 	public ResponseEntity<ResponseWrapper<?>> handleIllegalState(IllegalStateException ex) {
 		return buildError(HttpStatus.CONFLICT, ErrorCode.BAD_REQUEST, ex.getMessage());

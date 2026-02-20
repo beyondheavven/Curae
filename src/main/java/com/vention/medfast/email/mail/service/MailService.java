@@ -4,7 +4,7 @@ public interface MailService {
 
 	void sendEmailVerification(String toEmail, String verificationToken);
 
-	void sendPasswordResetCode(String toEmail, int code);
+	void sendPasswordResetCode(String toEmail, String code);
 
 	void sendDoctorWelcomeEmail(String toEmail, String tempPassword, String token);
 

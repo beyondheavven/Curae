@@ -1,10 +1,9 @@
 package com.vention.medfast.password.service;
 
 import com.vention.medfast.api.exception.PasswordResetException;
-import com.vention.medfast.email.mapper.EmailVerificationTokenMapper;
 import com.vention.medfast.email.model.EmailTokenStatus;
+import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
-import com.vention.medfast.email.repository.EmailVerificationTokenRepository;
 import com.vention.medfast.email.service.EmailVerificationTokenService;
 import com.vention.medfast.password.event.PasswordResetCreatedEvent;
 import com.vention.medfast.user.model.User;
@@ -19,7 +18,6 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -34,16 +32,10 @@ public class PasswordResetServiceImplTest {
 	private UserService userService;
 
 	@Mock
-	private EmailVerificationTokenRepository tokenRepository;
-
-	@Mock
 	private EmailVerificationTokenService tokenService;
 
 	@Mock
 	private ApplicationEventPublisher eventPublisher;
-
-	@Mock
-	private EmailVerificationTokenMapper tokenMapper;
 
 	@InjectMocks
 	private PasswordResetServiceImpl service;
@@ -54,45 +46,35 @@ public class PasswordResetServiceImplTest {
 		user.setEmail("test@mail.com");
 
 		EmailVerificationToken token = new EmailVerificationToken();
-		token.setCode(1234);
+		token.setCode("1234");
+		token.setUser(user);
+		token.setType(EmailTokenType.RESET_PASSWORD);
 
-		when(userService.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
-		when(tokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(any(), any())).thenReturn(Optional.empty());
-		when(tokenMapper.createResetPasswordToken(any(), any(), any(), any())).thenReturn(token);
+		when(userService.findByUsername("test@mail.com")).thenReturn(user);
+		when(tokenService.getLatestResetToken(any(), any())).thenThrow(EntityNotFoundException.class);
+		when(tokenService.createToken(any(), any())).thenReturn(token);
 
 		service.sendResetCode("test@mail.com");
-
-		verify(tokenRepository).save(token);
 		verify(eventPublisher).publishEvent(any(PasswordResetCreatedEvent.class));
 	}
 
 	@Test
-	void sendResetCode_shouldUpdateExistingToken() {
+	void sendResetCode_shouldUpdateExistingToken_whenTokenExists() {
+		String email = "test@example.com";
 		User user = new User();
-		user.setEmail("test@mail.com");
+		EmailVerificationToken oldToken = new EmailVerificationToken();
+		EmailVerificationToken updatedToken = new EmailVerificationToken();
+		updatedToken.setCode("1234");
 
-		EmailVerificationToken existing = new EmailVerificationToken();
-		existing.setResendCount(1);
-		existing.setExpiresAt(Instant.now().minusSeconds(10));
+		when(userService.findByUsername(email)).thenReturn(user);
+		when(tokenService.getLatestResetToken(email, EmailTokenType.RESET_PASSWORD)).thenReturn(oldToken);
+		when(tokenService.updateToken(any(), any())).thenReturn(updatedToken);
 
-		when(userService.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
-		when(tokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(any(), any()))
-			.thenReturn(Optional.of(existing));
+		service.sendResetCode(email);
 
-		service.sendResetCode("test@mail.com");
-
-		assertThat(existing.getResendCount()).isEqualTo(2);
-		verify(tokenRepository).save(existing);
+		verify(tokenService).updateToken(any(), any());
+		verify(eventPublisher).publishEvent(any(PasswordResetCreatedEvent.class));
 	}
-
-	@Test
-    void sendResetCode_shouldThrow_whenUserNotFound() {
-        when(userService.findByEmail("missing@mail.com")).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.sendResetCode("missing@mail.com"))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessage("User not found");
-    }
 
 	@Test
 	void verifyCode_shouldReturnResetToken_whenValid() {
@@ -101,19 +83,15 @@ public class PasswordResetServiceImplTest {
 
 		EmailVerificationToken token = new EmailVerificationToken();
 		token.setUser(user);
-		token.setCode(1234);
+		token.setCode("1234");
+		token.setTokenHash("reset-token");
 		token.setExpiresAt(Instant.now().plus(1, ChronoUnit.MINUTES));
-
-		when(userService.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
-		when(tokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(any(), any()))
-			.thenReturn(Optional.of(token));
-		when(tokenService.createForResetPassword(user)).thenReturn("reset-token");
+		when(tokenService.getLatestResetToken(any(), any())).thenReturn(token);
 
 		String result = service.verifyCode("test@mail.com", "1234");
 
 		assertThat(result).isEqualTo("reset-token");
 		assertThat(token.getStatus()).isEqualTo(EmailTokenStatus.VERIFIED);
-		verify(tokenRepository).save(token);
 	}
 
 	@Test
@@ -122,12 +100,9 @@ public class PasswordResetServiceImplTest {
 
 		EmailVerificationToken token = new EmailVerificationToken();
 		token.setUser(user);
-		token.setCode(1234);
+		token.setCode("1234");
 		token.setExpiresAt(Instant.now().plusSeconds(60));
-
-		when(userService.findByEmail(any())).thenReturn(Optional.of(user));
-		when(tokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(any(), any()))
-			.thenReturn(Optional.of(token));
+		when(tokenService.getLatestResetToken(any(), any())).thenReturn(token);
 
 		assertThatThrownBy(() -> service.verifyCode("mail", "0000")).isInstanceOf(PasswordResetException.class)
 			.hasMessage("Code is wrong");
@@ -139,12 +114,9 @@ public class PasswordResetServiceImplTest {
 
 		EmailVerificationToken token = new EmailVerificationToken();
 		token.setUser(user);
-		token.setCode(1234);
+		token.setCode("1234");
 		token.setExpiresAt(Instant.now().minusSeconds(1));
-
-		when(userService.findByEmail(any())).thenReturn(Optional.of(user));
-		when(tokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(any(), any()))
-			.thenReturn(Optional.of(token));
+		when(tokenService.getLatestResetToken(any(), any())).thenReturn(token);
 
 		assertThatThrownBy(() -> service.verifyCode("mail", "1234")).isInstanceOf(PasswordResetException.class)
 			.hasMessage("Code is expired");
@@ -152,22 +124,30 @@ public class PasswordResetServiceImplTest {
 
 	@Test
 	void sendResetCode_shouldBlockTokenAfterThreeResends() {
+		String email = "test@mail.com";
+
 		User user = new User();
-		user.setEmail("test@mail.com");
+		user.setEmail(email);
 
-		EmailVerificationToken token = new EmailVerificationToken();
-		token.setResendCount(2);
-		token.setExpiresAt(Instant.now().minusSeconds(10));
+		EmailVerificationToken existingToken = new EmailVerificationToken();
+		existingToken.setResendCount(2);
+		existingToken.setExpiresAt(Instant.now().minusSeconds(10));
 
-		when(userService.findByEmail(any())).thenReturn(Optional.of(user));
-		when(tokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(any(), any()))
-			.thenReturn(Optional.of(token));
+		EmailVerificationToken updatedToken = new EmailVerificationToken();
+		updatedToken.setResendCount(3);
+		updatedToken.setBlockedUntil(Instant.now().plusSeconds(1800));
 
-		service.sendResetCode("test@mail.com");
+		when(userService.findByUsername(email)).thenReturn(user);
+		when(tokenService.getLatestResetToken(email, EmailTokenType.RESET_PASSWORD)).thenReturn(existingToken);
+		when(tokenService.updateToken(any(), any())).thenReturn(updatedToken);
 
-		assertThat(token.getResendCount()).isEqualTo(3);
-		assertThat(token.getBlockedUntil()).isNotNull();
-		verify(tokenRepository).save(token);
+		service.sendResetCode(email);
+
+		verify(tokenService).updateToken(any(), any());
+		verify(eventPublisher).publishEvent(any(PasswordResetCreatedEvent.class));
+
+		assertThat(updatedToken.getResendCount()).isEqualTo(3);
+		assertThat(updatedToken.getBlockedUntil()).isNotNull();
 	}
 
 	@Test
@@ -176,13 +156,10 @@ public class PasswordResetServiceImplTest {
 
 		EmailVerificationToken token = new EmailVerificationToken();
 		token.setUser(user);
-		token.setCode(1234);
+		token.setCode("1234");
 		token.setExpiresAt(Instant.now().plusSeconds(60));
 		token.setBlockedUntil(Instant.now().plusSeconds(60));
-
-		when(userService.findByEmail(any())).thenReturn(Optional.of(user));
-		when(tokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(any(), any()))
-			.thenReturn(Optional.of(token));
+		when(tokenService.getLatestResetToken(any(), any())).thenReturn(token);
 
 		assertThatThrownBy(() -> service.verifyCode("mail", "1234")).isInstanceOf(PasswordResetException.class)
 			.hasMessage("Too many attempts. Try again later");

@@ -72,7 +72,7 @@ class EmailVerificationTokenMapperTest {
 		user.setId(10L);
 		user.setEmail("reset@med.com");
 
-		Integer code = 555888;
+		String code = "555888";
 		String tokenHash = "secure-hash-value";
 		Instant expiresAt = Instant.now().plus(Duration.ofMinutes(15));
 

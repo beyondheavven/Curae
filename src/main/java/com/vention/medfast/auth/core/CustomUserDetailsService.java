@@ -22,7 +22,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) {
-		User user = userService.findByUsername(username);
+		String normalizedUsername = username.toLowerCase();
+		User user = userService.findByUsername(normalizedUsername);
 		return loadUserEntity(user);
 	}
 

@@ -62,13 +62,13 @@ public class PasswordControllerTest extends AbstractControllerIntegrationTest {
 		String email = "john.smith@mail.com";
 		passwordResetService.sendResetCode(email);
 
-		Integer actualCode = em
-			.createQuery("SELECT v.code FROM EmailVerificationToken v WHERE v.user.email = :email", Integer.class)
+		String actualCode = em
+			.createQuery("SELECT v.code FROM EmailVerificationToken v WHERE v.user.email = :email", String.class)
 			.setParameter("email", email)
 			.getSingleResult();
 
 		PasswordResetVerifyDto request = new PasswordResetVerifyDto();
-		request.setCode(actualCode.toString());
+		request.setCode(actualCode);
 		request.setEmail(email);
 
 		performRequest(HttpMethod.POST, "/account/password-reset/verify", request).andExpect(status().isOk())
@@ -100,8 +100,7 @@ public class PasswordControllerTest extends AbstractControllerIntegrationTest {
 		patient.setStatus(Status.UNVERIFIED);
 		em.persist(patient);
 
-		String rawToken = "AeeFL5k6fiGdNMKHw1tvROlC8RuFJXQrWqnbH2IY44E";
-		String tokenHash = sha256Hex(rawToken);
+		String tokenHash = "AeeFL5k6fiGdNMKHw1tvROlC8RuFJXQrWqnbH2IY44E";
 
 		EmailVerificationToken verificationToken = new EmailVerificationToken();
 		verificationToken.setTokenHash(tokenHash);
@@ -114,7 +113,7 @@ public class PasswordControllerTest extends AbstractControllerIntegrationTest {
 		em.flush();
 		em.clear();
 
-		SetPasswordRequestDto request = new SetPasswordRequestDto(rawToken, "NewSecurePass123!", "NewSecurePass123!");
+		SetPasswordRequestDto request = new SetPasswordRequestDto(tokenHash, "NewSecurePass123!", "NewSecurePass123!");
 
 		performRequest(HttpMethod.POST, "/account/set-password", request).andExpect(status().isNoContent());
 	}

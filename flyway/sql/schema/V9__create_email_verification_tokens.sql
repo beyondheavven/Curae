@@ -9,7 +9,7 @@ CREATE TABLE email_verification_token
     create_date TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     type        VARCHAR(25) NOT NULL,
-    code        INT,
+    code        VARCHAR(255),
     status      VARCHAR(25) NOT NULL,
 
     CONSTRAINT email_verification_token_user_fk

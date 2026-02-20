@@ -51,7 +51,7 @@ public class EmailVerificationToken {
 	private EmailTokenType type;
 
 	@Column(name = "code")
-	private Integer code;
+	private String code;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false, length = 15)

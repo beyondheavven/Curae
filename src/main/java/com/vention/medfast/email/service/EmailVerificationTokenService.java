@@ -4,6 +4,9 @@ import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.user.model.User;
 
+import java.time.Instant;
+import java.util.Optional;
+
 public interface EmailVerificationTokenService {
 
 	String createForPatient(User user);
@@ -16,6 +19,10 @@ public interface EmailVerificationTokenService {
 
 	void deleteToken(EmailVerificationToken token);
 
-	String createForResetPassword(User user);
+	EmailVerificationToken getLatestResetToken(String email, EmailTokenType type);
+
+	EmailVerificationToken createToken(User user, String code);
+
+	EmailVerificationToken updateToken(EmailVerificationToken token, Instant now);
 
 }

@@ -39,9 +39,9 @@ public class MailServiceImpl implements MailService {
 	}
 
 	@Override
-	public void sendPasswordResetCode(String toEmail, int code) {
+	public void sendPasswordResetCode(String toEmail, String code) {
 		sendTemplateEmail(toEmail, mailProps.getSubjects().getResetPassword(),
-				mailProps.getTemplates().getResetPassword(), Map.of("resetCode", String.format("%04d", code)));
+				mailProps.getTemplates().getResetPassword(), Map.of("resetCode", code));
 	}
 
 	@Override

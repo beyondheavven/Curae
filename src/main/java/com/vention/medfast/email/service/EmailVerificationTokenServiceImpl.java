@@ -1,6 +1,8 @@
 package com.vention.medfast.email.service;
 
+import com.vention.medfast.api.exception.PasswordResetException;
 import com.vention.medfast.email.mapper.EmailVerificationTokenMapper;
+import com.vention.medfast.email.model.EmailTokenStatus;
 import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.email.properties.EmailVerificationProperties;
@@ -20,7 +22,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -80,8 +86,7 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 
 	@Override
 	@Transactional
-	public EmailVerificationToken validateToken(String rawToken, EmailTokenType expectedType) {
-		String tokenHash = sha256Hex(rawToken);
+	public EmailVerificationToken validateToken(String tokenHash, EmailTokenType expectedType) {
 
 		EmailVerificationToken token = emailVerificationTokenRepository.findByTokenHash(tokenHash)
 			.orElseThrow(() -> new EntityNotFoundException("Token not found"));
@@ -104,9 +109,42 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public String createForResetPassword(User user) {
-		return generateAndSaveToken(user, EmailTokenType.RESET_PASSWORD);
+	public EmailVerificationToken getLatestResetToken(String email, EmailTokenType type) {
+		return emailVerificationTokenRepository.findTopByUserEmailAndTypeOrderByCreatedAtDesc(email, type)
+			.orElseThrow(() -> new EntityNotFoundException("Token not found"));
+	}
+
+	@Override
+	@Transactional
+	public EmailVerificationToken createToken(User user, String code) {
+		EmailVerificationToken token = emailVerificationTokenMapper.createResetPasswordToken(user, code,
+				UUID.randomUUID().toString(), Instant.now().plus(1, ChronoUnit.MINUTES));
+		return emailVerificationTokenRepository.save(token);
+	}
+
+	@Override
+	@Transactional
+	public EmailVerificationToken updateToken(EmailVerificationToken token, Instant now) {
+		validateResendRules(token, now);
+		token.setResendCount(token.getResendCount() + 1);
+		if (token.getResendCount() >= 3) {
+			token.setBlockedUntil(now.plus(30, ChronoUnit.MINUTES));
+		}
+		String code = String.format("%04d", ThreadLocalRandom.current().nextInt(0, 10000));
+		token.setCode(code);
+		token.setTokenHash(UUID.randomUUID().toString());
+		token.setExpiresAt(now.plus(1, ChronoUnit.MINUTES));
+		token.setStatus(EmailTokenStatus.SENT);
+		return token;
+	}
+
+	private void validateResendRules(EmailVerificationToken token, Instant now) {
+		if (token.getBlockedUntil() != null && token.getBlockedUntil().isAfter(now)) {
+			throw new PasswordResetException("Too many attempts. Try again later");
+		}
+		if (token.getExpiresAt() != null && token.getExpiresAt().isAfter(now)) {
+			throw new PasswordResetException("Please wait before resending code");
+		}
 	}
 
 	private String generateAndSaveToken(User user, EmailTokenType type) {

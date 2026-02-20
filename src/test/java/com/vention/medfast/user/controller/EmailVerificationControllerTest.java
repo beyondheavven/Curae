@@ -38,8 +38,7 @@ public class EmailVerificationControllerTest extends AbstractControllerIntegrati
 		patient.setStatus(Status.UNVERIFIED);
 		em.persist(patient);
 
-		String rawToken = "AeeFL5k6fiGdNMKHw1tvROlC8RuFJXQrWqnbH2IY44E";
-		String tokenHash = sha256Hex(rawToken);
+		String tokenHash = "AeeFL5k6fiGdNMKHw1tvROlC8RuFJXQrWqnbH2IY44E";
 
 		EmailVerificationToken verificationToken = new EmailVerificationToken();
 		verificationToken.setTokenHash(tokenHash);
@@ -52,14 +51,14 @@ public class EmailVerificationControllerTest extends AbstractControllerIntegrati
 		em.flush();
 		em.clear();
 
-		mockMvc.perform(get("/auth/verify").param("token", rawToken)).andExpect(status().isOk());
+		mockMvc.perform(get("/auth/verify").param("token", tokenHash)).andExpect(status().isOk());
 
 		User updatedUser = em.find(User.class, patient.getId());
 		assertThat(updatedUser.getStatus()).isEqualTo(Status.ACTIVE);
 
 		boolean tokenExists = em
 			.createQuery("SELECT count(t) > 0 FROM EmailVerificationToken t WHERE t.tokenHash = :token", Boolean.class)
-			.setParameter("token", rawToken)
+			.setParameter("token", tokenHash)
 			.getSingleResult();
 		assertThat(tokenExists).isFalse();
 	}
