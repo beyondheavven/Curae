@@ -20,6 +20,7 @@ import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
 import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.patient.service.PatientService;
+import com.vention.medfast.wrapper.CachedPage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
@@ -74,7 +76,7 @@ class TestServiceImplTest {
 	@DisplayName("Should return patient lab history page")
 	void shouldReturnPatientLabHistory() {
 		Long userId = 1L;
-		Pageable pageable = Pageable.unpaged();
+		Pageable pageable = PageRequest.of(0, 10);
 		TestHistoryRow historyRow = new TestHistoryRow(10L, LocalDate.now(), AppointmentStatus.COMPLETED);
 
 		when(testRepository.findLabHistoryRows(userId, pageable)).thenReturn(new PageImpl<>(List.of(historyRow)));
@@ -84,12 +86,13 @@ class TestServiceImplTest {
 
 		when(labResultRepository.findHistoryRowsByTestIds(List.of(10L))).thenReturn(List.of(labRow));
 
-		Page<PatientLabHistoryDTO> result = testService.getPatientLabHistory(userId, pageable);
+		CachedPage<PatientLabHistoryDTO> result = testService.getPatientLabHistory(userId, pageable);
 
 		assertThat(result).isNotNull();
-		assertThat(result.getContent()).hasSize(1);
+		assertThat(result.content()).hasSize(1);
+		assertThat(result.totalElements()).isEqualTo(1);
 
-		PatientLabHistoryDTO dto = result.getContent().get(0);
+		PatientLabHistoryDTO dto = result.content().get(0);
 		assertThat(dto.appointmentId()).isEqualTo(10L);
 		assertThat(dto.tests()).hasSize(1);
 		assertThat(dto.tests().get(0).testName()).isEqualTo("Blood Test");

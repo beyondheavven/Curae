@@ -27,9 +27,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -50,7 +48,6 @@ public class Appointment {
 	private LocalTime time;
 
 	@Enumerated(EnumType.STRING)
-	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "status", nullable = false)
 	private AppointmentStatus status;
 
@@ -59,7 +56,6 @@ public class Appointment {
 	private Patient patient;
 
 	@Enumerated(EnumType.STRING)
-	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
 	@Column(name = "type", nullable = false)
 	private AppointmentType type;
 

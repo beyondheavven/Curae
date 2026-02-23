@@ -6,6 +6,7 @@ import com.vention.medfast.appointment.dto.TestCreateWithLabsDto;
 import com.vention.medfast.appointment.service.TestService;
 import com.vention.medfast.auth.core.CustomUserDetails;
 import com.vention.medfast.constants.ApiPaths;
+import com.vention.medfast.wrapper.CachedPage;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -48,7 +50,9 @@ public class TestController {
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	public ResponseWrapper<Page<PatientLabHistoryDTO>> getLabHistory(@AuthenticationPrincipal CustomUserDetails user,
 			@PageableDefault(size = 10, sort = "date", direction = Sort.Direction.DESC) Pageable pageable) {
-		return ResponseWrapper.ok(testService.getPatientLabHistory(user.getId(), pageable));
+		CachedPage<PatientLabHistoryDTO> cached = testService.getPatientLabHistory(user.getId(), pageable);
+		Page<PatientLabHistoryDTO> page = new PageImpl<>(cached.content(), pageable, cached.totalElements());
+		return ResponseWrapper.ok(page);
 	}
 
 	@PreAuthorize("hasRole('DOCTOR')")

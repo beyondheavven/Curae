@@ -16,12 +16,14 @@ import com.vention.medfast.patient.service.PatientService;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.service.service.ProvidedServiceService;
 import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
+import com.vention.medfast.wrapper.CachedSlice;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -63,7 +65,10 @@ public class VisitServiceImpl implements VisitService {
 		String email = auth.getName();
 		Patient patient = patientService.getPatientByEmail(email);
 
-		return visitCacheService.getVisits(patient.getId(), type, pageable.getPageNumber(), pageable.getPageSize());
+		CachedSlice<VisitListItemDto> cached = visitCacheService.getVisits(patient.getId(), type,
+				pageable.getPageNumber(), pageable.getPageSize());
+
+		return new SliceImpl<>(cached.content(), pageable, cached.hasNext());
 	}
 
 	@Override

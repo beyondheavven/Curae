@@ -19,6 +19,9 @@ spring:
       - filesystem:${user.dir}/flyway/sql/data
     clean-disabled: false
 
+  cache:
+    type: simple
+
 custom:
   security:
     public-routes: "/actuator/**"

@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.vention.medfast.wrapper.CachedPage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,12 +52,12 @@ public class TestServiceImpl implements TestService {
 	@Override
 	@Transactional(readOnly = true)
 	@Cacheable(cacheNames = "patientTestHistory",
-			key = "#userId + ':' + #pageable.pageNumber + ':' + #pageable.pageSize")
-	public Page<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable) {
+			key = "'patient:' + #userId + ':page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize", sync = true)
+	public CachedPage<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable) {
 		Page<TestHistoryRow> tests = testRepository.findLabHistoryRows(userId, pageable);
 
 		if (tests.isEmpty()) {
-			return Page.empty(pageable);
+			return new CachedPage<>(List.of(), pageable.getPageNumber(), pageable.getPageSize(), 0);
 		}
 
 		List<Long> testIds = tests.stream().map(TestHistoryRow::testId).toList();
@@ -66,12 +69,16 @@ public class TestServiceImpl implements TestService {
 					Collectors.mapping(lr -> new LabResultDTO(lr.labResultId(), lr.testName(), lr.status(),
 							lr.resultUrl(), lr.uploadedAt()), Collectors.toList())));
 
-		return tests.map(test -> new PatientLabHistoryDTO(test.testId(), test.date(), test.status().name(),
-				resultsByTestId.getOrDefault(test.testId(), List.of())));
+		Page<PatientLabHistoryDTO> page = tests.map(test -> new PatientLabHistoryDTO(test.testId(), test.date(),
+				test.status().name(), resultsByTestId.getOrDefault(test.testId(), List.of())));
+
+		return new CachedPage<>(page.getContent(), pageable.getPageNumber(), pageable.getPageSize(),
+				page.getTotalElements());
 	}
 
 	@Override
 	@Transactional
+	@CacheEvict(cacheNames = "patientTestHistory", allEntries = true)
 	public void createWithLabs(TestCreateWithLabsDto req) {
 		Patient patient = patientService.getById(req.patientId());
 		Clinic clinic = clinicService.findById(req.clinicId());

@@ -5,6 +5,7 @@ import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
 import com.vention.medfast.appointment.dto.TestCreateWithLabsDto;
 import com.vention.medfast.appointment.service.TestService;
 import com.vention.medfast.auth.core.CustomUserDetails;
+import com.vention.medfast.wrapper.CachedPage;
 import com.vention.medfast.wrapper.ResponseWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,12 +47,15 @@ class TestControllerTest {
 
 		Pageable pageable = Pageable.unpaged();
 		PatientLabHistoryDTO historyDto = new PatientLabHistoryDTO(1L, LocalDate.now(), "COMPLETED", List.of());
-		Page<PatientLabHistoryDTO> expectedPage = new PageImpl<>(List.of(historyDto));
+		CachedPage<PatientLabHistoryDTO> expectedPage = new CachedPage<>(List.of(historyDto), 0, 10, 1);
 
 		when(testService.getPatientLabHistory(userId, pageable)).thenReturn(expectedPage);
 
 		ResponseWrapper<Page<PatientLabHistoryDTO>> response = controller.getLabHistory(user, pageable);
-		assertThat(response.getData()).isEqualTo(expectedPage);
+		Page<PatientLabHistoryDTO> page = response.getData();
+		assertThat(page.getContent()).hasSize(1);
+		assertThat(page.getContent().get(0)).isEqualTo(historyDto);
+		assertThat(page.getTotalElements()).isEqualTo(1);
 		assertThat(response.getStatus()).isEqualTo(HttpStatus.OK);
 		verify(testService).getPatientLabHistory(userId, pageable);
 	}

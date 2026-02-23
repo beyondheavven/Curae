@@ -3,6 +3,7 @@ package com.vention.medfast.appointment.service.cache;
 import com.vention.medfast.appointment.dto.VisitListItemDto;
 import com.vention.medfast.appointment.model.VisitType;
 import com.vention.medfast.appointment.repository.VisitRepository;
+import com.vention.medfast.wrapper.CachedSlice;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,15 +37,18 @@ public class VisitCacheServiceTest {
 		int page = 0;
 		int size = 10;
 
-		Slice<VisitListItemDto> expected = new SliceImpl<>(List.of());
+		Slice<VisitListItemDto> expected = new SliceImpl<>(List.of(), PageRequest.of(page, size), false);
 
 		when(visitRepository.findPastByPatient(eq(patientId), any(LocalDate.class), any(LocalTime.class),
 				any(PageRequest.class)))
 			.thenReturn(expected);
 
-		Slice<VisitListItemDto> result = visitCacheService.getVisits(patientId, VisitType.PAST, page, size);
+		CachedSlice<VisitListItemDto> result = visitCacheService.getVisits(patientId, VisitType.PAST, page, size);
 
-		assertThat(result).isSameAs(expected);
+		assertThat(result.content()).isEqualTo(expected.getContent());
+		assertThat(result.page()).isEqualTo(page);
+		assertThat(result.size()).isEqualTo(size);
+		assertThat(result.hasNext()).isFalse();
 
 		verify(visitRepository).findPastByPatient(eq(patientId), any(LocalDate.class), any(LocalTime.class),
 				any(PageRequest.class));
@@ -56,15 +60,18 @@ public class VisitCacheServiceTest {
 		int page = 1;
 		int size = 5;
 
-		Slice<VisitListItemDto> expected = new SliceImpl<>(List.of());
+		Slice<VisitListItemDto> expected = new SliceImpl<>(List.of(), PageRequest.of(page, size), true);
 
 		when(visitRepository.findUpcomingByPatient(eq(patientId), any(LocalDate.class), any(LocalTime.class),
 				any(PageRequest.class)))
 			.thenReturn(expected);
 
-		Slice<VisitListItemDto> result = visitCacheService.getVisits(patientId, VisitType.UPCOMING, page, size);
+		CachedSlice<VisitListItemDto> result = visitCacheService.getVisits(patientId, VisitType.UPCOMING, page, size);
 
-		assertThat(result).isSameAs(expected);
+		assertThat(result.content()).isEqualTo(expected.getContent());
+		assertThat(result.page()).isEqualTo(page);
+		assertThat(result.size()).isEqualTo(size);
+		assertThat(result.hasNext()).isTrue();
 
 		verify(visitRepository).findUpcomingByPatient(eq(patientId), any(LocalDate.class), any(LocalTime.class),
 				any(PageRequest.class));

@@ -81,6 +81,21 @@ spring:
   flyway:
     enabled: false
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      timeout: 2000ms
+
+  cache:
+    type: redis
+
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+
 validation:
   password:
     regex: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$"
@@ -93,6 +108,8 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+    org.springframework.cache: TRACE
+    org.springframework.data.redis.cache: TRACE
 
 app:
   base-url: ${openapi.server-url}
