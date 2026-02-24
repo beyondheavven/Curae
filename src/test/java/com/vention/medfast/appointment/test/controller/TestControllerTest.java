@@ -47,7 +47,7 @@ class TestControllerTest {
 
 		Pageable pageable = Pageable.unpaged();
 		PatientLabHistoryDTO historyDto = new PatientLabHistoryDTO(1L, LocalDate.now(), "COMPLETED", List.of());
-		CachedPage<PatientLabHistoryDTO> expectedPage = new CachedPage<>(List.of(historyDto), 0, 10, 1);
+		Page<PatientLabHistoryDTO> expectedPage = new PageImpl<>(List.of(historyDto));
 
 		when(testService.getPatientLabHistory(userId, pageable)).thenReturn(expectedPage);
 

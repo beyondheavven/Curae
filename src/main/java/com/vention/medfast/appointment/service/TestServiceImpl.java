@@ -6,9 +6,9 @@ import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
 import com.vention.medfast.appointment.model.Test;
 import com.vention.medfast.appointment.repository.TestRepository;
+import com.vention.medfast.appointment.service.cache.TestCacheService;
 import com.vention.medfast.clinic.model.Clinic;
 import com.vention.medfast.clinic.service.ClinicService;
-import com.vention.medfast.labresult.repository.LabResultRepository;
 import com.vention.medfast.labresult.service.LabResultService;
 import com.vention.medfast.labtest.model.LabTest;
 import com.vention.medfast.labtest.service.LabTestService;
@@ -18,16 +18,12 @@ import com.vention.medfast.statistics.dto.response.AppointmentStatusCounts;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.vention.medfast.wrapper.CachedPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,8 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class TestServiceImpl implements TestService {
 
 	private final TestRepository testRepository;
-
-	private final LabResultRepository labResultRepository;
 
 	private final PatientService patientService;
 
@@ -49,31 +43,15 @@ public class TestServiceImpl implements TestService {
 
 	private final TestMapper testMapper;
 
+	private final TestCacheService testCacheService;
+
 	@Override
 	@Transactional(readOnly = true)
-	@Cacheable(cacheNames = "patientTestHistory",
-			key = "'patient:' + #userId + ':page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize", sync = true)
-	public CachedPage<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable) {
-		Page<TestHistoryRow> tests = testRepository.findLabHistoryRows(userId, pageable);
+	public Page<PatientLabHistoryDTO> getPatientLabHistory(Long userId, Pageable pageable) {
+		CachedPage<PatientLabHistoryDTO> cached = testCacheService.getPatientLabHistory(userId,
+				pageable.getPageNumber(), pageable.getPageSize());
 
-		if (tests.isEmpty()) {
-			return new CachedPage<>(List.of(), pageable.getPageNumber(), pageable.getPageSize(), 0);
-		}
-
-		List<Long> testIds = tests.stream().map(TestHistoryRow::testId).toList();
-
-		List<LabResultRow> labResults = labResultRepository.findHistoryRowsByTestIds(testIds);
-
-		Map<Long, List<LabResultDTO>> resultsByTestId = labResults.stream()
-			.collect(Collectors.groupingBy(LabResultRow::testId,
-					Collectors.mapping(lr -> new LabResultDTO(lr.labResultId(), lr.testName(), lr.status(),
-							lr.resultUrl(), lr.uploadedAt()), Collectors.toList())));
-
-		Page<PatientLabHistoryDTO> page = tests.map(test -> new PatientLabHistoryDTO(test.testId(), test.date(),
-				test.status().name(), resultsByTestId.getOrDefault(test.testId(), List.of())));
-
-		return new CachedPage<>(page.getContent(), pageable.getPageNumber(), pageable.getPageSize(),
-				page.getTotalElements());
+		return new PageImpl<>(cached.content(), pageable, cached.totalElements());
 	}
 
 	@Override
