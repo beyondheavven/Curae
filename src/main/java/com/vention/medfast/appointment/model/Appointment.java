@@ -27,9 +27,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
 
 @Getter
 @Setter
@@ -57,9 +57,8 @@ public class Appointment {
 	@JoinColumn(name = "patient_id", nullable = false)
 	private Patient patient;
 
-	@Enumerated(EnumType.STRING)
-	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
-	@Column(name = "type", nullable = false, columnDefinition = "appointment_type_enum")
+	@JdbcType(PostgreSQLEnumJdbcType.class)
+	@Column(name = "type", nullable = false)
 	private AppointmentType type;
 
 	@ManyToOne(fetch = FetchType.LAZY)
