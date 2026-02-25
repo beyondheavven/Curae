@@ -27,7 +27,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 @Getter
 @Setter
@@ -56,7 +58,8 @@ public class Appointment {
 	private Patient patient;
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "type", nullable = false)
+	@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+	@Column(name = "type", nullable = false, columnDefinition = "appointment_type_enum")
 	private AppointmentType type;
 
 	@ManyToOne(fetch = FetchType.LAZY)

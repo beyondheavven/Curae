@@ -1,6 +1,7 @@
 package com.vention.medfast.appointment.service;
 
-import com.vention.medfast.appointment.dto.*;
+import com.vention.medfast.appointment.dto.PatientLabHistoryDTO;
+import com.vention.medfast.appointment.dto.TestCreateWithLabsDto;
 import com.vention.medfast.appointment.mapper.TestMapper;
 import com.vention.medfast.appointment.model.AppointmentStatus;
 import com.vention.medfast.appointment.model.AppointmentType;
@@ -23,7 +24,9 @@ import java.util.Set;
 import com.vention.medfast.wrapper.CachedPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
