@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +25,7 @@ class OnlineConsultationControllerIntegrationTest extends AbstractControllerInte
 	@Test
 	void shouldReturnOnlineConsultationWhenAuthorized() throws Exception {
 		performRequest(HttpMethod.GET, ApiPaths.ONLINE_CONSULTATION_ENDPOINT + "/{id}", null, EXISTING_ID)
+			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.id").value(EXISTING_ID))
 			.andExpect(jsonPath("$.data.meetingLink").value("https://zoom.us/j/987654321"));

@@ -48,7 +48,8 @@ public class TestController {
 					content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))) })
 	public ResponseWrapper<Page<PatientLabHistoryDTO>> getLabHistory(@AuthenticationPrincipal CustomUserDetails user,
 			@PageableDefault(size = 10, sort = "date", direction = Sort.Direction.DESC) Pageable pageable) {
-		return ResponseWrapper.ok(testService.getPatientLabHistory(user.getId(), pageable));
+		Page<PatientLabHistoryDTO> page = testService.getPatientLabHistory(user.getId(), pageable);
+		return ResponseWrapper.ok(page);
 	}
 
 	@PreAuthorize("hasRole('DOCTOR')")

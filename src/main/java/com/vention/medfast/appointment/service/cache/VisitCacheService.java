@@ -6,6 +6,7 @@ import com.vention.medfast.appointment.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
+import com.vention.medfast.wrapper.CachedSlice;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
@@ -18,18 +19,20 @@ public class VisitCacheService {
 
 	private final VisitRepository visitRepository;
 
-	@Cacheable(cacheNames = "patientVisits", key = "T(java.util.Objects).hash(#patientId, #type, #page, #size)",
-			sync = true)
-	public Slice<VisitListItemDto> getVisits(Long patientId, VisitType type, int page, int size) {
+	@Cacheable(cacheNames = "patientVisits",
+			key = "'patient:' + #patientId + ':type:' + #type + ':page:' + #page + ':size:' + #size", sync = true)
+	public CachedSlice<VisitListItemDto> getVisits(Long patientId, VisitType type, int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
 		LocalDateTime now = LocalDateTime.now();
 
-		return switch (type) {
+		Slice<VisitListItemDto> slice = switch (type) {
 			case PAST -> visitRepository.findPastByPatient(patientId, now.toLocalDate(), now.toLocalTime(), pageable);
 			case UPCOMING ->
 				visitRepository.findUpcomingByPatient(patientId, now.toLocalDate(), now.toLocalTime(), pageable);
 		};
+
+		return new CachedSlice<>(slice.getContent(), page, size, slice.hasNext());
 	}
 
 }

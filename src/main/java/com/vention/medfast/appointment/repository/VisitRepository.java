@@ -32,7 +32,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
 			join v.clinic c
 			join c.address addr
 			where a.patient.id = :patientId
-			  and a.type = com.vention.medfast.appointment.model.AppointmentType.VISIT
+			  and a.type = "VISIT"
 			  and (a.date, a.time) > (:today, :now)
 			order by a.date, a.time
 			""")

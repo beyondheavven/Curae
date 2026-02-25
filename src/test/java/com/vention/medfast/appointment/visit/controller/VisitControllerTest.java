@@ -11,6 +11,7 @@ import com.vention.medfast.patient.model.Patient;
 import com.vention.medfast.service.model.ProvidedService;
 import com.vention.medfast.appointment.dto.VisitCreateDto;
 import com.vention.medfast.appointment.model.Visit;
+import com.vention.medfast.wrapper.CachedSlice;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -95,7 +96,7 @@ class VisitControllerTest extends AbstractControllerIntegrationTest {
 		VisitListItemDto dto = new VisitListItemDto("John", "Doe", "Clinic", "Kyiv", LocalDate.now().minusDays(1),
 				LocalTime.NOON, AppointmentStatus.COMPLETED);
 
-		Slice<VisitListItemDto> slice = new SliceImpl<>(List.of(dto));
+		CachedSlice<VisitListItemDto> slice = new CachedSlice<>(List.of(dto), 0, 10, false);
 
 		when(visitCacheService.getVisits(any(), eq(VisitType.PAST), anyInt(), anyInt())).thenReturn(slice);
 
@@ -107,7 +108,8 @@ class VisitControllerTest extends AbstractControllerIntegrationTest {
 	@Test
 	void shouldReturnEmptyArrayWhenNoUpcomingVisitsAvailable() throws Exception {
 		login("jane.doe@mail.com", "pass");
-		when(visitCacheService.getVisits(any(), any(), anyInt(), anyInt())).thenReturn(new SliceImpl<>(List.of()));
+		when(visitCacheService.getVisits(any(), any(), anyInt(), anyInt()))
+			.thenReturn(new CachedSlice<>(List.of(), 0, 10, false));
 		performRequest(HttpMethod.GET, "/visits?type=UPCOMING&page=0&size=10", null).andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.content").isArray())
 			.andExpect(jsonPath("$.data.content.length()").value(0));

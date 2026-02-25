@@ -31,7 +31,7 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 
 	private final DoctorService doctorService;
 
-	@Cacheable(cacheNames = "onlineConsultationDetails", key = "#consultationId")
+	@Cacheable(cacheNames = "onlineConsultationDetails", key = "'consultation:' + #consultationId", sync = true)
 	@Override
 	@Transactional(readOnly = true)
 	public OnlineConsultationDetails getDetails(Long consultationId) {
@@ -53,7 +53,7 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 		onlineConsultationRepository.save(oc);
 	}
 
-	@CacheEvict(cacheNames = "onlineConsultationDetails", key = "#consultationId")
+	@CacheEvict(cacheNames = "onlineConsultationDetails", key = "'consultation:' + #consultationId")
 	@Override
 	@Transactional
 	public void deleteById(Long consultationId) {
@@ -61,7 +61,7 @@ public class OnlineConsultationServiceImpl implements OnlineConsultationService 
 		onlineConsultationRepository.delete(oc);
 	}
 
-	@CacheEvict(cacheNames = "onlineConsultationDetails", key = "#req.onlineConsultationId()")
+	@CacheEvict(cacheNames = "onlineConsultationDetails", key = "'consultation:' + #req.onlineConsultationId()")
 	@Override
 	@Transactional
 	public void update(UpdateOnlineConsultationRequest req) {

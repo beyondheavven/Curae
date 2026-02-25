@@ -24,7 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
+import com.vention.medfast.wrapper.CachedSlice;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -126,9 +126,10 @@ class VisitServiceImplTest {
 		patient.setId(1L);
 		VisitListItemDto dto = new VisitListItemDto("John", "Doe", "Clinic", "Kyiv", LocalDate.now(), LocalTime.NOON,
 				AppointmentStatus.COMPLETED);
-		Slice<VisitListItemDto> slice = new SliceImpl<>(List.of(dto));
+		CachedSlice<VisitListItemDto> slice = new CachedSlice<>(List.of(dto), 0, 10, false);
 		Pageable pageable = mock(Pageable.class);
-
+		when(pageable.getPageNumber()).thenReturn(0);
+		when(pageable.getPageSize()).thenReturn(10);
 		SecurityContextHolder.setContext(securityContext);
 		when(securityContext.getAuthentication()).thenReturn(authentication);
 		when(authentication.getName()).thenReturn(email);
@@ -139,6 +140,7 @@ class VisitServiceImplTest {
 		Slice<VisitListItemDto> result = visitService.findAllForPatient(VisitType.UPCOMING, pageable);
 
 		assertThat(result.getContent()).containsExactly(dto);
+		assertThat(result.hasNext()).isFalse();
 		verify(visitCacheService).getVisits(any(), any(), anyInt(), anyInt());
 	}
 
@@ -149,9 +151,10 @@ class VisitServiceImplTest {
 		patient.setId(1L);
 		VisitListItemDto dto = new VisitListItemDto("Jane", "Doe", "Clinic", "Lviv", LocalDate.now(), LocalTime.NOON,
 				AppointmentStatus.COMPLETED);
-		Slice<VisitListItemDto> slice = new SliceImpl<>(List.of(dto));
+		CachedSlice<VisitListItemDto> slice = new CachedSlice<>(List.of(dto), 0, 10, true);
 		Pageable pageable = mock(Pageable.class);
-
+		when(pageable.getPageNumber()).thenReturn(0);
+		when(pageable.getPageSize()).thenReturn(10);
 		SecurityContextHolder.setContext(securityContext);
 		when(securityContext.getAuthentication()).thenReturn(authentication);
 		when(authentication.getName()).thenReturn(email);
@@ -162,6 +165,7 @@ class VisitServiceImplTest {
 		Slice<VisitListItemDto> result = visitService.findAllForPatient(VisitType.PAST, pageable);
 
 		assertThat(result.getContent()).containsExactly(dto);
+		assertThat(result.hasNext()).isTrue();
 		verify(visitCacheService).getVisits(any(), any(), anyInt(), anyInt());
 	}
 
