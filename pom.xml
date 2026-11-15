@@ -15,8 +15,17 @@
   <groupId>com.vention</groupId>
   <artifactId>medfast</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+  <packaging>pom</packaging>
   <name>Medfast</name>
   <description>Medfast backend (REST API)</description>
+  <modules>
+    <module>common-events</module>
+    <module>api-gateway</module>
+    <module>appointment-service</module>
+    <module>auth-service</module>
+    <module>payment-service</module>
+    <module>notification-service</module>
+  </modules>
 
   <properties>
     <java.version>25</java.version>
@@ -29,6 +38,7 @@
     <jacoco.version>0.8.14</jacoco.version>
     <maven.surefire.version>3.5.4</maven.surefire.version>
     <hibernate.processor.version>7.2.0.Final</hibernate.processor.version>
+    <jjwt.version>0.12.5</jjwt.version>
   </properties>
 
   <dependencies>
