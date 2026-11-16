@@ -1,4 +1,4 @@
-package com.vention.medfast.auth.dto;
+package com.vention.medfast.auth.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

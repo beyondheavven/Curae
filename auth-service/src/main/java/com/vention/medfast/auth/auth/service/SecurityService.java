@@ -1,4 +1,4 @@
-package com.vention.medfast.auth.service;
+package com.vention.medfast.auth.auth.service;
 
 public interface SecurityService {
 

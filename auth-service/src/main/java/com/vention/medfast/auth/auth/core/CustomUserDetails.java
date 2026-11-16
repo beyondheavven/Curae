@@ -1,7 +1,5 @@
-package com.vention.medfast.auth.core;
+package com.vention.medfast.auth.auth.core;
 
-import com.vention.medfast.user.model.RoleType;
-import com.vention.medfast.user.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,6 +1,6 @@
-package com.vention.medfast.auth.jwt;
+package com.vention.medfast.auth.auth.jwt;
 
-import com.vention.medfast.auth.core.CustomUserDetails;
+import com.vention.medfast.auth.auth.core.CustomUserDetails;
 import com.vention.medfast.auth.jwt.service.JwtServiceImpl;
 import com.vention.medfast.doctor.repository.DoctorRepository;
 import com.vention.medfast.patient.repository.PatientRepository;

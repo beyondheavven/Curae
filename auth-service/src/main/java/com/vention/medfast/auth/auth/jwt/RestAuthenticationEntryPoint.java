@@ -1,4 +1,4 @@
-package com.vention.medfast.auth.jwt;
+package com.vention.medfast.auth.auth.jwt;
 
 import com.vention.medfast.wrapper.ErrorCode;
 import com.vention.medfast.wrapper.ResponseWrapper;

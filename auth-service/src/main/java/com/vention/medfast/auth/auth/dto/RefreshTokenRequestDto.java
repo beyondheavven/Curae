@@ -1,4 +1,4 @@
-package com.vention.medfast.auth.dto;
+package com.vention.medfast.auth.auth.dto;
 
 import jakarta.validation.constraints.NotNull;
 

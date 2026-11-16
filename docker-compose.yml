@@ -1,6 +1,6 @@
 services:
   app:
-    container_name: medfast_api
+    container_name: portal-api
     build: .
     environment:
       - SPRING_PROFILES_ACTIVE=dev,rabbit

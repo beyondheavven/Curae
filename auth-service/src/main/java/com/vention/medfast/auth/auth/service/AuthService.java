@@ -1,4 +1,4 @@
-package com.vention.medfast.auth.service;
+package com.vention.medfast.auth.auth.service;
 
 import com.vention.medfast.auth.dto.AuthRequestDto;
 import com.vention.medfast.auth.dto.AuthResponseDto;

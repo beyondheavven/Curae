@@ -57,7 +57,7 @@ Database initialization and migrations are automated using Docker Compose.
 
 ## Database ER Diagram
 
-![Database ER Diagram](Medfast_internship.png)
+![Database ER Diagram](structure.png)
 
 ## Quick Start
 

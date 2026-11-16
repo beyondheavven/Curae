@@ -1,12 +1,8 @@
-package com.vention.medfast.auth.controller;
+package com.vention.medfast.auth.auth.controller;
 
-import com.vention.medfast.auth.dto.AuthRequestDto;
-import com.vention.medfast.auth.dto.AuthResponseDto;
-import com.vention.medfast.auth.dto.LogoutRequestDto;
-import com.vention.medfast.auth.dto.RefreshTokenRequestDto;
-import com.vention.medfast.auth.service.AuthService;
-import com.vention.medfast.constants.ApiPaths;
-import com.vention.medfast.wrapper.ResponseWrapper;
+import com.vention.medfast.auth.auth.dto.AuthResponseDto;
+import com.vention.medfast.auth.auth.dto.LogoutRequestDto;
+import com.vention.medfast.auth.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

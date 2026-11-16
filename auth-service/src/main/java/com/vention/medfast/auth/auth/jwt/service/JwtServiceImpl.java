@@ -1,7 +1,7 @@
-package com.vention.medfast.auth.jwt.service;
+package com.vention.medfast.auth.auth.jwt.service;
 
-import com.vention.medfast.auth.core.CustomUserDetails;
-import com.vention.medfast.auth.jwt.JwtProperties;
+import com.vention.medfast.auth.auth.core.CustomUserDetails;
+import com.vention.medfast.auth.auth.jwt.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;

@@ -1,4 +1,4 @@
-package com.vention.medfast.auth.core;
+package com.vention.medfast.auth.auth.core;
 
 import com.vention.medfast.doctor.service.DoctorService;
 import com.vention.medfast.patient.service.PatientService;
