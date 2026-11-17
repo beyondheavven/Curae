@@ -1,9 +1,13 @@
 services:
   app:
     container_name: portal-api
-    build: .
+    build:
+      context: .
+      args:
+        APP_MODULE: api-gateway
     environment:
       - SPRING_PROFILES_ACTIVE=dev,rabbit
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
       - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
@@ -35,7 +39,108 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_started
+      kafka:
+        condition: service_started
       loki:
+        condition: service_started
+
+  auth-service:
+    container_name: medfast-auth-service
+    build:
+      context: .
+      args:
+        APP_MODULE: auth-service
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - AUTH_DB_NAME=${AUTH_DB_NAME}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_VERIFICATION_TTL_MS=${EMAIL_VERIFICATION_TTL_MS}
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  appointment-service:
+    container_name: medfast-appointment-service
+    build:
+      context: .
+      args:
+        APP_MODULE: appointment-service
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - APPOINTMENT_DB_NAME=${APPOINTMENT_DB_NAME}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - "8082:8082"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  payment-service:
+    container_name: medfast-payment-service
+    build:
+      context: .
+      args:
+        APP_MODULE: payment-service
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PAYMENT_DB_NAME=${PAYMENT_DB_NAME}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - JWT_SECRET=${JWT_SECRET}
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - WEBHOOK_SECRET_KEY=${WEBHOOK_SECRET_KEY}
+      - PAYMENT_SUCCESS_URL=${PAYMENT_SUCCESS_URL}
+      - PAYMENT_CANCEL_URL=${PAYMENT_CANCEL_URL}
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  notification-service:
+    container_name: medfast-notification-service
+    build:
+      context: .
+      args:
+        APP_MODULE: notification-service
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - NOTIFICATION_DB_NAME=${NOTIFICATION_DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+      - MAIL_SMTP_STARTTLS=${MAIL_SMTP_STARTTLS}
+      - APP_BASE_URL=http://localhost:8080
+    ports:
+      - "8084:8084"
+    depends_on:
+      kafka:
         condition: service_started
 
   postgres:
@@ -49,6 +154,7 @@ services:
       - "${POSTGRES_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./scripts/init-databases.sql:/docker-entrypoint-initdb.d/01-init-databases.sql:ro
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
@@ -64,6 +170,26 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  kafka:
+    image: apache/kafka:3.9.1
+    container_name: medfast-kafka
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:9094,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    restart: unless-stopped
 
   loki:
     image: grafana/loki:3.5.9
@@ -115,11 +241,11 @@ services:
   stripe-cli:
     image: stripe/stripe-cli:latest
     container_name: stripe-cli
-    command: listen --forward-to http://app:8080/api/webhook --api-key ${STRIPE_SECRET_KEY} --log-level info
+    command: listen --forward-to http://payment-service:8083/webhook --api-key ${STRIPE_SECRET_KEY} --log-level info
     environment:
       - STRIPE_API_KEY=${STRIPE_SECRET_KEY}
     depends_on:
-      - app
+      - payment-service
     restart: on-failure
 
   rabbitmq:

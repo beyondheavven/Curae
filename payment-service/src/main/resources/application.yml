@@ -16,7 +16,7 @@ spring:
     enabled: true
     locations: classpath:db/migration
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -31,11 +31,18 @@ spring:
         spring.json.trusted.packages: "com.vention.medfast.event"
 
 stripe:
-  public-key: ${STRIPE_PUBLIC_KEY:}
-  secret-key: ${STRIPE_SECRET_KEY:}
-  webhook-secret: ${WEBHOOK_SECRET_KEY:}
-  success-url: ${PAYMENT_SUCCESS_URL:http://localhost:8080/payment/success}
-  cancel-url: ${PAYMENT_CANCEL_URL:http://localhost:8080/payment/cancel}
+  public-key: ${STRIPE_PUBLIC_KEY:pk_test_placeholder}
+  secret-key: ${STRIPE_SECRET_KEY:sk_test_placeholder}
+  webhook-secret: ${WEBHOOK_SECRET_KEY:whsec_placeholder}
+  payment-success-url: ${PAYMENT_SUCCESS_URL:http://localhost:8080/payment-success.html}
+  payment-cancel-url: ${PAYMENT_CANCEL_URL:http://localhost:8080/payment-failed.html}
+
+jwt:
+  secret: ${JWT_SECRET:very-long-secret-should-be-at-least-256-bit}
+
+custom:
+  security:
+    public-routes: /error,/actuator,/actuator/**,/v3/api-docs,/swagger-ui,/webhook,/webhook/**,/payment-success.html,/payment-failed.html,/payment-cancel.html
 
 management:
   endpoints:
@@ -45,3 +52,10 @@ management:
   endpoint:
     health:
       show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

@@ -4,6 +4,60 @@ server:
 spring:
   application:
     name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: auth-service
+              uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
+              predicates:
+                - Path=/auth/**,/account/**,/users/**,/registration/**
+            - id: appointment-service
+              uri: ${APPOINTMENT_SERVICE_URL:http://appointment-service:8082}
+              predicates:
+                - Path=/appointments/**,/visits/**,/tests/**,/test/**,/online-consultations/**,/online-consultation/**,/referrals/**,/prescriptions/**,/statistics/**,/lab-results/**,/doctors/**,/clinics/**,/patients/**
+            - id: payment-service
+              uri: ${PAYMENT_SERVICE_URL:http://payment-service:8083}
+              predicates:
+                - Path=/payment/**,/purchase/**,/payments/**,/purchases/**,/webhook,/webhook/**,/payment-success.html,/payment-failed.html,/payment-cancel.html
+            - id: notification-service
+              uri: ${NOTIFICATION_SERVICE_URL:http://notification-service:8084}
+              predicates:
+                - Path=/notifications/**
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs/gateway
+  swagger-ui:
+    url: /v3/api-docs
+    path: /api/swagger-ui.html
+
+gateway:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:8000,http://localhost:3000,http://localhost:8080}
+  jwt-secret: ${JWT_SECRET:very-long-secret-should-be-at-least-256-bit}
+  public-paths:
+    - /error
+    - /actuator
+    - /auth
+    - /account
+    - /registration
+    - /webhook
+    - /v3/api-docs
+    - /swagger-ui
+    - /api/swagger-ui.html
+    - /payment-success.html
+    - /payment-failed.html
+    - /payment-cancel.html
+  services:
+    - name: auth-service
+      url: ${AUTH_SERVICE_URL:http://auth-service:8081}
+    - name: appointment-service
+      url: ${APPOINTMENT_SERVICE_URL:http://appointment-service:8082}
+    - name: payment-service
+      url: ${PAYMENT_SERVICE_URL:http://payment-service:8083}
+    - name: notification-service
+      url: ${NOTIFICATION_SERVICE_URL:http://notification-service:8084}
 
 management:
   endpoints:
@@ -13,3 +67,10 @@ management:
   endpoint:
     health:
       show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+
+logging:
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

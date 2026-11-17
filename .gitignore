@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 
 # === Spring configs ===
+.env
 src/main/resources/application.properties
 src/main/resources/application-*.properties
 

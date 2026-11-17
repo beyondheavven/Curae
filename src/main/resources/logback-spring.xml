@@ -5,7 +5,7 @@
   <springProperty scope="context" name="springAppVersion" source="spring.application.version" defaultValue="0.0.0"/>
   <springProperty scope="context" name="springActiveProfile" source="spring.profiles.active" defaultValue="dev"/>
 
-  <property name="CONSOLE_PATTERN" value="%d{HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) %logger{36} - %msg%n"/>
+  <property name="CONSOLE_PATTERN" value="%d{HH:mm:ss.SSS} %magenta([%thread]) %highlight(%-5level) [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"/>
 
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
@@ -54,6 +54,8 @@
         <contextName>
           <fieldName>ServiceName</fieldName>
         </contextName>
+
+        <mdc/>
 
         <arguments>
           <includeNonStructuredArguments>false</includeNonStructuredArguments>
