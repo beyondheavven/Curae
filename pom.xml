@@ -25,6 +25,8 @@
     <module>auth-service</module>
     <module>payment-service</module>
     <module>notification-service</module>
+    <module>user-profile-service</module>
+    <module>provider-service</module>
   </modules>
 
   <properties>

@@ -26,4 +26,16 @@ public class AuthEventPublisher {
 				new PasswordResetCodeRequestedEvent(email, code, Instant.now()));
 	}
 
+	public void patientProfileRegistered(PatientRegistrationEvent event) {
+		kafkaTemplate.send("user.patient-profile.registered", event);
+	}
+
+	public void doctorProfileRegistered(DoctorRegistrationEvent event) {
+		kafkaTemplate.send("provider.doctor.registered", event);
+	}
+
+	public void userIdentityUpdated(UserIdentityUpdatedEvent event) {
+		kafkaTemplate.send("user.identity.updated", event);
+	}
+
 }

@@ -12,11 +12,19 @@ spring:
             - id: auth-service
               uri: ${AUTH_SERVICE_URL:http://auth-service:8081}
               predicates:
-                - Path=/auth/**,/account/**,/users/**,/registration/**
+                - Path=/auth/**,/account/**,/users/**,/registration/**,/countries/**
             - id: appointment-service
               uri: ${APPOINTMENT_SERVICE_URL:http://appointment-service:8082}
               predicates:
-                - Path=/appointments/**,/visits/**,/tests/**,/test/**,/online-consultations/**,/online-consultation/**,/referrals/**,/prescriptions/**,/statistics/**,/lab-results/**,/doctors/**,/clinics/**,/patients/**
+                - Path=/appointments/**,/visits/**,/tests/**,/test/**,/online-consultations/**,/online-consultation/**,/referrals/**,/prescriptions/**,/statistics/**,/lab-results/**,/clinics/**
+            - id: user-profile-service
+              uri: ${USER_PROFILE_SERVICE_URL:http://user-profile-service:8085}
+              predicates:
+                - Path=/profile/**,/patients/**
+            - id: provider-service
+              uri: ${PROVIDER_SERVICE_URL:http://provider-service:8086}
+              predicates:
+                - Path=/doctors/**,/specializations/**,/services/**
             - id: payment-service
               uri: ${PAYMENT_SERVICE_URL:http://payment-service:8083}
               predicates:
@@ -42,6 +50,7 @@ gateway:
     - /auth
     - /account
     - /registration
+    - /countries
     - /webhook
     - /v3/api-docs
     - /swagger-ui
@@ -54,6 +63,10 @@ gateway:
       url: ${AUTH_SERVICE_URL:http://auth-service:8081}
     - name: appointment-service
       url: ${APPOINTMENT_SERVICE_URL:http://appointment-service:8082}
+    - name: user-profile-service
+      url: ${USER_PROFILE_SERVICE_URL:http://user-profile-service:8085}
+    - name: provider-service
+      url: ${PROVIDER_SERVICE_URL:http://provider-service:8086}
     - name: payment-service
       url: ${PAYMENT_SERVICE_URL:http://payment-service:8083}
     - name: notification-service

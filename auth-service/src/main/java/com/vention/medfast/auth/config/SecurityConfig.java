@@ -59,6 +59,9 @@ public class SecurityConfig {
 				.requestMatchers("/auth/login", "/auth/refresh", "/auth/verify")
 				.permitAll()
 
+				.requestMatchers(HttpMethod.GET, "/countries/**")
+				.permitAll()
+
 				.requestMatchers("/ws/**", "/api/ws")
 				.permitAll()
 

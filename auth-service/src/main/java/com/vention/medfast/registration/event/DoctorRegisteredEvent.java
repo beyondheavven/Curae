@@ -1,4 +1,6 @@
 package com.vention.medfast.registration.event;
 
-public record DoctorRegisteredEvent(Long userId, String tempPassword) {
+import com.vention.medfast.registration.dto.DoctorRegistrationRequestDto;
+
+public record DoctorRegisteredEvent(Long userId, String tempPassword, DoctorRegistrationRequestDto request) {
 }

@@ -7,6 +7,8 @@ import com.vention.medfast.email.model.EmailTokenType;
 import com.vention.medfast.email.model.EmailVerificationToken;
 import com.vention.medfast.email.properties.EmailVerificationProperties;
 import com.vention.medfast.email.repository.EmailVerificationTokenRepository;
+import com.vention.medfast.event.AuthEventPublisher;
+import com.vention.medfast.event.UserIdentityUpdatedEvent;
 import com.vention.medfast.user.model.RoleType;
 import com.vention.medfast.user.model.Status;
 import com.vention.medfast.user.model.User;
@@ -43,6 +45,8 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 
 	private final EmailVerificationTokenMapper emailVerificationTokenMapper;
 
+	private final AuthEventPublisher authEventPublisher;
+
 	private final SecureRandom secureRandom = new SecureRandom();
 
 	private final EmailVerificationProperties emailVerificationProperties;
@@ -77,6 +81,10 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 
 		user.setStatus(Status.ACTIVE);
 		emailVerificationTokenRepository.delete(token);
+		authEventPublisher.userIdentityUpdated(new UserIdentityUpdatedEvent(user.getId(), user.getEmail(),
+				user.getFirstName(), user.getLastName(),
+				user.getBirthDate() != null ? user.getBirthDate().toString() : null, user.getStatus().name(),
+				Instant.now()));
 	}
 
 	@Override

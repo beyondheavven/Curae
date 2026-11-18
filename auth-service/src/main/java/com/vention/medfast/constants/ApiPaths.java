@@ -28,4 +28,6 @@ public final class ApiPaths {
 
 	public static final String RESET_PASSWORD_VERIFY_ENDPOINT = "password-reset/verify";
 
+	public static final String COUNTRY_ENDPOINT = "/countries";
+
 }

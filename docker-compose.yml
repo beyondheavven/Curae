@@ -271,7 +271,52 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
     restart: unless-stopped
 
+
+  user-profile-service:
+    container_name: medfast-user-profile-service
+    build:
+      context: .
+      args:
+        APP_MODULE: user-profile-service
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PROFILE_DB_NAME=${PROFILE_DB_NAME:-medfast_profile}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
+  provider-service:
+    container_name: medfast-provider-service
+    build:
+      context: .
+      args:
+        APP_MODULE: provider-service
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - PROVIDER_DB_NAME=${PROVIDER_DB_NAME:-medfast_provider}
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - JWT_SECRET=${JWT_SECRET}
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+
 volumes:
   pgdata:
   grafana_storage:
-  loki_data:
+  loki_data:
