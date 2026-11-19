@@ -37,3 +37,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# === Local compose build logs ===
+compose-*.out
+compose-*.err

@@ -29,9 +29,11 @@ Curae is split into domain services behind an API Gateway. Services communicate 
 - `scripts/init-databases.sql` — creates service databases on first PostgreSQL init
 - `*/src/main/resources/db/migration/` — Flyway migrations per service
 - `monitoring/` — Prometheus, Loki, Promtail, Grafana provisioning & dashboards
+- `k8s/` — Kubernetes manifests (Deployments, Services, HPA, Ingress, infrastructure, kustomization)
+- `.github/workflows/` — CI (build + test on PRs) and CD (images to GHCR + deploy)
 - `postman/` — API collection and environment
 - `docker-compose.yml`, `Dockerfile` — containerized build/run
-- `ACTUATOR.md`, `TESTING_CONVENTIONS.md` — additional docs
+- `ACTUATOR.md`, `TESTING_CONVENTIONS.md`, `CONTRIBUTING.md` — additional docs
 
 ## Prerequisites
 
@@ -110,6 +112,39 @@ Useful endpoints:
 
 Service ports: gateway `8080`, auth `8081`, appointment `8082`, payment `8083`, notification `8084`, profile `8085`, provider `8086`, chat `8087`.
 
+## Kubernetes
+
+`k8s/` contains a kustomization that deploys the whole stack into the `curae` namespace. All application services are exposed internally as `ClusterIP`; the only outside entry point is an **nginx Ingress** on 80/443.
+
+| External host | Backend | What you get |
+| --- | --- | --- |
+| `api.curae.local` | `api-gateway:8080` | REST API, Swagger `/api/swagger-ui.html`, OpenAPI `/v3/api-docs` |
+| `grafana.curae.local` | `grafana:3000` | Dashboards (admin / `GF_ADMIN_PASSWORD`) |
+| `prometheus.curae.local` | `prometheus:9090` | Targets, alerts |
+| `loki.curae.local` | `loki:3100` | Log API |
+| `rabbitmq.curae.local` | `rabbitmq:15672` | RabbitMQ management UI |
+
+8080/3000/9090/3100 are **in-cluster** ports. From outside use the Ingress hosts on 80/443. Replace `curae.local` with your real domain and add TLS in the Ingress (cert-manager annotation) for HTTPS.
+
+Prerequisites: an nginx Ingress Controller, a default StorageClass, and two objects created from local files (not committed):
+
+```bash
+kubectl create secret generic curae-secrets --from-env-file=.env -n curae
+kubectl create configmap grafana-dashboards --from-file=monitoring/grafana/dashboards -n curae
+```
+
+`curae-secrets` must contain `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `JWT_SECRET`, `GF_ADMIN_PASSWORD`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`, `REDIS_PASSWORD`, plus the mail/Stripe keys used by notification and payment services.
+
+Deploy and inspect:
+
+```bash
+kubectl apply -k k8s
+kubectl -n curae get pods,svc,ingress,hpa
+kubectl -n curae rollout status deployment/api-gateway
+```
+
+Each service starts with 2 replicas and an HPA (`min 2 / max 5`, CPU 70%, memory 80%). Stateful infrastructure (Postgres, Kafka, RabbitMQ, Redis, Loki, Prometheus, Grafana) runs 1 replica with PVCs. Probes use `/actuator/health/readiness` and `/actuator/health/liveness` (see `ACTUATOR.md`).
+
 ## Local Build
 
 ```bash
@@ -161,7 +196,15 @@ Most service modules include `src/test`; `common-events` and `chat-service` curr
 2. Select the **Dev** environment.
 3. Run the collection (consider adding a small delay, e.g. 200 ms, to avoid token/race issues during rotation).
 
+## CI/CD and Git Workflow
+
+- `ci.yml` runs `./mvnw -B -ntp verify` on pull requests to `main` and on pushes to feature branches.
+- `cd.yml` runs on pushes to `main`: builds 8 images, pushes them to GHCR, applies `k8s/`, pins each Deployment to the commit SHA and waits for rollout.
+- Deploy needs repository secret `KUBE_CONFIG` (base64-encoded kubeconfig). Without it the deploy steps are skipped.
+- Direct pushes to `main` are not allowed — see `CONTRIBUTING.md` for the branch/PR workflow and branch-protection settings.
+
 ## Additional Documentation
 
 - `ACTUATOR.md` — actuator endpoints and diagnostics
 - `TESTING_CONVENTIONS.md` — testing guidelines
+- `CONTRIBUTING.md` — branching, PR and release workflow

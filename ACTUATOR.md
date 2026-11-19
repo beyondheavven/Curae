@@ -36,6 +36,24 @@ Exposure is configured per service in `*/src/main/resources/application.yml` und
 - Grafana: `http://localhost:3000` with provisioned Prometheus/Loki datasources and dashboards in `monitoring/grafana/`.
 - Logs are collected by Promtail from containers matching `curae-*` and stored in Loki.
 
+## Kubernetes
+
+Inside the cluster the same ports are reachable by service name (e.g. `http://api-gateway:8080/actuator/health`). From outside use the nginx Ingress hosts on 80/443:
+
+| Host | Service | Actuator |
+| --- | --- | --- |
+| `api.curae.local` | api-gateway | `/actuator/health`, `/actuator/prometheus` |
+| `grafana.curae.local` | grafana | Grafana UI |
+| `prometheus.curae.local` | prometheus | Prometheus UI |
+
+Spring Boot health probes are enabled in every service (`management.endpoint.health.probes.enabled: true`):
+
+- `/actuator/health/liveness` — liveness probe
+- `/actuator/health/readiness` — readiness probe
+- `/actuator/health` — startup probe
+
+Probes are called by kubelet on the pod IP, not through the gateway. Gateway `public-paths` already permits the `/actuator` prefix.
+
 ## Runtime Diagnostics
 
 To inspect/change log levels at runtime (where actuator loggers endpoint is exposed), use `/actuator/loggers` on the target service, for example:

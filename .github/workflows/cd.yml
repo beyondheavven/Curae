@@ -1,0 +1,97 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/beyondheavven/patient-portal
+
+jobs:
+  build-images:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - api-gateway
+          - auth-service
+          - appointment-service
+          - payment-service
+          - notification-service
+          - user-profile-service
+          - provider-service
+          - chat-service
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          build-args: APP_MODULE=${{ matrix.module }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.module }}:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}/${{ matrix.module }}:latest
+
+  deploy:
+    needs: build-images
+    runs-on: ubuntu-latest
+    env:
+      KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        if: env.KUBE_CONFIG != ''
+        run: |
+          mkdir -p ~/.kube
+          printf '%s' "$KUBE_CONFIG" | base64 -d > ~/.kube/config
+
+      - name: Apply manifests
+        if: env.KUBE_CONFIG != ''
+        run: kubectl apply -k k8s
+
+      - name: Pin images to current commit
+        if: env.KUBE_CONFIG != ''
+        run: |
+          kubectl -n curae set image deployment/api-gateway api-gateway=${{ env.IMAGE_PREFIX }}/api-gateway:${{ github.sha }}
+          kubectl -n curae set image deployment/auth-service auth-service=${{ env.IMAGE_PREFIX }}/auth-service:${{ github.sha }}
+          kubectl -n curae set image deployment/appointment-service appointment-service=${{ env.IMAGE_PREFIX }}/appointment-service:${{ github.sha }}
+          kubectl -n curae set image deployment/payment-service payment-service=${{ env.IMAGE_PREFIX }}/payment-service:${{ github.sha }}
+          kubectl -n curae set image deployment/notification-service notification-service=${{ env.IMAGE_PREFIX }}/notification-service:${{ github.sha }}
+          kubectl -n curae set image deployment/user-profile-service user-profile-service=${{ env.IMAGE_PREFIX }}/user-profile-service:${{ github.sha }}
+          kubectl -n curae set image deployment/provider-service provider-service=${{ env.IMAGE_PREFIX }}/provider-service:${{ github.sha }}
+          kubectl -n curae set image deployment/chat-service chat-service=${{ env.IMAGE_PREFIX }}/chat-service:${{ github.sha }}
+
+      - name: Wait for rollout
+        if: env.KUBE_CONFIG != ''
+        run: |
+          kubectl -n curae rollout status deployment/api-gateway --timeout=5m
+          kubectl -n curae rollout status deployment/auth-service --timeout=5m
+          kubectl -n curae rollout status deployment/appointment-service --timeout=5m
+          kubectl -n curae rollout status deployment/payment-service --timeout=5m
+          kubectl -n curae rollout status deployment/notification-service --timeout=5m
+          kubectl -n curae rollout status deployment/user-profile-service --timeout=5m
+          kubectl -n curae rollout status deployment/provider-service --timeout=5m
+          kubectl -n curae rollout status deployment/chat-service --timeout=5m
