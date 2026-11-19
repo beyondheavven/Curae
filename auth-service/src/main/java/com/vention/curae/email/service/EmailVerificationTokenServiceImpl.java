@@ -81,10 +81,10 @@ public class EmailVerificationTokenServiceImpl implements EmailVerificationToken
 
 		user.setStatus(Status.ACTIVE);
 		emailVerificationTokenRepository.delete(token);
-		authEventPublisher.userIdentityUpdated(new UserIdentityUpdatedEvent(user.getId(), user.getEmail(),
-				user.getFirstName(), user.getLastName(),
-				user.getBirthDate() != null ? user.getBirthDate().toString() : null, user.getStatus().name(),
-				Instant.now()));
+		authEventPublisher
+			.userIdentityUpdated(new UserIdentityUpdatedEvent(user.getId(), user.getEmail(), user.getFirstName(),
+					user.getLastName(), user.getBirthDate() != null ? user.getBirthDate().toString() : null,
+					user.getStatus().name(), Instant.now()));
 	}
 
 	@Override

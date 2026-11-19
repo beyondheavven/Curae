@@ -23,7 +23,8 @@ public class AppointmentClient {
 				.queryParam("doctorId", doctorId)
 				.build())
 			.retrieve()
-			.body(new ParameterizedTypeReference<ResponseWrapper<Boolean>>() {});
+			.body(new ParameterizedTypeReference<ResponseWrapper<Boolean>>() {
+			});
 		return result != null && Boolean.TRUE.equals(result.getData());
 	}
 

@@ -143,10 +143,10 @@ public class UserServiceImpl implements UserService {
 				|| !Objects.equals(oldProfileUrl, saved.getProfileUrl());
 
 		if (identityChanged) {
-			authEventPublisher.userIdentityUpdated(new UserIdentityUpdatedEvent(saved.getId(), saved.getEmail(),
-					saved.getFirstName(), saved.getLastName(),
-					saved.getBirthDate() != null ? saved.getBirthDate().toString() : null, saved.getStatus().name(),
-					Instant.now()));
+			authEventPublisher
+				.userIdentityUpdated(new UserIdentityUpdatedEvent(saved.getId(), saved.getEmail(), saved.getFirstName(),
+						saved.getLastName(), saved.getBirthDate() != null ? saved.getBirthDate().toString() : null,
+						saved.getStatus().name(), Instant.now()));
 		}
 
 		return userMapper.toResponseDto(saved);

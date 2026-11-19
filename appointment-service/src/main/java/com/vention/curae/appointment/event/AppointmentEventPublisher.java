@@ -23,17 +23,18 @@ public class AppointmentEventPublisher {
 
 	public void appointmentCreated(Appointment appointment, Long doctorId) {
 		kafkaTemplate.send("appointment.created",
-				new AppointmentCreatedEvent(appointment.getId(), appointment.getPatientId(), patientEmail(appointment.getPatientId()),
-						patientName(appointment.getPatientId()), doctorId, doctorName(doctorId),
-						appointment.getScheduledDate().atTime(appointment.getScheduledTime()), null, Instant.now()));
+				new AppointmentCreatedEvent(appointment.getId(), appointment.getPatientId(),
+						patientEmail(appointment.getPatientId()), patientName(appointment.getPatientId()), doctorId,
+						doctorName(doctorId), appointment.getScheduledDate().atTime(appointment.getScheduledTime()),
+						null, Instant.now()));
 	}
 
 	public void appointmentCreated(Appointment appointment, Long doctorId, Long serviceId) {
 		kafkaTemplate.send("appointment.created",
-				new AppointmentCreatedEvent(appointment.getId(), appointment.getPatientId(), patientEmail(appointment.getPatientId()),
-						patientName(appointment.getPatientId()), doctorId, doctorName(doctorId),
-						appointment.getScheduledDate().atTime(appointment.getScheduledTime()), servicePrice(serviceId),
-						Instant.now()));
+				new AppointmentCreatedEvent(appointment.getId(), appointment.getPatientId(),
+						patientEmail(appointment.getPatientId()), patientName(appointment.getPatientId()), doctorId,
+						doctorName(doctorId), appointment.getScheduledDate().atTime(appointment.getScheduledTime()),
+						servicePrice(serviceId), Instant.now()));
 	}
 
 	public void appointmentStatusChanged(Appointment appointment, Long doctorId, String oldStatus, String newStatus) {
@@ -52,14 +53,18 @@ public class AppointmentEventPublisher {
 		if (patientId == null) {
 			return null;
 		}
-		return userSnapshotRepository.findById(patientId).map(s -> joinName(s.getFirstName(), s.getLastName())).orElse(null);
+		return userSnapshotRepository.findById(patientId)
+			.map(s -> joinName(s.getFirstName(), s.getLastName()))
+			.orElse(null);
 	}
 
 	private String doctorName(Long doctorId) {
 		if (doctorId == null) {
 			return null;
 		}
-		return userSnapshotRepository.findById(doctorId).map(s -> joinName(s.getFirstName(), s.getLastName())).orElse(null);
+		return userSnapshotRepository.findById(doctorId)
+			.map(s -> joinName(s.getFirstName(), s.getLastName()))
+			.orElse(null);
 	}
 
 	private BigDecimal servicePrice(Long serviceId) {

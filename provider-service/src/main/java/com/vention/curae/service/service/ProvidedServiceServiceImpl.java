@@ -74,8 +74,9 @@ public class ProvidedServiceServiceImpl implements ProvidedServiceService {
 		Set<Long> oldIds = service.getSpecializations().stream().map(Specialization::getId).collect(Collectors.toSet());
 		Set<Long> newIds = newSpecializations.stream().map(Specialization::getId).collect(Collectors.toSet());
 		service.getSpecializations().removeIf(oldSpec -> !newIds.contains(oldSpec.getId()));
-		newSpecializations.stream().filter(newSpec -> !oldIds.contains(newSpec.getId()))
-				.forEach(service.getSpecializations()::add);
+		newSpecializations.stream()
+			.filter(newSpec -> !oldIds.contains(newSpec.getId()))
+			.forEach(service.getSpecializations()::add);
 
 		ProvidedService saved = serviceRepository.save(service);
 		publishUpsert(saved);
@@ -92,7 +93,7 @@ public class ProvidedServiceServiceImpl implements ProvidedServiceService {
 	@Transactional(readOnly = true)
 	public Page<ProvidedServiceResponseDto> search(String query, Pageable pageable) {
 		return serviceRepository.findAll(ProvidedServiceSpecification.searchService(query), pageable)
-				.map(serviceMapper::toDto);
+			.map(serviceMapper::toDto);
 	}
 
 	private void publishUpsert(ProvidedService service) {

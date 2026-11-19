@@ -50,8 +50,7 @@ public class ClinicFeedbackController {
 	}
 
 	@Operation(summary = "Create feedback for clinic")
-	@ApiResponses({
-			@ApiResponse(responseCode = "201", description = "Successfully created"),
+	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Successfully created"),
 			@ApiResponse(responseCode = "400", description = "Validation or business error",
 					content = @Content(mediaType = "application/json",
 							schema = @Schema(implementation = ErrorResponseDto.class))) })

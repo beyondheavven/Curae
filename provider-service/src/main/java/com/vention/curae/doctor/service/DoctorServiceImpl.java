@@ -50,7 +50,7 @@ public class DoctorServiceImpl implements DoctorService {
 	@Transactional(readOnly = true)
 	public Page<DoctorSearchResponseDto> search(DoctorSearchDto searchDto, Pageable pageable) {
 		return doctorRepository.findAll(DoctorSpecification.searchBySearchDto(searchDto), pageable)
-				.map(this::toSearchResponse);
+			.map(this::toSearchResponse);
 	}
 
 	@Override
@@ -94,8 +94,8 @@ public class DoctorServiceImpl implements DoctorService {
 			snapshot.setFirstName(dto.firstName());
 			snapshot.setLastName(dto.lastName());
 			userSnapshotRepository.save(snapshot);
-			UserProfileIdentitySyncRequestedEvent event = new UserProfileIdentitySyncRequestedEvent(snapshot.getUserId(),
-					snapshot.getEmail(), snapshot.getFirstName(), snapshot.getLastName(),
+			UserProfileIdentitySyncRequestedEvent event = new UserProfileIdentitySyncRequestedEvent(
+					snapshot.getUserId(), snapshot.getEmail(), snapshot.getFirstName(), snapshot.getLastName(),
 					snapshot.getBirthDate() != null ? snapshot.getBirthDate().toString() : null,
 					snapshot.getProfileUrl(), false, Instant.now());
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
@@ -141,10 +141,14 @@ public class DoctorServiceImpl implements DoctorService {
 		validateIds(ids, found.stream().map(Specialization::getId).collect(Collectors.toSet()), "Specializations");
 		Set<Specialization> newSpecializations = new HashSet<>(found);
 
-		doctor.getSpecializations().stream().filter(s -> !newSpecializations.contains(s)).toList()
-				.forEach(doctor::removeSpecialization);
-		newSpecializations.stream().filter(s -> !doctor.getSpecializations().contains(s))
-				.forEach(doctor::addSpecialization);
+		doctor.getSpecializations()
+			.stream()
+			.filter(s -> !newSpecializations.contains(s))
+			.toList()
+			.forEach(doctor::removeSpecialization);
+		newSpecializations.stream()
+			.filter(s -> !doctor.getSpecializations().contains(s))
+			.forEach(doctor::addSpecialization);
 	}
 
 	private void updateClinics(Doctor doctor, Set<Long> clinicIds) {
@@ -183,41 +187,47 @@ public class DoctorServiceImpl implements DoctorService {
 		UserSnapshot snapshot = doctor.getUserSnapshot() != null ? doctor.getUserSnapshot()
 				: doctorSnapshot(doctor.getUserId());
 		return DoctorResponseDto.builder()
-				.id(doctor.getId())
-				.firstName(snapshot != null ? snapshot.getFirstName() : null)
-				.lastName(snapshot != null ? snapshot.getLastName() : null)
-				.bio(doctor.getBio())
-				.email(snapshot != null ? snapshot.getEmail() : null)
-				.licenseNumber(doctor.getDetails() != null ? doctor.getDetails().getLicenseNumber() : null)
-				.phoneNumber(doctor.getDetails() != null ? doctor.getDetails().getPhoneNumber() : null)
-				.specializations(doctor.getSpecializations().stream()
-						.sorted(Comparator.comparing(Specialization::getId, Comparator.nullsLast(Long::compareTo)))
-						.map(s -> new com.vention.curae.specialization.dto.SpecializationBaseDto(s.getId(), s.getName(),
-								s.getDescription()))
-						.toList())
-				.clinics(doctor.getClinics().stream()
-						.sorted(Comparator.comparing(Clinic::getId, Comparator.nullsLast(Long::compareTo)))
-						.map(c -> new com.vention.curae.clinic.dto.ClinicBaseDto(c.getId(), c.getName(),
-								c.getDescription(),
-								c.getAddress() == null ? null
-										: new com.vention.curae.address.dto.ClinicAddressBaseDto(
-												c.getAddress().getStreet(), c.getAddress().getCity(),
-												c.getAddress().getZipCode())))
-						.toList())
-				.build();
+			.id(doctor.getId())
+			.firstName(snapshot != null ? snapshot.getFirstName() : null)
+			.lastName(snapshot != null ? snapshot.getLastName() : null)
+			.bio(doctor.getBio())
+			.email(snapshot != null ? snapshot.getEmail() : null)
+			.licenseNumber(doctor.getDetails() != null ? doctor.getDetails().getLicenseNumber() : null)
+			.phoneNumber(doctor.getDetails() != null ? doctor.getDetails().getPhoneNumber() : null)
+			.specializations(doctor.getSpecializations()
+				.stream()
+				.sorted(Comparator.comparing(Specialization::getId, Comparator.nullsLast(Long::compareTo)))
+				.map(s -> new com.vention.curae.specialization.dto.SpecializationBaseDto(s.getId(), s.getName(),
+						s.getDescription()))
+				.toList())
+			.clinics(doctor.getClinics()
+				.stream()
+				.sorted(Comparator.comparing(Clinic::getId, Comparator.nullsLast(Long::compareTo)))
+				.map(c -> new com.vention.curae.clinic.dto.ClinicBaseDto(c.getId(), c.getName(), c.getDescription(),
+						c.getAddress() == null ? null
+								: new com.vention.curae.address.dto.ClinicAddressBaseDto(c.getAddress().getStreet(),
+										c.getAddress().getCity(), c.getAddress().getZipCode())))
+				.toList())
+			.build();
 	}
 
 	private DoctorSearchResponseDto toSearchResponse(Doctor doctor) {
 		UserSnapshot snapshot = doctor.getUserSnapshot() != null ? doctor.getUserSnapshot()
 				: doctorSnapshot(doctor.getUserId());
-		String specialization = doctor.getSpecializations().stream().map(Specialization::getName).sorted()
-				.collect(Collectors.joining(", "));
+		String specialization = doctor.getSpecializations()
+			.stream()
+			.map(Specialization::getName)
+			.sorted()
+			.collect(Collectors.joining(", "));
 		if (specialization.isBlank()) {
 			specialization = null;
 		}
-		return DoctorSearchResponseDto.builder().firstName(snapshot != null ? snapshot.getFirstName() : null)
-				.lastName(snapshot != null ? snapshot.getLastName() : null)
-				.profileUrl(snapshot != null ? snapshot.getProfileUrl() : null).specialization(specialization).build();
+		return DoctorSearchResponseDto.builder()
+			.firstName(snapshot != null ? snapshot.getFirstName() : null)
+			.lastName(snapshot != null ? snapshot.getLastName() : null)
+			.profileUrl(snapshot != null ? snapshot.getProfileUrl() : null)
+			.specialization(specialization)
+			.build();
 	}
 
 }

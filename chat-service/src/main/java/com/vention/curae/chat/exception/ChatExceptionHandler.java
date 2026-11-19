@@ -38,8 +38,8 @@ public class ChatExceptionHandler {
 		List<com.vention.curae.wrapper.FieldValidationError> errors = ex.getBindingResult()
 			.getFieldErrors()
 			.stream()
-			.map(error -> new com.vention.curae.wrapper.FieldValidationError(error.getField(),
-					error.getRejectedValue(), error.getDefaultMessage()))
+			.map(error -> new com.vention.curae.wrapper.FieldValidationError(error.getField(), error.getRejectedValue(),
+					error.getDefaultMessage()))
 			.toList();
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 			.body(ResponseWrapper.withValidationError(HttpStatus.BAD_REQUEST, "Validation failed", errors));

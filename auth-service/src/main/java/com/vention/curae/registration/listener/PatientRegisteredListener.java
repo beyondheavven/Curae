@@ -29,14 +29,14 @@ public class PatientRegisteredListener {
 
 		var person = event.person();
 		var addr = event.address();
-		eventPublisher.patientProfileRegistered(new com.vention.curae.event.PatientRegistrationEvent(user.getId(),
-				user.getEmail(), user.getFirstName(), user.getLastName(),
-				user.getBirthDate() != null ? user.getBirthDate().toString() : null,
-				person.getGender() != null ? person.getGender().name() : null, person.getCitizenship(),
-				new com.vention.curae.event.PatientRegistrationEvent.AddressData(addr.getStreet(), addr.getCity(),
-						addr.getApartment(), addr.getHouseNumber(), addr.getState(), addr.getZipCode(),
-						addr.getPhoneNumber()),
-				Instant.now()));
+		eventPublisher.patientProfileRegistered(
+				new com.vention.curae.event.PatientRegistrationEvent(user.getId(), user.getEmail(), user.getFirstName(),
+						user.getLastName(), user.getBirthDate() != null ? user.getBirthDate().toString() : null,
+						person.getGender() != null ? person.getGender().name() : null, person.getCitizenship(),
+						new com.vention.curae.event.PatientRegistrationEvent.AddressData(addr.getStreet(),
+								addr.getCity(), addr.getApartment(), addr.getHouseNumber(), addr.getState(),
+								addr.getZipCode(), addr.getPhoneNumber()),
+						Instant.now()));
 	}
 
 }

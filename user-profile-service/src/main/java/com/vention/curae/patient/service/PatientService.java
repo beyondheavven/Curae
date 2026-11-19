@@ -16,8 +16,7 @@ public class PatientService {
 
 	@Transactional(readOnly = true)
 	public PatientResponseDto getPatientById(Long id) {
-		Patient p = patientRepository.findById(id)
-			.orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+		Patient p = patientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Patient not found"));
 		return new PatientResponseDto(p.getId(), p.getUserId(), p.getCitizenship(), p.getGender());
 	}
 

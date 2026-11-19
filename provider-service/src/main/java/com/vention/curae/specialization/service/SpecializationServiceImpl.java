@@ -68,15 +68,20 @@ public class SpecializationServiceImpl implements SpecializationService {
 		List<ProvidedService> newServices = processServices(dto.serviceIds());
 		Set<Long> newIds = newServices.stream().map(ProvidedService::getId).collect(Collectors.toSet());
 
-		specialization.getServices().stream().filter(oldService -> !newIds.contains(oldService.getId()))
-				.forEach(oldService -> oldService.getSpecializations().remove(specialization));
+		specialization.getServices()
+			.stream()
+			.filter(oldService -> !newIds.contains(oldService.getId()))
+			.forEach(oldService -> oldService.getSpecializations().remove(specialization));
 		specialization.getServices().removeIf(oldService -> !newIds.contains(oldService.getId()));
 
-		newServices.stream().filter(newService -> specialization.getServices().stream()
-				.noneMatch(existing -> existing.getId().equals(newService.getId()))).forEach(newService -> {
-					specialization.getServices().add(newService);
-					newService.getSpecializations().add(specialization);
-				});
+		newServices.stream()
+			.filter(newService -> specialization.getServices()
+				.stream()
+				.noneMatch(existing -> existing.getId().equals(newService.getId())))
+			.forEach(newService -> {
+				specialization.getServices().add(newService);
+				newService.getSpecializations().add(specialization);
+			});
 
 		serviceRepository.saveAll(specialization.getServices());
 		return specialization.getId();
@@ -90,7 +95,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
 	private Specialization findById(Long id) {
 		return specializationRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Specialization not found"));
+			.orElseThrow(() -> new EntityNotFoundException("Specialization not found"));
 	}
 
 	private List<ProvidedService> processServices(List<Integer> serviceIds) {

@@ -28,7 +28,8 @@ public class RegistrationServiceImpl implements RegistrationService {
 
 		User patientUser = userService.createPatient(request.getPerson());
 
-		eventPublisher.publishEvent(new PatientRegisteredEvent(patientUser.getId(), request.getPerson(), request.getAddress()));
+		eventPublisher
+			.publishEvent(new PatientRegisteredEvent(patientUser.getId(), request.getPerson(), request.getAddress()));
 	}
 
 	@Override

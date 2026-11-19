@@ -26,9 +26,11 @@ public class PatientController {
 	@Operation(summary = "Get patient by ID")
 	@GetMapping("/{id}")
 	public ResponseWrapper<PatientResponseDto> getById(
-			@Parameter(description = "ID of patient to find") @PathVariable("id") Long id, Authentication authentication) {
-		boolean isAdminOrDoctor = authentication.getAuthorities().stream().anyMatch(
-				a -> "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_DOCTOR".equals(a.getAuthority()));
+			@Parameter(description = "ID of patient to find") @PathVariable("id") Long id,
+			Authentication authentication) {
+		boolean isAdminOrDoctor = authentication.getAuthorities()
+			.stream()
+			.anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()) || "ROLE_DOCTOR".equals(a.getAuthority()));
 		if (!isAdminOrDoctor) {
 			Long userId = Long.valueOf(authentication.getName());
 			if (!patientService.isOwnedByUser(id, userId)) {

@@ -67,7 +67,8 @@ public class SnapshotKafkaListener {
 	@KafkaListener(topics = "provider.service.upserted", groupId = "appointment-service-group")
 	public void handleServiceUpserted(ProvidedServiceUpsertedEvent event) {
 		log.info("Received ProvidedServiceUpsertedEvent for serviceId={}", event.serviceId());
-		ServiceSnapshot snapshot = serviceSnapshotRepository.findById(event.serviceId()).orElseGet(ServiceSnapshot::new);
+		ServiceSnapshot snapshot = serviceSnapshotRepository.findById(event.serviceId())
+			.orElseGet(ServiceSnapshot::new);
 		snapshot.setServiceId(event.serviceId());
 		snapshot.setName(event.name());
 		snapshot.setDescription(event.description());

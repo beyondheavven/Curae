@@ -85,10 +85,10 @@ public class UserIdentitySyncListener {
 		}
 
 		if (changed || event.emailChanged()) {
-			authEventPublisher.userIdentityUpdated(new UserIdentityUpdatedEvent(user.getId(), user.getEmail(),
-					user.getFirstName(), user.getLastName(),
-					user.getBirthDate() != null ? user.getBirthDate().toString() : null, user.getStatus().name(),
-					Instant.now()));
+			authEventPublisher
+				.userIdentityUpdated(new UserIdentityUpdatedEvent(user.getId(), user.getEmail(), user.getFirstName(),
+						user.getLastName(), user.getBirthDate() != null ? user.getBirthDate().toString() : null,
+						user.getStatus().name(), Instant.now()));
 		}
 	}
 

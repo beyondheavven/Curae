@@ -28,10 +28,10 @@ public class DoctorRegisteredListener {
 		eventPublisher.doctorWelcomeRequested(user.getEmail(), event.tempPassword(), rawToken);
 
 		var req = event.request();
-		eventPublisher.doctorProfileRegistered(new com.vention.curae.event.DoctorRegistrationEvent(user.getId(),
-				user.getEmail(), user.getFirstName(), user.getLastName(),
-				user.getBirthDate() != null ? user.getBirthDate().toString() : null, req.phoneNumber(),
-				req.licenseNumber(), req.specializationIds(), Instant.now()));
+		eventPublisher.doctorProfileRegistered(
+				new com.vention.curae.event.DoctorRegistrationEvent(user.getId(), user.getEmail(), user.getFirstName(),
+						user.getLastName(), user.getBirthDate() != null ? user.getBirthDate().toString() : null,
+						req.phoneNumber(), req.licenseNumber(), req.specializationIds(), Instant.now()));
 	}
 
 }

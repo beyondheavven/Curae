@@ -5,8 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
 @Schema(description = "Represents the provided service details")
-public record ProvidedServiceResponseDto(
-		@Schema(description = "Service ID", example = "1") Long id,
+public record ProvidedServiceResponseDto(@Schema(description = "Service ID", example = "1") Long id,
 		@Schema(description = "Service Name", example = "General Consultation") String name,
 		@Schema(description = "Short description", example = "Primary health check...") String description,
 		@Schema(description = "Price", example = "50.00") Double price,
