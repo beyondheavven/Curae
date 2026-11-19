@@ -61,7 +61,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "{container=\"medfast_api\", level=~\"$Level\", logger=~\"$Logger\"} ",
+          "expr": "{container=~\"medfast-.*\", level=~\"$Level\"} ",
           "queryType": "range",
           "refId": "A"
         }
@@ -221,7 +221,7 @@
           },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "sum by (level) (rate({container=\"medfast_api\", level=~\"$Level\"}[1m]))",
+          "expr": "sum by (level) (rate({container=~\"medfast-.*\", level=~\"$Level\"}[1m]))",
           "queryType": "range",
           "refId": "A"
         }
@@ -314,7 +314,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "jvm_memory_used_bytes{job=\"medfast_api\", area=\"heap\"}",
+          "expr": "jvm_memory_used_bytes{job=~\"$application\", area=\"heap\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -408,7 +408,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (status) (rate(http_server_requests_seconds_count{job=\"medfast_api\"}[1m]))",
+          "expr": "sum by (status) (rate(http_server_requests_seconds_count{job=~\"$application\"}[1m]))",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -477,7 +477,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "up{job=\"medfast_api\"}",
+          "expr": "up{job=~\"$application\"}",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -572,7 +572,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(jvm_gc_pause_seconds_sum{job=\"medfast_api\"}[5m])",
+          "expr": "rate(jvm_gc_pause_seconds_sum{job=~\"$application\"}[5m])",
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
@@ -585,54 +585,95 @@
   "preload": false,
   "schemaVersion": 42,
   "tags": [],
-  "templating": {
+    "templating": {
     "list": [
       {
-        "allowCustomValue": false,
         "current": {
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
+          "selected": true,
+          "text": "All",
+          "value": ".+"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "definition": "label_values(up, job)",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": ".+",
+        "label": "Application",
+        "multi": false,
+        "name": "application",
+        "options": [],
+        "query": {
+          "query": "label_values(up, job)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".*"
         },
         "datasource": {
           "type": "loki",
           "uid": "P8E80F9AEF21F6940"
         },
-        "definition": "",
+        "definition": "label_values({container=~\"medfast-.*\"}, level)",
+        "hide": 0,
         "includeAll": true,
+        "allValue": ".*",
+        "label": "Level",
         "multi": true,
         "name": "Level",
         "options": [],
         "query": {
           "label": "level",
           "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "",
+          "stream": "{container=~\"medfast-.*\"}",
           "type": 1
         },
         "refresh": 1,
         "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
         "type": "query"
       },
       {
         "current": {
-          "text": ".*",
+          "selected": true,
+          "text": "All",
           "value": ".*"
         },
-        "description": "Enter a class or package name (e.g., com.vention.medfast.service.*)",
-        "label": "Package Filter",
+        "datasource": {
+          "type": "loki",
+          "uid": "P8E80F9AEF21F6940"
+        },
+        "definition": "label_values({container=~\"medfast-.*\"}, logger)",
+        "hide": 0,
+        "includeAll": true,
+        "allValue": ".*",
+        "label": "Logger",
+        "multi": true,
         "name": "Logger",
-        "options": [
-          {
-            "selected": true,
-            "text": ".*",
-            "value": ".*"
-          }
-        ],
-        "query": ".*",
-        "type": "textbox"
+        "options": [],
+        "query": {
+          "label": "logger",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{container=~\"medfast-.*\"}",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },

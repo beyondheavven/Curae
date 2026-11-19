@@ -1,4 +1,4 @@
-server:
+﻿server:
   http_listen_port: 9080
   grpc_listen_port: 0
 
@@ -19,26 +19,13 @@ scrape_configs:
         target_label: 'container'
       - source_labels: ['__meta_docker_container_log_stream']
         target_label: 'logstream'
-
     pipeline_stages:
       - docker: {}
-
       - match:
-          selector: '{container="medfast_api"}'
+          selector: '{container=~"medfast-.*"}'
           stages:
-            - json:
-                expressions:
-                  level: Level
-                  service: service
-                  version: version
-                  env: env
-                  logger: Logger
-                  thread: Thread
-                  message: Message
-                  exception: ExceptionClass
-
+            - regex:
+                expression: '^(?P<level>TRACE|DEBUG|INFO|WARN|ERROR)\s+\[(?P<service>[^,\]]*),(?P<traceId>[^,\]]*),(?P<spanId>[^\]]*)\]'
             - labels:
                 level:
-                logger:
                 service:
-                env:
