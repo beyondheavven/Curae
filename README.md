@@ -135,6 +135,8 @@ kubectl create configmap grafana-dashboards --from-file=monitoring/grafana/dashb
 
 `curae-secrets` must contain `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `JWT_SECRET`, `GF_ADMIN_PASSWORD`, `RABBITMQ_USERNAME`, `RABBITMQ_PASSWORD`, `REDIS_PASSWORD`, plus the mail/Stripe keys used by notification and payment services.
 
+If the GHCR package is private, add `imagePullSecrets` to the service Deployments (create it with `kubectl -n curae create secret docker-registry ghcr ...`).
+
 Deploy and inspect:
 
 ```bash

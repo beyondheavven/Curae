@@ -6,7 +6,6 @@ metadata:
   labels:
     app: api-gateway
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: api-gateway
@@ -101,7 +100,6 @@ metadata:
   labels:
     app: auth-service
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: auth-service
@@ -196,7 +194,6 @@ metadata:
   labels:
     app: appointment-service
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: appointment-service
@@ -291,7 +288,6 @@ metadata:
   labels:
     app: payment-service
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: payment-service
@@ -386,7 +382,6 @@ metadata:
   labels:
     app: notification-service
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: notification-service
@@ -481,7 +476,6 @@ metadata:
   labels:
     app: user-profile-service
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: user-profile-service
@@ -576,7 +570,6 @@ metadata:
   labels:
     app: provider-service
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: provider-service
@@ -671,7 +664,6 @@ metadata:
   labels:
     app: chat-service
 spec:
-  replicas: 2
   selector:
     matchLabels:
       app: chat-service
