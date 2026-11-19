@@ -1,4 +1,4 @@
-﻿server:
+server:
   http_listen_port: 9080
   grpc_listen_port: 0
 
@@ -22,7 +22,7 @@ scrape_configs:
     pipeline_stages:
       - docker: {}
       - match:
-          selector: '{container=~"medfast-.*"}'
+          selector: '{container=~"curae-.*"}'
           stages:
             - regex:
                 expression: '^(?P<level>TRACE|DEBUG|INFO|WARN|ERROR)\s+\[(?P<service>[^,\]]*),(?P<traceId>[^,\]]*),(?P<spanId>[^\]]*)\]'

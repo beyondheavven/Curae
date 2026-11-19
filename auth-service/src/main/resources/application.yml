@@ -5,7 +5,7 @@ spring:
   application:
     name: auth-service
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${AUTH_DB_NAME:medfast_auth}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${AUTH_DB_NAME:curae_auth}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   jpa:
@@ -30,7 +30,7 @@ spring:
       properties:
         spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
-        spring.json.trusted.packages: "com.vention.medfast.event"
+        spring.json.trusted.packages: "com.vention.curae.event"
 
 jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}

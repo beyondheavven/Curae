@@ -5,7 +5,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${PAYMENT_DB_NAME:medfast_payment}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${PAYMENT_DB_NAME:curae_payment}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   jpa:
@@ -28,7 +28,7 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: "com.vention.medfast.event"
+        spring.json.trusted.packages: "com.vention.curae.event"
 
 stripe:
   public-key: ${STRIPE_PUBLIC_KEY:pk_test_placeholder}

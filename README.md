@@ -1,8 +1,8 @@
-# Medfast API Documentation
+# Curae API Documentation
 
 ## Accessing Swagger UI
 
-The Medfast REST API provides **interactive documentation** using **Swagger/OpenAPI**.
+The Curae REST API provides **interactive documentation** using **Swagger/OpenAPI**.
 
 #### Local Development
 
@@ -33,7 +33,7 @@ The OpenAPI specification is **generated automatically** from your Spring Boot c
 
 ---
 
-# MedFast PostgreSQL Docker Setup
+# Curae PostgreSQL Docker Setup
 
 ## Description
 
@@ -98,9 +98,9 @@ docker compose run --rm flyway migrate
 * Configured via `.env` file:
 
 ```
-POSTGRES_USER=medfast_user
-POSTGRES_PASSWORD=medfast_password
-POSTGRES_DB=medfast_db
+POSTGRES_USER=curae_user
+POSTGRES_PASSWORD=curae_password
+POSTGRES_DB=curae_db
 POSTGRES_PORT=5432
 
 GF_ADMIN_PASSWORD=admin
@@ -216,7 +216,7 @@ We use Spring Boot Actuator to manage log levels dynamically without restarting 
 #### Check the current log level:
 To see log level for the application package:
 ```bash
-curl http://localhost:8080/api/actuator/loggers/com.vention.medfast
+curl http://localhost:8080/api/actuator/loggers/com.vention.curae
 ```
 
 #### Change Log Level
@@ -224,7 +224,7 @@ To enable `DEBUG` logs for the main application:
 ```bash
 curl -i -X POST -H "Content-Type: application/json" \
   -d '{"configuredLevel": "DEBUG"}' \
-  http://localhost:8080/api/actuator/loggers/com.vention.medfast
+  http://localhost:8080/api/actuator/loggers/com.vention.curae
 ```
 
 To enable `DEBUG` logs for Spring Security:
@@ -253,7 +253,7 @@ curl -i -X POST -H "Content-Type: application/json" \
 Stage(stage) - Console Output:
 ```
 09:27:39.549 [http-nio-8080-exec-1] DEBUG c.v.m.auth.service.AuthServiceImpl - Authentication successful. Generating tokens for User ID: 1
-09:27:39.729 [scheduling-1] DEBUG c.v.medfast.scheduled.LogsPoster - Debug message
+09:27:39.729 [scheduling-1] DEBUG c.v.curae.scheduled.LogsPoster - Debug message
 09:27:39.797 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into refresh_tokens (status,token,users_id) values (?,?,?)
 ```
 
@@ -261,14 +261,14 @@ Dev/Production(dev, prod) - JSON Output:
 ```JSON
 {
   "Timestamp/UTC": "2025-12-15T08:22:49.043273Z",
-  "service": "medfast_api",
+  "service": "curae_api",
   "version": "0.0.0",
   "env": "prod",
   "Level": "WARN",
   "Thread": "http-nio-8080-exec-3",
-  "Logger": "com.vention.medfast.auth.service.AuthServiceImpl",
+  "Logger": "com.vention.curae.auth.service.AuthServiceImpl",
   "ServiceName": "default",
-  "Class": "com.vention.medfast.auth.service.AuthServiceImpl",
+  "Class": "com.vention.curae.auth.service.AuthServiceImpl",
   "Method": "login",
   "File": "AuthServiceImpl.java",
   "Line": 62,
@@ -306,12 +306,12 @@ Logs from the Spring Boot application are collected, parsed, and stored as struc
 From the Grafana home dashboard, you can quickly filter logs using the dedicated panels:
 
 - **Level Filter**: Select one or more log levels(e.g., `ERROR`, `WARN`, `INFO`) from the dropdown list.
-- **Package Filter**: Enter a specific class or package, such as `com.vention.medfast.user`, to narrow results.
+- **Package Filter**: Enter a specific class or package, such as `com.vention.curae.user`, to narrow results.
 
 #### LogQL Query Structure(Advanced)
 For precise filtering and searching, use the LogQL in Grafana's Explore view.
 
-- `{container="medfast_api"} |= "Database connected"`: find logs containing text
+- `{container="curae_api"} |= "Database connected"`: find logs containing text
 
 ---
 
@@ -321,12 +321,12 @@ For precise filtering and searching, use the LogQL in Grafana's Explore view.
 1. **Install Postman:** Download it from [postman.com/downloads](https://www.postman.com/downloads/)
 2. **Import Collection and Environment:**
    * To import your data into Postman, click Import in the sidebar
-   * Drag and drop the `postman/medfast-api-postman-collection.json` and `postman/dev-postman-env.json` files
+   * Drag and drop the `postman/curae-api-postman-collection.json` and `postman/dev-postman-env.json` files
 
 ### How to Run Tests
 1. **Select Environment:** in the top right corner of Postman, change the dropdown from "No Environment" to **Dev** (environment you imported).
 2. **Run the Collection:**
-   * Select the **Medfast API** collection folder.
+   * Select the **Curae API** collection folder.
    * Click the **Run** button (top right).
    * **IMPORTANT:** In the Runner settings, set **Delay** to `200ms`. This prevents database race conditions during token rotation.
-   * Click **Run the Medfast API**.
+   * Click **Run the Curae API**.

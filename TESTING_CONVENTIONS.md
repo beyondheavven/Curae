@@ -232,7 +232,7 @@ public void shouldReturn404WhenGetUserByIdNotFound() throws Exception {
 For operations that do not return a body, verify that the server returns `204 No Content` and ensure the service method was called.
 
 ```java
-import com.vention.medfast.constants.ApiPaths;
+import com.vention.curae.constants.ApiPaths;
 
 @Test
 public void shouldReturn204WhenDeleteUserExists() throws Exception {

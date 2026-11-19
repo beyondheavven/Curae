@@ -1,8 +1,0 @@
-package com.vention.medfast.notification.model;
-
-public enum NotificationType {
-
-	APPOINTMENT_CREATED, APPOINTMENT_CANCELLED, APPOINTMENT_DETAILS_CHANGED, LAB_RESULT_READY, PAYMENT_COMPLETED,
-	PAYMENT_FAILED
-
-}

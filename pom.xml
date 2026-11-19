@@ -13,11 +13,11 @@
   </parent>
 
   <groupId>com.vention</groupId>
-  <artifactId>medfast</artifactId>
+  <artifactId>curae</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>Medfast</name>
-  <description>Medfast backend (REST API)</description>
+  <name>Curae</name>
+  <description>Curae backend (REST API)</description>
   <modules>
     <module>common-events</module>
     <module>api-gateway</module>

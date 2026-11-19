@@ -5,7 +5,7 @@ spring:
   application:
     name: chat-service
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${CHAT_DB_NAME:medfast_chat}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${CHAT_DB_NAME:curae_chat}
     username: ${POSTGRES_USER:postgres}
     password: ${POSTGRES_PASSWORD:postgres}
   jpa:

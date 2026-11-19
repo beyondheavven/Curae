@@ -1,10 +1,10 @@
-# Actuator Endpoints: Monitoring and Diagnostics (Medfast API)
+# Actuator Endpoints: Monitoring and Diagnostics (Curae API)
 
 ---
 
 ## 1. Overview and Rationale
 
-The Spring Boot Actuator integrated into the Medfast API to enhance **observability**, **diagnostics**,
+The Spring Boot Actuator integrated into the Curae API to enhance **observability**, **diagnostics**,
 and **operational monitoring**.
 This integration provides standardized health checks, metrics, and system information necessary for various monitoring tools (e.g., Kubernetes, Prometheus).
 

@@ -1,6 +1,6 @@
 services:
   api-gateway:
-    container_name: medfast-api-gateway
+    container_name: curae-api-gateway
     build:
       context: .
       args:
@@ -27,7 +27,7 @@ services:
       - chat-service
 
   auth-service:
-    container_name: medfast-auth-service
+    container_name: curae-auth-service
     build:
       context: .
       args:
@@ -50,7 +50,7 @@ services:
         condition: service_started
 
   appointment-service:
-    container_name: medfast-appointment-service
+    container_name: curae-appointment-service
     build:
       context: .
       args:
@@ -72,7 +72,7 @@ services:
         condition: service_started
 
   payment-service:
-    container_name: medfast-payment-service
+    container_name: curae-payment-service
     build:
       context: .
       args:
@@ -99,7 +99,7 @@ services:
         condition: service_started
 
   notification-service:
-    container_name: medfast-notification-service
+    container_name: curae-notification-service
     build:
       context: .
       args:
@@ -128,7 +128,7 @@ services:
         condition: service_healthy
 
   user-profile-service:
-    container_name: medfast-user-profile-service
+    container_name: curae-user-profile-service
     build:
       context: .
       args:
@@ -138,7 +138,7 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PROFILE_DB_NAME=${PROFILE_DB_NAME:-medfast_profile}
+      - PROFILE_DB_NAME=${PROFILE_DB_NAME:-curae_profile}
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - JWT_SECRET=${JWT_SECRET}
     ports:
@@ -150,7 +150,7 @@ services:
         condition: service_started
 
   provider-service:
-    container_name: medfast-provider-service
+    container_name: curae-provider-service
     build:
       context: .
       args:
@@ -160,7 +160,7 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PROVIDER_DB_NAME=${PROVIDER_DB_NAME:-medfast_provider}
+      - PROVIDER_DB_NAME=${PROVIDER_DB_NAME:-curae_provider}
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - JWT_SECRET=${JWT_SECRET}
     ports:
@@ -172,7 +172,7 @@ services:
         condition: service_started
 
   chat-service:
-    container_name: medfast-chat-service
+    container_name: curae-chat-service
     build:
       context: .
       args:
@@ -199,7 +199,7 @@ services:
 
   postgres:
     image: postgres:15-alpine
-    container_name: medfast-postgres
+    container_name: curae-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -218,7 +218,7 @@ services:
 
   kafka:
     image: apache/kafka:3.9.1
-    container_name: medfast-kafka
+    container_name: curae-kafka
     ports:
       - "9094:9094"
     environment:
@@ -249,7 +249,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: medfast-redis
+    container_name: curae-redis
     ports:
       - "6379:6379"
     command: >

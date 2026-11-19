@@ -1,8 +1,7 @@
-CREATE DATABASE medfast_auth;
-CREATE DATABASE medfast_appointment;
-CREATE DATABASE medfast_payment;
-CREATE DATABASE medfast_notification;
-CREATE DATABASE medfast_profile;
-CREATE DATABASE medfast_provider;
-CREATE DATABASE medfast_chat;
-CREATE DATABASE medfast_feedback;
+CREATE DATABASE curae_auth;
+CREATE DATABASE curae_appointment;
+CREATE DATABASE curae_payment;
+CREATE DATABASE curae_notification;
+CREATE DATABASE curae_profile;
+CREATE DATABASE curae_provider;
+CREATE DATABASE curae_chat;
