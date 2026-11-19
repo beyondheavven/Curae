@@ -38,7 +38,7 @@ jwt:
 
 custom:
   security:
-    public-routes: /error,/actuator,/actuator/**,/v3/api-docs,/swagger-ui
+    public-routes: /error,/actuator,/actuator/**,/v3/api-docs,/swagger-ui,/appointments/internal/**
 
 management:
   endpoints:

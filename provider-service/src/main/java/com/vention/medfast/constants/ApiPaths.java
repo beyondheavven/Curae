@@ -16,4 +16,6 @@ public final class ApiPaths {
 
 	public static final String SEARCH_ENDPOINT = "/search";
 
+	public static final String FEEDBACK_ENDPOINT = "/feedbacks";
+
 }

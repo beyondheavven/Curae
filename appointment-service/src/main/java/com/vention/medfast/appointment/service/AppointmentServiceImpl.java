@@ -51,7 +51,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 		appointment.setScheduledTime(dto.time());
 		appointment.setStatus(AppointmentStatus.SCHEDULED);
 		Appointment saved = appointmentRepository.save(appointment);
-		eventPublisher.appointmentCreated(saved, referral.getIssuedBy());
+		eventPublisher.appointmentCreated(saved, referral.getIssuedBy(), referral.getServiceId());
 		return saved.getId();
 	}
 

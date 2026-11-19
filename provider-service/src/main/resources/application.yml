@@ -55,3 +55,11 @@ management:
 logging:
   pattern:
     level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+
+services:
+  appointment:
+    url: ${APPOINTMENT_SERVICE_URL:http://appointment-service:8082}
+
+services:
+  appointment:
+    url: ${APPOINTMENT_SERVICE_URL:http://appointment-service:8082}

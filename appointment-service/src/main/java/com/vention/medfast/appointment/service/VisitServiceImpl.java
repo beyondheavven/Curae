@@ -54,7 +54,7 @@ public class VisitServiceImpl implements VisitService {
 		visit.setClinicName(dto.clinicName());
 		visit.setCity(dto.city());
 		Visit saved = visitRepository.save(visit);
-		eventPublisher.appointmentCreated(savedAppointment, dto.doctorId());
+		eventPublisher.appointmentCreated(savedAppointment, dto.doctorId(), dto.serviceId());
 		return saved.getAppointmentId();
 	}
 
