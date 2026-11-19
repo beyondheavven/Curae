@@ -1,332 +1,167 @@
-# Curae API Documentation
+# Curae
 
-## Accessing Swagger UI
+Microservices-based healthcare backend platform.
 
-The Curae REST API provides **interactive documentation** using **Swagger/OpenAPI**.
+## Overview
 
-#### Local Development
+Curae is split into domain services behind an API Gateway. Services communicate synchronously over HTTP and asynchronously via Kafka (domain events, `common-events`) and RabbitMQ/STOMP (chat).
 
-Open your browser and navigate to:
-http://localhost:8080/api/swagger-ui/index.html
+## Architecture
 
-#### Features in Swagger UI
+| Service | Port | Responsibility | Database / Messaging |
+| --- | ---: | --- | --- |
+| `api-gateway` | 8080 | Entry point: routing, JWT validation, CORS, aggregated OpenAPI/Swagger | - |
+| `auth-service` | 8081 | Authentication, users, registration, countries, email/password flows | `curae_auth`, Kafka |
+| `appointment-service` | 8082 | Appointments, visits, tests/lab results, referrals, consultations, statistics | `curae_appointment`, Kafka |
+| `payment-service` | 8083 | Payments/purchases, Stripe checkout & webhooks | `curae_payment`, Kafka, Stripe |
+| `notification-service` | 8084 | Notifications and email delivery | `curae_notification`, Kafka, SMTP |
+| `user-profile-service` | 8085 | User/patient profiles | `curae_profile`, Kafka |
+| `provider-service` | 8086 | Doctors, clinics, specializations, provided services, feedback | `curae_provider`, Kafka |
+| `chat-service` | 8087 | Patient–doctor chat (REST + WebSocket/STOMP) | `curae_chat`, RabbitMQ |
+| `common-events` | - | Shared library: events, response wrappers, common DTOs | - |
 
-- Explore all available endpoints grouped by tags (Patients, Doctors, Appointments, etc.).
-- View request/response models, status codes, and descriptions.
-- **Try it out**: send test requests directly from the browser.
-    - If endpoints require JWT authentication, click the **Authorize** button and provide your token.
-- See **OpenAPI specification** in JSON or YAML format:
-    - JSON: `http://localhost:8080/v3/api-docs`
-    - YAML: `http://localhost:8080/v3/api-docs.yaml`
+**Infrastructure (Docker Compose):** PostgreSQL, Kafka, RabbitMQ, Redis, Stripe CLI, Prometheus, Grafana, Loki, Promtail.
 
----
+## Repository Structure
 
-## Regenerating / Updating API Documentation
+- `api-gateway/`, `auth-service/`, `appointment-service/`, `payment-service/`, `notification-service/`, `user-profile-service/`, `provider-service/`, `chat-service/` — service modules
+- `common-events/` — shared contracts/utilities
+- `scripts/init-databases.sql` — creates service databases on first PostgreSQL init
+- `*/src/main/resources/db/migration/` — Flyway migrations per service
+- `monitoring/` — Prometheus, Loki, Promtail, Grafana provisioning & dashboards
+- `postman/` — API collection and environment
+- `docker-compose.yml`, `Dockerfile` — containerized build/run
+- `ACTUATOR.md`, `TESTING_CONVENTIONS.md` — additional docs
 
-The OpenAPI specification is **generated automatically** from your Spring Boot controllers and annotations. To update it:
+## Prerequisites
 
-1. **Add or modify controllers/endpoints**, request/response models, or annotations (`@RestController`, `@GetMapping`, `@Parameter`, `@Schema`, etc.).
-2. **Restart the application** to regenerate the OpenAPI spec.
-3. **Verify changes** in Swagger UI or by accessing:
-    - JSON: `/v3/api-docs`
-    - YAML: `/v3/api-docs.yaml`
-
----
-
-# Curae PostgreSQL Docker Setup
-
-## Description
-
-This project provides a fully reproducible PostgreSQL environment with Flyway-based schema versioning.
-Database initialization and migrations are automated using Docker Compose.
-
-## Project Structure
-
-```
-.
-├─ docker-compose.yml
-├─ .env
-├─ flyway/
-│  └─ sql/
-│     ├─ V1__create_tables.sql
-│     ├─ V2__create_constraints.sql
-│     ├─ V3__create_indexes.sql
-│     └─ V4__seed_data.sql
-└─ README.md
-```
-
-## Database ER Diagram
-
-![Database ER Diagram](structure.png)
-
-## Quick Start
-
-### Start the Environment
-
-```bash
-docker compose up -d
-```
-
-* Starts the PostgreSQL container with persistent storage
-* Automatically runs Flyway migrations
-
-### Stop the Environment
-
-```bash
-docker compose down -v
-```
-
-* Removes containers, networks, and volumes
-
-## Flyway Migrations
-
-* Migration scripts are located in `flyway/sql/`
-* Naming convention: `V<version>__<description>.sql`
-* To run migrations manually:
-
-```bash
-docker compose run --rm flyway migrate
-```
-
-## Initialization Scripts
-
-* Located in `docker-entrypoint-initdb.d/` (Postgres automatically executes them on first startup)
-* Create schemas, tables, and seed essential data
+- Docker & Docker Compose
+- (For local non-container builds) JDK 25 + Maven Wrapper (`mvnw.cmd` / `./mvnw`)
 
 ## Configuration
 
-* Configured via `.env` file:
+Create a `.env` file in the project root (used by `docker-compose.yml`). Required/commonly used variables:
 
-```
-POSTGRES_USER=curae_user
-POSTGRES_PASSWORD=curae_password
-POSTGRES_DB=curae_db
+```env
+# PostgreSQL
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
 POSTGRES_PORT=5432
 
-GF_ADMIN_PASSWORD=admin
+# Service databases
+AUTH_DB_NAME=curae_auth
+APPOINTMENT_DB_NAME=curae_appointment
+PAYMENT_DB_NAME=curae_payment
+NOTIFICATION_DB_NAME=curae_notification
+PROFILE_DB_NAME=curae_profile
+PROVIDER_DB_NAME=curae_provider
+CHAT_DB_NAME=curae_chat
+
+# Security
+JWT_SECRET=
+EMAIL_VERIFICATION_TTL_MS=3600000
+CORS_ALLOWED_ORIGINS=http://localhost:8000,http://localhost:3000,http://localhost:8080
+
+# Messaging / cache
+RABBITMQ_USERNAME=
+RABBITMQ_PASSWORD=
+REDIS_PASSWORD=
+
+# Mail (notification-service)
+MAIL_HOST=
+MAIL_PORT=
+MAIL_USERNAME=
+MAIL_PASSWORD=
+MAIL_SMTP_AUTH=true
+MAIL_SMTP_STARTTLS=true
+
+# Stripe (payment-service / stripe-cli)
+STRIPE_PUBLIC_KEY=
+STRIPE_SECRET_KEY=
+WEBHOOK_SECRET_KEY=
+PAYMENT_SUCCESS_URL=
+PAYMENT_CANCEL_URL=
+
+# Monitoring
+GF_ADMIN_PASSWORD=
 ```
 
-## Notes
+> Check `docker-compose.yml` and each service `application.yml` for the full/default set of variables.
 
-* Simply running `docker compose up` is sufficient; no manual steps are required.
-
----
-
-## Integration Testing with Testcontainers
-
-This project uses **Testcontainers** to spin up isolated PostgreSQL instances for integration testing.
-
-### Running Tests
-
-#### 1. Local Development
-
-By default, running tests locally will use the `test` profile. This profile is configured to **reuse** the database container between runs to speed up execution.
-
-**Prerequisites**
-
-Even though the code enables reuse, **Testcontainers requires a global permission flag** on your machine.
-
-1. Navigate to your home directory
-2. Find (or create) file names .testcontainers.properties.
-3. Add the following line to the file:
-
-```properties
-testcontainers.reuse.enable=true
-```
-
-**Without this file, Testcontainers will ignore the code settings**
-
-#### 2. CI Mode
-
-To run tests in a pristine environment, use the test-ci profile. This forces a fresh container for every run to ensure isolation.
-
-**Example using mvn**
+## Quick Start (Docker)
 
 ```bash
-mvn verify "-Dspring.profiles.active=test-ci"
+docker compose up -d --build
 ```
 
-### Troubleshooting
+- PostgreSQL initializes databases from `scripts/init-databases.sql` **only on first startup** of the `pgdata` volume.
+- To recreate from scratch: `docker compose down -v` then start again.
 
-#### Docker not running
+Useful endpoints:
 
-Error: `IllegalStateException: Could not find a valid Docker environment`
+| URL | Purpose |
+| --- | --- |
+| `http://localhost:8080/api/swagger-ui.html` | Gateway Swagger UI |
+| `http://localhost:8080/v3/api-docs` | Aggregated OpenAPI (gateway) |
+| `http://localhost:3000` | Grafana (`admin` / `GF_ADMIN_PASSWORD`) |
+| `http://localhost:9090` | Prometheus |
+| `http://localhost:3100` | Loki API |
 
-Fix: Start Docker and retry.
+Service ports: gateway `8080`, auth `8081`, appointment `8082`, payment `8083`, notification `8084`, profile `8085`, provider `8086`, chat `8087`.
 
-#### Flyway checksum mismatch
+## Local Build
 
-Error: `org.springframework.beans.factory.BeanCreationException: ... Validate failed: Migrations have failed validation`
-
-Possible Cause: You modified a SQL migration script after the test container had already run.
-
-Fix: Manually destroy the reusable container to force a fresh start.
-
-#### Container reuse not working
-
-Check:
-
-* Active profile is set to 'test'(default).
-* ~/.testcontainers.properties exists with testcontainers.reuse.enable=true.
-
-## Git Pre-push Hooks
-
-Our team uses in this project git pre-push hooks to execute scripts before pushing to remote origin.
-Currently, we have 1 script file, which ensures project builds correctly
-
-Scripts are stored in:
-
-* ./.githooks/
-
-### 1. How to install
-
-#### Linux / macOS
-
-For pre-push scripts to work correctly on Linux and macOS, you only need to install Git and Maven.
-
-#### Windows
-
-For Windows you should install Maven, Git and Git Bash. Git Bash is needed for executing shell scripts from .githooks
-
-### 2. Setup
-
-Scripts in .githooks must be marked as executable. Also You should set folder with pre-push scripts in your git.
-
-You can execute following command to do that (Linux, macOS and Windows with Git Bash)
-
-```
-git config core.hooksPath .githooks
-chmod +x .githooks/*
-```
-
-Or you can run bash script from (Linux, macOS and Windows with Git Bash)
-
-* ./scripts/setup-hooks.sh
-
----
-
-## Logging
-The application logging is configured in `src/main/resources/logback-spring.xml`. This file defines environment-specific behaviors, log levels and sensitive data masking rules.
-
-### How to Change Log Level at Runtime
-We use Spring Boot Actuator to manage log levels dynamically without restarting the service.
-
-**Base URL**: `http://localhost:8080/api/actuator/loggers`
-
-#### Check the current log level:
-To see log level for the application package:
 ```bash
-curl http://localhost:8080/api/actuator/loggers/com.vention.curae
+# Windows (PowerShell)
+.\mvnw.cmd -DskipTests clean compile
+
+# Build specific service with dependencies
+.\mvnw.cmd -DskipTests -pl chat-service -am clean compile
 ```
 
-#### Change Log Level
-To enable `DEBUG` logs for the main application:
-```bash
-curl -i -X POST -H "Content-Type: application/json" \
-  -d '{"configuredLevel": "DEBUG"}' \
-  http://localhost:8080/api/actuator/loggers/com.vention.curae
-```
+## API & Gateway
 
-To enable `DEBUG` logs for Spring Security:
-```bash
-curl -i -X POST -H "Content-Type: application/json" \
-  -d '{"configuredLevel": "DEBUG"}' \
-  http://localhost:8080/api/actuator/loggers/org.springframework.security
-```
-### How to Enable SQL Logging
+- All external traffic should go through `api-gateway` (`:8080`).
+- Gateway routes requests by path to downstream services (auth, appointments/visits/referrals/statistics, profiles/patients, providers/clinics/feedbacks, payments/webhooks, notifications, chats, WebSocket `/ws/**`).
+- Swagger UI: `http://localhost:8080/api/swagger-ui.html`, aggregated spec: `http://localhost:8080/v3/api-docs`.
+- Individual services expose their own Springdoc endpoints and actuator on their ports.
 
-#### Enable SQL Query Logging:
-```bash
-curl -i -X POST -H "Content-Type: application/json" \
-  -d '{"configuredLevel": "DEBUG"}' \
-  http://localhost:8080/api/actuator/loggers/org.hibernate.SQL
-```
+## Databases & Migrations
 
-#### Enable Bind Parameters(see values):
-```bash
-curl -i -X POST -H "Content-Type: application/json" \
-  -d '{"configuredLevel": "TRACE"}' \
-  http://localhost:8080/api/actuator/loggers/org.hibernate.orm.jdbc.bind
-```
+- One PostgreSQL instance, separate database per service (`curae_auth`, `curae_appointment`, `curae_payment`, `curae_notification`, `curae_profile`, `curae_provider`, `curae_chat`).
+- Schema changes are managed by Flyway per service (`*/src/main/resources/db/migration/`, `ddl-auto: validate`).
 
-### Example of Log Formats
-Stage(stage) - Console Output:
-```
-09:27:39.549 [http-nio-8080-exec-1] DEBUG c.v.m.auth.service.AuthServiceImpl - Authentication successful. Generating tokens for User ID: 1
-09:27:39.729 [scheduling-1] DEBUG c.v.curae.scheduled.LogsPoster - Debug message
-09:27:39.797 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - insert into refresh_tokens (status,token,users_id) values (?,?,?)
-```
+## Messaging
 
-Dev/Production(dev, prod) - JSON Output:
-```JSON
-{
-  "Timestamp/UTC": "2025-12-15T08:22:49.043273Z",
-  "service": "curae_api",
-  "version": "0.0.0",
-  "env": "prod",
-  "Level": "WARN",
-  "Thread": "http-nio-8080-exec-3",
-  "Logger": "com.vention.curae.auth.service.AuthServiceImpl",
-  "ServiceName": "default",
-  "Class": "com.vention.curae.auth.service.AuthServiceImpl",
-  "Method": "login",
-  "File": "AuthServiceImpl.java",
-  "Line": 62,
-  "Message": "Failed login attempt for email: admin@med.com - Bad Credentials"
-}
-```
+- **Kafka:** asynchronous domain/integration events (shared in `common-events`, produced/consumed by services).
+- **RabbitMQ:** chat message fanout/transport for `chat-service` (WebSocket/STOMP).
 
 ## Observability
-This project uses **Grafana, Loki** and **Promtail** to create observability stack. The goal is to provide developers with real-time log search and metric visualization.
 
-### How to run the application
-To launch the entire environment - PostgreSQL database, our application, and the monitoring stack - use one single command.
+- **Actuator:** services expose `health`, `info`, `prometheus` (see `ACTUATOR.md`).
+- **Prometheus:** scrapes `/actuator/prometheus` from gateway and all services (`monitoring/prometheus/prometheus.yml`).
+- **Loki + Promtail:** Promtail collects Docker container logs (`curae-*`) and ships to Loki (`monitoring/promtail/promtail-config.yml`).
+- **Grafana:** provisioned datasources and dashboards in `monitoring/grafana/`.
+
+## Testing
+
+Run module/all tests with Maven Wrapper:
 
 ```bash
-docker-compose up -d --build
+.\mvnw.cmd test
+.\mvnw.cmd -pl auth-service -am test
 ```
 
-**Confirm running services**
-```bash
-docker-compose ps
-```
+Most service modules include `src/test`; `common-events` and `chat-service` currently have no test sources. See `TESTING_CONVENTIONS.md` for conventions.
 
-### How to access the Monitoring UI(Grafana)
-The primary dashboard is available immediately upon successful startup:
+## API Testing (Postman)
 
-|Service|Address| Role                                                                                                                |
-|-------|---------------------|---------------------------------------------------------------------------------------------------------------------|
-|Grafana|http://localhost:3000| The main dashboard used for viewing logs and basic metrics                                                          |
-|Prometheus|http://localhost:9090/targets | Metrics status. Check this page to confirm Prometheus is successfully scraping metrics from all configured services |
+1. Import `postman/curae-api-postman-collection.json` and `postman/dev-postman-env.json`.
+2. Select the **Dev** environment.
+3. Run the collection (consider adding a small delay, e.g. 200 ms, to avoid token/race issues during rotation).
 
-### Viewing and Filtering Application Logs
-Logs from the Spring Boot application are collected, parsed, and stored as structured JSON data in Loki.
+## Additional Documentation
 
-#### Dashboard Filters
-From the Grafana home dashboard, you can quickly filter logs using the dedicated panels:
-
-- **Level Filter**: Select one or more log levels(e.g., `ERROR`, `WARN`, `INFO`) from the dropdown list.
-- **Package Filter**: Enter a specific class or package, such as `com.vention.curae.user`, to narrow results.
-
-#### LogQL Query Structure(Advanced)
-For precise filtering and searching, use the LogQL in Grafana's Explore view.
-
-- `{container="curae_api"} |= "Database connected"`: find logs containing text
-
----
-
-## API Testing with Postman
-
-### How to Setup
-1. **Install Postman:** Download it from [postman.com/downloads](https://www.postman.com/downloads/)
-2. **Import Collection and Environment:**
-   * To import your data into Postman, click Import in the sidebar
-   * Drag and drop the `postman/curae-api-postman-collection.json` and `postman/dev-postman-env.json` files
-
-### How to Run Tests
-1. **Select Environment:** in the top right corner of Postman, change the dropdown from "No Environment" to **Dev** (environment you imported).
-2. **Run the Collection:**
-   * Select the **Curae API** collection folder.
-   * Click the **Run** button (top right).
-   * **IMPORTANT:** In the Runner settings, set **Delay** to `200ms`. This prevents database race conditions during token rotation.
-   * Click **Run the Curae API**.
+- `ACTUATOR.md` — actuator endpoints and diagnostics
+- `TESTING_CONVENTIONS.md` — testing guidelines
