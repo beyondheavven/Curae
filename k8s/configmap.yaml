@@ -6,6 +6,7 @@ metadata:
 data:
   POSTGRES_HOST: postgres
   POSTGRES_PORT: "5432"
+  SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE: "5"
   KAFKA_BOOTSTRAP_SERVERS: kafka:9092
   RABBITMQ_HOST: rabbitmq
   RABBITMQ_PORT: "5672"
@@ -28,3 +29,18 @@ data:
   USER_PROFILE_SERVICE_URL: http://user-profile-service:8085
   PROVIDER_SERVICE_URL: http://provider-service:8086
   CHAT_SERVICE_URL: http://chat-service:8087
+  GATEWAY_PUBLICPATHS_0: /error
+  GATEWAY_PUBLICPATHS_1: /actuator
+  GATEWAY_PUBLICPATHS_2: /auth
+  GATEWAY_PUBLICPATHS_3: /account
+  GATEWAY_PUBLICPATHS_4: /registration
+  GATEWAY_PUBLICPATHS_5: /countries
+  GATEWAY_PUBLICPATHS_6: /webhook
+  GATEWAY_PUBLICPATHS_7: /ws
+  GATEWAY_PUBLICPATHS_8: /v3/api-docs
+  GATEWAY_PUBLICPATHS_9: /swagger-ui
+  GATEWAY_PUBLICPATHS_10: /api/swagger-ui.html
+  GATEWAY_PUBLICPATHS_11: /api/swagger-ui/
+  GATEWAY_PUBLICPATHS_12: /payment-success.html
+  GATEWAY_PUBLICPATHS_13: /payment-failed.html
+  GATEWAY_PUBLICPATHS_14: /payment-cancel.html

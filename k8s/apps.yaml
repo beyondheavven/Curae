@@ -406,6 +406,10 @@ spec:
           env:
             - name: JAVA_TOOL_OPTIONS
               value: -XX:MaxRAMPercentage=65
+            - name: SPRING_MAIL_HOST
+              value: mailpit
+            - name: SPRING_MAIL_PORT
+              value: "1025"
           envFrom:
             - configMapRef:
                 name: curae-config

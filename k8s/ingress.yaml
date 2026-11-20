@@ -60,3 +60,13 @@ spec:
                 name: rabbitmq
                 port:
                   number: 15672
+    - host: mail.curae.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mailpit
+                port:
+                  number: 8025

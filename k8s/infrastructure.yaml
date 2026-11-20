@@ -32,6 +32,9 @@ spec:
       containers:
         - name: postgres
           image: postgres:15-alpine
+          args:
+            - "-c"
+            - "max_connections=300"
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -124,6 +127,8 @@ spec:
           ports:
             - name: kafka
               containerPort: 9092
+            - name: controller
+              containerPort: 9093
           volumeMounts:
             - name: data
               mountPath: /var/lib/kafka/data
@@ -633,3 +638,35 @@ spec:
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailpit
+  namespace: curae
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailpit
+  template:
+    metadata:
+      labels:
+        app: mailpit
+    spec:
+      containers:
+        - name: mailpit
+          image: axllent/mailpit:latest
+          ports:
+            - name: smtp
+              containerPort: 1025
+            - name: http
+              containerPort: 8025
+          readinessProbe:
+            tcpSocket:
+              port: smtp
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: smtp
+            periodSeconds: 10
