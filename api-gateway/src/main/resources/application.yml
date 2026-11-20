@@ -60,6 +60,7 @@ gateway:
     - /v3/api-docs
     - /swagger-ui
     - /api/swagger-ui.html
+    - /api/swagger-ui/
     - /payment-success.html
     - /payment-failed.html
     - /payment-cancel.html

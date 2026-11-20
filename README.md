@@ -118,11 +118,12 @@ Service ports: gateway `8080`, auth `8081`, appointment `8082`, payment `8083`, 
 
 | External host | Backend | What you get |
 | --- | --- | --- |
-| `api.curae.local` | `api-gateway:8080` | REST API, Swagger `/api/swagger-ui.html`, OpenAPI `/v3/api-docs` |
+| `api.curae.local` | `api-gateway:8080` | REST API, Swagger `/api/swagger-ui/index.html`, OpenAPI `/v3/api-docs` |
 | `grafana.curae.local` | `grafana:3000` | Dashboards (admin / `GF_ADMIN_PASSWORD`) |
 | `prometheus.curae.local` | `prometheus:9090` | Targets, alerts |
 | `loki.curae.local` | `loki:3100` | Log API |
 | `rabbitmq.curae.local` | `rabbitmq:15672` | RabbitMQ management UI |
+| `mail.curae.local` | `mailpit:8025` | Mailpit UI (local SMTP catcher) |
 
 8080/3000/9090/3100 are **in-cluster** ports. From outside use the Ingress hosts on 80/443. Replace `curae.local` with your real domain and add TLS in the Ingress (cert-manager annotation) for HTTPS.
 
@@ -146,6 +147,38 @@ kubectl -n curae rollout status deployment/api-gateway
 ```
 
 Each service starts with 2 replicas and an HPA (`min 2 / max 5`, CPU 70%, memory 80%). Stateful infrastructure (Postgres, Kafka, RabbitMQ, Redis, Loki, Prometheus, Grafana) runs 1 replica with PVCs. Probes use `/actuator/health/readiness` and `/actuator/health/liveness` (see `ACTUATOR.md`).
+
+### Local Kubernetes on Docker Desktop
+
+Use the `docker-desktop` context; `minikube` is not used for this stack. Docker Desktop's LoadBalancer mapping on port 80 can intermittently drop connections (`ERR_EMPTY_RESPONSE` for `swagger-initializer.js`), so keep a stable port-forward to the Ingress controller:
+
+```bash
+kubectl config use-context docker-desktop
+kubectl -n ingress-nginx port-forward deployment/ingress-nginx-controller 18080:80 --address 127.0.0.1
+```
+
+Then open `http://api.curae.local:18080/api/swagger-ui/index.html`. The aggregated spec is `/v3/api-docs`; the gateway-only spec is `/v3/api-docs/gateway`.
+
+Map the Ingress hosts to `127.0.0.1` in `C:\Windows\System32\drivers\etc\hosts` first:
+
+```text
+127.0.0.1 api.curae.local
+127.0.0.1 grafana.curae.local
+127.0.0.1 prometheus.curae.local
+127.0.0.1 loki.curae.local
+127.0.0.1 rabbitmq.curae.local
+127.0.0.1 mail.curae.local
+```
+
+Verify with `kubectl -n curae get pods` and `kubectl -n curae rollout status deployment/api-gateway`. HPA metrics require `metrics-server`; on Docker Desktop it may need `--kubelet-insecure-tls`.
+
+For a GUI, install Headlamp and select cluster `docker-desktop`, namespace `curae`:
+
+```bash
+winget install Headlamp.Headlamp
+```
+
+Headlamp reads `~/.kube/config`, so no token is needed locally. `mailpit` receives SMTP on `mailpit:1025`; its UI is `mail.curae.local`.
 
 ## Local Build
 
