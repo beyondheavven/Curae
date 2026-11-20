@@ -238,6 +238,10 @@ Most service modules include `src/test`; `common-events` and `chat-service` curr
 - Deploy needs repository secret `KUBE_CONFIG` (base64-encoded kubeconfig). Without it the deploy steps are skipped.
 - Direct pushes to `main` are not allowed — see `CONTRIBUTING.md` for the branch/PR workflow and branch-protection settings.
 
+## License
+
+Curae backend is licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
+
 ## Additional Documentation
 
 - `ACTUATOR.md` — actuator endpoints and diagnostics
